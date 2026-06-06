@@ -24,8 +24,8 @@ class DashboardTest extends TestCase
         $response = $this->actingAs($user)->get('/dashboard');
 
         $response->assertOk();
-        $response->assertSee('What should I do today?');
-        $response->assertSee("Generate Today's Plan");
-        $response->assertSee('Applied to Laravel Developer role');
+        $response->assertSeeText('What should I do today?');
+        $response->assertSeeText("Generate Today's Plan");
+        $response->assertSeeText('Applied to Laravel Developer role');
     }
 }
