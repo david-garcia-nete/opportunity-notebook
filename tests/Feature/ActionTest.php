@@ -174,10 +174,23 @@ class ActionTest extends TestCase
             ->assertOk()
             ->assertSeeText('Actions Due Today')
             ->assertSeeText('Overdue Actions')
-            ->assertSeeText('You have overdue actions that need attention.')
-            ->assertSeeTextInOrder(['Actions Due Today', '2'])
-            ->assertSeeTextInOrder(['Overdue Actions', '1'])
-            ->assertSeeTextInOrder(['Pipeline', 'Actions', '4']);
+            ->assertSeeText('You have overdue actions that need attention.');
+
+        $dashboardText = $this->normalizedResponseText($response->getContent());
+
+        $this->assertStringContainsString(
+            'Actions Due Today 2 Follow-ups and next steps',
+            $dashboardText
+        );
+        $this->assertStringContainsString(
+            'Overdue Actions 1 Need attention now',
+            $dashboardText
+        );
+        $this->assertStringContainsString(
+            'Pipeline A simple count across the MVP workflow. '
+                .'Opportunities 0 Contacts 0 Actions 4 Applications',
+            $dashboardText
+        );
     }
 
     public function test_dashboard_focus_uses_actions_due_today_when_none_are_overdue(): void
@@ -193,6 +206,13 @@ class ActionTest extends TestCase
         $response
             ->assertOk()
             ->assertSeeText('You have actions due today.');
+    }
+
+    private function normalizedResponseText(string $content): string
+    {
+        $text = html_entity_decode(strip_tags($content));
+
+        return trim(preg_replace('/\s+/', ' ', $text));
     }
 
     public function test_guests_are_redirected_to_login(): void
