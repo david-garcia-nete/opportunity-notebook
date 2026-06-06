@@ -26,6 +26,8 @@ class DashboardTest extends TestCase
         $response->assertOk();
         $response->assertSeeText('What should I do today?');
         $response->assertSeeText("Generate Today's Plan");
-        $response->assertSeeText('Applied to Laravel Developer role');
+        $response->assertSeeText('Activity will appear here as tracked entities are added.');
+        $response->assertSeeText('Opportunities');
+        $response->assertSeeText('Active Opportunities');
     }
 }
