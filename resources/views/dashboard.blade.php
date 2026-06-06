@@ -13,25 +13,18 @@
 
     @php
         $metrics = [
-            ['label' => 'Opportunities', 'value' => 12, 'description' => 'Total opportunities tracked'],
-            ['label' => 'Active Opportunities', 'value' => 7, 'description' => 'Worth attention right now'],
-            ['label' => 'Actions Due Today', 'value' => 3, 'description' => 'Follow-ups and next steps'],
-            ['label' => 'Applications This Week', 'value' => 5, 'description' => 'Submitted in the last 7 days'],
+            ['label' => 'Opportunities', 'value' => $opportunityCount, 'description' => 'Total opportunities tracked'],
+            ['label' => 'Active Opportunities', 'value' => $activeOpportunityCount, 'description' => 'Worth attention right now'],
+            ['label' => 'Actions Due Today', 'value' => 0, 'description' => 'Follow-ups and next steps'],
+            ['label' => 'Applications This Week', 'value' => 0, 'description' => 'Submitted in the last 7 days'],
         ];
 
         $pipeline = [
-            ['label' => 'Opportunities', 'count' => 12],
-            ['label' => 'Contacts', 'count' => 8],
-            ['label' => 'Actions', 'count' => 18],
-            ['label' => 'Applications', 'count' => 5],
-            ['label' => 'Projects', 'count' => 3],
-        ];
-
-        $activities = [
-            'Applied to Laravel Developer role',
-            'Followed up with recruiter',
-            'Updated Jam Notebook portfolio project',
-            'Added new opportunity',
+            ['label' => 'Opportunities', 'count' => $opportunityCount],
+            ['label' => 'Contacts', 'count' => 0],
+            ['label' => 'Actions', 'count' => 0],
+            ['label' => 'Applications', 'count' => 0],
+            ['label' => 'Projects', 'count' => 0],
         ];
     @endphp
 
@@ -62,7 +55,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <h3 class="text-lg font-semibold text-gray-900">Pipeline</h3>
-                            <p class="mt-1 text-sm text-gray-500">Simple placeholder counts across the MVP workflow.</p>
+                            <p class="mt-1 text-sm text-gray-500">A simple count across the MVP workflow.</p>
                         </div>
                     </div>
 
@@ -87,17 +80,8 @@
 
             <section class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                 <h3 class="text-lg font-semibold text-gray-900">Recent Activity</h3>
-                <div class="mt-5 divide-y divide-gray-100">
-                    @foreach ($activities as $activity)
-                        <div class="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
-                            <span class="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-50 text-indigo-700">
-                                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                    <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
-                                </svg>
-                            </span>
-                            <p class="text-sm font-medium text-gray-700">{{ $activity }}</p>
-                        </div>
-                    @endforeach
+                <div class="mt-5 rounded-xl bg-gray-50 p-4 text-sm text-gray-500 ring-1 ring-inset ring-gray-100">
+                    Activity will appear here as tracked entities are added.
                 </div>
             </section>
         </div>
