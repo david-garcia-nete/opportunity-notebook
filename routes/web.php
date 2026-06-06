@@ -12,13 +12,14 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
+    $today = today()->toDateString();
     $opportunityCount = Opportunity::count();
     $activeOpportunityCount = Opportunity::whereNotIn('status', ['rejected', 'closed'])->count();
     $actionCount = Action::count();
-    $actionsDueTodayCount = Action::whereDate('due_date', today())
+    $actionsDueTodayCount = Action::whereDate('due_date', $today)
         ->whereNull('completed_at')
         ->count();
-    $overdueActionCount = Action::whereDate('due_date', '<', today())
+    $overdueActionCount = Action::whereDate('due_date', '<', $today)
         ->whereNull('completed_at')
         ->count();
 
