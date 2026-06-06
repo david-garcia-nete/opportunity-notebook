@@ -15,14 +15,14 @@
         $metrics = [
             ['label' => 'Opportunities', 'value' => $opportunityCount, 'description' => 'Total opportunities tracked'],
             ['label' => 'Active Opportunities', 'value' => $activeOpportunityCount, 'description' => 'Worth attention right now'],
-            ['label' => 'Actions Due Today', 'value' => 0, 'description' => 'Follow-ups and next steps'],
-            ['label' => 'Applications This Week', 'value' => 0, 'description' => 'Submitted in the last 7 days'],
+            ['label' => 'Actions Due Today', 'value' => $actionsDueTodayCount, 'description' => 'Follow-ups and next steps'],
+            ['label' => 'Overdue Actions', 'value' => $overdueActionCount, 'description' => 'Need attention now'],
         ];
 
         $pipeline = [
             ['label' => 'Opportunities', 'count' => $opportunityCount],
             ['label' => 'Contacts', 'count' => 0],
-            ['label' => 'Actions', 'count' => 0],
+            ['label' => 'Actions', 'count' => $actionCount],
             ['label' => 'Applications', 'count' => 0],
             ['label' => 'Projects', 'count' => 0],
         ];
@@ -72,8 +72,14 @@
                 <section class="rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm">
                     <p class="text-sm font-semibold uppercase tracking-wide text-indigo-600">Today's Focus</p>
                     <div class="mt-4 rounded-2xl bg-indigo-50 p-6 text-center ring-1 ring-inset ring-indigo-100">
-                        <h3 class="text-xl font-semibold text-gray-900">Generate Today's Plan</h3>
-                        <p class="mt-2 text-sm font-medium text-indigo-700">Coming Soon</p>
+                        <h3 class="text-xl font-semibold text-gray-900">What needs attention?</h3>
+                        @if ($overdueActionCount > 0)
+                            <p class="mt-2 text-sm font-medium text-indigo-700">You have overdue actions that need attention.</p>
+                        @elseif ($actionsDueTodayCount > 0)
+                            <p class="mt-2 text-sm font-medium text-indigo-700">You have actions due today.</p>
+                        @else
+                            <p class="mt-2 text-sm font-medium text-indigo-700">No urgent actions. Consider creating new opportunities.</p>
+                        @endif
                     </div>
                 </section>
             </div>

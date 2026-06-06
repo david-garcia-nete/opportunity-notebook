@@ -50,6 +50,47 @@
                     </div>
                 </dl>
             </div>
+
+            <section class="mt-8 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Related Actions</h3>
+                        <p class="mt-1 text-sm text-gray-500">Tasks that move this opportunity forward.</p>
+                    </div>
+                    <a href="{{ route('actions.create', ['opportunity_id' => $opportunity->id]) }}" class="inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                        Add Action
+                    </a>
+                </div>
+
+                @if ($opportunity->actions->isEmpty())
+                    <div class="mt-5 rounded-xl bg-gray-50 p-4 text-sm text-gray-500 ring-1 ring-inset ring-gray-100">
+                        No actions yet for this opportunity.
+                    </div>
+                @else
+                    <div class="mt-5 overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Action title</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Due date</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 bg-white">
+                                @foreach ($opportunity->actions as $action)
+                                    <tr>
+                                        <td class="whitespace-nowrap px-4 py-4 text-sm font-semibold text-gray-900">
+                                            <a href="{{ route('actions.show', $action) }}" class="text-indigo-600 hover:text-indigo-900">{{ $action->title }}</a>
+                                        </td>
+                                        <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-600">{{ $action->due_date?->toFormattedDateString() ?? '—' }}</td>
+                                        <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-600">{{ $action->status() }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </section>
         </div>
     </div>
 </x-app-layout>
