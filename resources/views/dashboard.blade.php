@@ -15,14 +15,14 @@
         $metrics = [
             ['label' => 'Opportunities', 'value' => $opportunityCount, 'description' => 'Total opportunities tracked'],
             ['label' => 'Active Opportunities', 'value' => $activeOpportunityCount, 'description' => 'Worth attention right now'],
-            ['label' => 'Actions Due Today', 'value' => $actionsDueTodayCount, 'description' => 'Follow-ups and next steps'],
-            ['label' => 'Overdue Actions', 'value' => $overdueActionCount, 'description' => 'Need attention now'],
+            ['label' => 'Actions Due Today', 'value' => $actionsDueTodayCount, 'description' => 'Follow-ups and next steps', 'test_id' => 'actions-due-today-count'],
+            ['label' => 'Overdue Actions', 'value' => $overdueActionCount, 'description' => 'Need attention now', 'test_id' => 'overdue-actions-count'],
         ];
 
         $pipeline = [
             ['label' => 'Opportunities', 'count' => $opportunityCount],
             ['label' => 'Contacts', 'count' => 0],
-            ['label' => 'Actions', 'count' => $actionCount],
+            ['label' => 'Actions', 'count' => $actionCount, 'test_id' => 'pipeline-actions-count'],
             ['label' => 'Applications', 'count' => 0],
             ['label' => 'Projects', 'count' => 0],
         ];
@@ -44,7 +44,13 @@
                 @foreach ($metrics as $metric)
                     <article class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                         <p class="text-sm font-medium text-gray-500">{{ $metric['label'] }}</p>
-                        <p class="mt-3 text-4xl font-bold text-gray-900">{{ $metric['value'] }}</p>
+                        <p class="mt-3 text-4xl font-bold text-gray-900">
+                            @isset($metric['test_id'])
+                                <span data-testid="{{ $metric['test_id'] }}">{{ $metric['value'] }}</span>
+                            @else
+                                {{ $metric['value'] }}
+                            @endisset
+                        </p>
                         <p class="mt-2 text-sm text-gray-500">{{ $metric['description'] }}</p>
                     </article>
                 @endforeach
@@ -63,7 +69,13 @@
                         @foreach ($pipeline as $item)
                             <div class="rounded-xl bg-gray-50 p-4 ring-1 ring-inset ring-gray-100">
                                 <p class="text-sm font-medium text-gray-600">{{ $item['label'] }}</p>
-                                <p class="mt-3 text-3xl font-bold text-indigo-700">{{ $item['count'] }}</p>
+                                <p class="mt-3 text-3xl font-bold text-indigo-700">
+                                    @isset($item['test_id'])
+                                        <span data-testid="{{ $item['test_id'] }}">{{ $item['count'] }}</span>
+                                    @else
+                                        {{ $item['count'] }}
+                                    @endisset
+                                </p>
                             </div>
                         @endforeach
                     </div>
@@ -74,11 +86,11 @@
                     <div class="mt-4 rounded-2xl bg-indigo-50 p-6 text-center ring-1 ring-inset ring-indigo-100">
                         <h3 class="text-xl font-semibold text-gray-900">What needs attention?</h3>
                         @if ($overdueActionCount > 0)
-                            <p class="mt-2 text-sm font-medium text-indigo-700">You have overdue actions that need attention.</p>
+                            <p class="mt-2 text-sm font-medium text-indigo-700"><span data-testid="todays-focus-message">You have overdue actions that need attention.</span></p>
                         @elseif ($actionsDueTodayCount > 0)
-                            <p class="mt-2 text-sm font-medium text-indigo-700">You have actions due today.</p>
+                            <p class="mt-2 text-sm font-medium text-indigo-700"><span data-testid="todays-focus-message">You have actions due today.</span></p>
                         @else
-                            <p class="mt-2 text-sm font-medium text-indigo-700">No urgent actions. Consider creating new opportunities.</p>
+                            <p class="mt-2 text-sm font-medium text-indigo-700"><span data-testid="todays-focus-message">No urgent actions. Consider creating new opportunities.</span></p>
                         @endif
                     </div>
                 </section>
