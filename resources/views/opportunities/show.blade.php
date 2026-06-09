@@ -135,6 +135,87 @@
                 @endif
             </section>
 
+
+            <section class="mt-8 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Projects</h3>
+                    <p class="mt-1 text-sm text-gray-500">Portfolio projects supporting this opportunity.</p>
+                </div>
+
+                <form method="POST" action="{{ route('opportunities.projects.store', $opportunity) }}" class="mt-5 grid gap-4 rounded-xl bg-gray-50 p-4 ring-1 ring-inset ring-gray-100 sm:grid-cols-2">
+                    @csrf
+                    <div>
+                        <label for="project_id" class="block text-sm font-medium text-gray-700">Project</label>
+                        <select id="project_id" name="project_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="">Choose a project</option>
+                            @foreach ($availableProjects as $project)
+                                <option value="{{ $project->id }}" @selected(old('project_id') == $project->id)>{{ $project->name }}{{ $project->status ? ' — '.$project->status : '' }}</option>
+                            @endforeach
+                        </select>
+                        @error('project_id')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div>
+                        <label for="project_notes" class="block text-sm font-medium text-gray-700">Notes</label>
+                        <textarea id="project_notes" name="notes" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="How this project supports the opportunity">{{ old('notes') }}</textarea>
+                        @error('notes')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div class="sm:col-span-2">
+                        <button type="submit" class="inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                            Attach Project
+                        </button>
+                    </div>
+                </form>
+
+                @if ($opportunity->projects->isEmpty())
+                    <div class="mt-5 rounded-xl bg-gray-50 p-4 text-sm text-gray-500 ring-1 ring-inset ring-gray-100">
+                        No projects linked to this opportunity yet.
+                    </div>
+                @else
+                    <div class="mt-5 overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Name</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Status</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">URL</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Notes</th>
+                                    <th scope="col" class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 bg-white">
+                                @foreach ($opportunity->projects as $project)
+                                    <tr>
+                                        <td class="whitespace-nowrap px-4 py-4 text-sm font-semibold text-gray-900">
+                                            <a href="{{ route('projects.show', $project) }}" class="text-indigo-600 hover:text-indigo-900">{{ $project->name }}</a>
+                                        </td>
+                                        <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-600">{{ $project->status }}</td>
+                                        <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-600">
+                                            @if ($project->url)
+                                                <a href="{{ $project->url }}" class="text-indigo-600 hover:text-indigo-900" target="_blank" rel="noopener noreferrer">{{ $project->url }}</a>
+                                            @else
+                                                —
+                                            @endif
+                                        </td>
+                                        <td class="px-4 py-4 text-sm text-gray-600">{{ $project->pivot->notes ?? '—' }}</td>
+                                        <td class="whitespace-nowrap px-4 py-4 text-right text-sm">
+                                            <form method="POST" action="{{ route('opportunities.projects.destroy', [$opportunity, $project]) }}">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="font-semibold text-red-600 hover:text-red-900">Remove</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </section>
+
             <section class="mt-8 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
