@@ -38,7 +38,12 @@
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Title</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Company</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Status</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Score</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Computed Score</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Income</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Probability</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Time</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Risk</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Manual Score</th>
                                     <th scope="col" class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">Actions</th>
                                 </tr>
                             </thead>
@@ -48,6 +53,11 @@
                                         <td class="whitespace-nowrap px-6 py-4 text-sm font-semibold text-gray-900">{{ $opportunity->title }}</td>
                                         <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-600">{{ $opportunity->company ?? '—' }}</td>
                                         <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-600">{{ $opportunity->status }}</td>
+                                        <td class="whitespace-nowrap px-6 py-4 text-sm font-semibold text-gray-900">{{ $opportunity->computedScore() ?? '—' }}</td>
+                                        <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-600">{{ $opportunity->income_potential ?? '—' }}</td>
+                                        <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-600">{{ $opportunity->probability_of_success ?? '—' }}</td>
+                                        <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-600">{{ $opportunity->time_to_revenue ?? '—' }}</td>
+                                        <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-600">{{ $opportunity->risk_level ?? '—' }}</td>
                                         <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-600">{{ $opportunity->score ?? '—' }}</td>
                                         <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
                                             <div class="flex items-center justify-end gap-3">

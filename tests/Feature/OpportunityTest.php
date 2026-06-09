@@ -43,6 +43,14 @@ class OpportunityTest extends TestCase
             'status' => 'idea',
             'score' => 72,
             'notes' => 'Potential six-week Laravel build.',
+            'income_potential' => 9,
+            'probability_of_success' => 7,
+            'time_to_revenue' => 3,
+            'strategic_alignment' => 8,
+            'personal_interest' => 9,
+            'skill_growth' => 8,
+            'family_fit' => 7,
+            'risk_level' => 4,
         ]);
 
         $opportunity = Opportunity::first();
@@ -55,7 +63,97 @@ class OpportunityTest extends TestCase
             'status' => 'idea',
             'score' => 72,
             'notes' => 'Potential six-week Laravel build.',
+            'income_potential' => 9,
+            'probability_of_success' => 7,
+            'time_to_revenue' => 3,
+            'strategic_alignment' => 8,
+            'personal_interest' => 9,
+            'skill_growth' => 8,
+            'family_fit' => 7,
+            'risk_level' => 4,
         ]);
+    }
+
+    public function test_computed_score_uses_positive_factors_minus_time_and_risk(): void
+    {
+        $opportunity = Opportunity::create([
+            'title' => 'Scored Opportunity',
+            'status' => 'active',
+            'income_potential' => 9,
+            'probability_of_success' => 8,
+            'time_to_revenue' => 3,
+            'strategic_alignment' => 7,
+            'personal_interest' => 6,
+            'skill_growth' => 5,
+            'family_fit' => 4,
+            'risk_level' => 2,
+        ]);
+
+        $this->assertSame(34, $opportunity->computedScore());
+    }
+
+    public function test_opportunity_show_displays_evaluation_data(): void
+    {
+        $user = User::factory()->create();
+        $opportunity = Opportunity::create([
+            'title' => 'Evaluation Visible Role',
+            'status' => 'active',
+            'income_potential' => 8,
+            'probability_of_success' => 7,
+            'time_to_revenue' => 2,
+            'strategic_alignment' => 9,
+            'personal_interest' => 6,
+            'skill_growth' => 5,
+            'family_fit' => 8,
+            'risk_level' => 3,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('opportunities.show', $opportunity));
+
+        $response
+            ->assertOk()
+            ->assertSee('Evaluation')
+            ->assertSee('Computed Score')
+            ->assertSee('Income Potential')
+            ->assertSee('Probability of Success')
+            ->assertSee('The computed score is a decision aid')
+            ->assertSee('38');
+    }
+
+    public function test_opportunity_index_ranks_by_computed_score(): void
+    {
+        $user = User::factory()->create();
+        Opportunity::create([
+            'title' => 'Lower Priority Opportunity',
+            'status' => 'active',
+            'income_potential' => 4,
+            'probability_of_success' => 4,
+            'time_to_revenue' => 8,
+            'strategic_alignment' => 4,
+            'personal_interest' => 4,
+            'skill_growth' => 4,
+            'family_fit' => 4,
+            'risk_level' => 8,
+        ]);
+        Opportunity::create([
+            'title' => 'Higher Priority Opportunity',
+            'status' => 'active',
+            'income_potential' => 9,
+            'probability_of_success' => 9,
+            'time_to_revenue' => 2,
+            'strategic_alignment' => 9,
+            'personal_interest' => 9,
+            'skill_growth' => 9,
+            'family_fit' => 9,
+            'risk_level' => 2,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('opportunities.index'));
+
+        $response
+            ->assertOk()
+            ->assertSee('Computed Score')
+            ->assertSeeInOrder(['Higher Priority Opportunity', 'Lower Priority Opportunity']);
     }
 
     public function test_authenticated_users_can_update_opportunities(): void
