@@ -41,7 +41,7 @@
                         <dd class="mt-1 text-base font-semibold text-gray-900">{{ $opportunity->status }}</dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-gray-500">Score</dt>
+                        <dt class="text-sm font-medium text-gray-500">Manual Score</dt>
                         <dd class="mt-1 text-base font-semibold text-gray-900">{{ $opportunity->score ?? '—' }}</dd>
                     </div>
                     <div class="sm:col-span-2">
@@ -51,6 +51,27 @@
                 </dl>
             </div>
 
+            <section class="mt-8 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Evaluation</h3>
+                        <p class="mt-1 text-sm text-gray-500">The computed score is a decision aid for comparing opportunities, not an absolute truth.</p>
+                    </div>
+                    <div class="rounded-xl bg-indigo-50 px-4 py-3 text-center ring-1 ring-inset ring-indigo-100">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-indigo-600">Computed Score</p>
+                        <p class="mt-1 text-2xl font-bold text-indigo-900">{{ $opportunity->computedScore() ?? '—' }}</p>
+                    </div>
+                </div>
+
+                <dl class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    @foreach (\App\Models\Opportunity::EVALUATION_FIELDS as $field => $label)
+                        <div class="rounded-xl bg-gray-50 p-4 ring-1 ring-inset ring-gray-100">
+                            <dt class="text-sm font-medium text-gray-500">{{ $label }}</dt>
+                            <dd class="mt-1 text-lg font-semibold text-gray-900">{{ $opportunity->{$field} ?? '—' }}</dd>
+                        </div>
+                    @endforeach
+                </dl>
+            </section>
 
             <section class="mt-8 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">

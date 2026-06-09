@@ -13,8 +13,13 @@ class OpportunityController extends Controller
 {
     public function index(): View
     {
+        $opportunities = Opportunity::latest()
+            ->get()
+            ->sortByDesc(fn (Opportunity $opportunity) => $opportunity->computedScore() ?? PHP_INT_MIN)
+            ->values();
+
         return view('opportunities.index', [
-            'opportunities' => Opportunity::latest()->get(),
+            'opportunities' => $opportunities,
         ]);
     }
 
@@ -79,6 +84,14 @@ class OpportunityController extends Controller
             'type' => ['nullable', 'string', 'max:255'],
             'status' => ['required', 'string', 'max:255'],
             'score' => ['nullable', 'integer', 'min:0'],
+            'income_potential' => ['nullable', 'integer', 'min:1', 'max:10'],
+            'probability_of_success' => ['nullable', 'integer', 'min:1', 'max:10'],
+            'time_to_revenue' => ['nullable', 'integer', 'min:1', 'max:10'],
+            'strategic_alignment' => ['nullable', 'integer', 'min:1', 'max:10'],
+            'personal_interest' => ['nullable', 'integer', 'min:1', 'max:10'],
+            'skill_growth' => ['nullable', 'integer', 'min:1', 'max:10'],
+            'family_fit' => ['nullable', 'integer', 'min:1', 'max:10'],
+            'risk_level' => ['nullable', 'integer', 'min:1', 'max:10'],
             'notes' => ['nullable', 'string'],
         ]);
     }

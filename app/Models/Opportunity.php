@@ -14,8 +14,58 @@ class Opportunity extends Model
         'type',
         'status',
         'score',
+        'income_potential',
+        'probability_of_success',
+        'time_to_revenue',
+        'strategic_alignment',
+        'personal_interest',
+        'skill_growth',
+        'family_fit',
+        'risk_level',
         'notes',
     ];
+
+    public const EVALUATION_FIELDS = [
+        'income_potential' => 'Income Potential',
+        'probability_of_success' => 'Probability of Success',
+        'time_to_revenue' => 'Time to Revenue',
+        'strategic_alignment' => 'Strategic Alignment',
+        'personal_interest' => 'Personal Interest',
+        'skill_growth' => 'Skill Growth',
+        'family_fit' => 'Family Fit',
+        'risk_level' => 'Risk Level',
+    ];
+
+    public function computedScore(): ?int
+    {
+        $positiveFactors = [
+            'income_potential',
+            'probability_of_success',
+            'strategic_alignment',
+            'personal_interest',
+            'skill_growth',
+            'family_fit',
+        ];
+
+        $adjustmentFactors = [
+            'time_to_revenue',
+            'risk_level',
+        ];
+
+        $hasEvaluation = collect([...$positiveFactors, ...$adjustmentFactors])
+            ->contains(fn (string $field) => $this->{$field} !== null);
+
+        if (! $hasEvaluation) {
+            return null;
+        }
+
+        // Simple foundation formula: add the positive 1-10 dimensions, then subtract
+        // time-to-revenue and risk because slower or riskier opportunities should rank lower.
+        $positiveScore = collect($positiveFactors)->sum(fn (string $field) => $this->{$field} ?? 0);
+        $adjustmentScore = collect($adjustmentFactors)->sum(fn (string $field) => $this->{$field} ?? 0);
+
+        return $positiveScore - $adjustmentScore;
+    }
 
     public function actions(): HasMany
     {
@@ -45,6 +95,14 @@ class Opportunity extends Model
     {
         return [
             'score' => 'integer',
+            'income_potential' => 'integer',
+            'probability_of_success' => 'integer',
+            'time_to_revenue' => 'integer',
+            'strategic_alignment' => 'integer',
+            'personal_interest' => 'integer',
+            'skill_growth' => 'integer',
+            'family_fit' => 'integer',
+            'risk_level' => 'integer',
         ];
     }
 }
