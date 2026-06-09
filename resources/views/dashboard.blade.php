@@ -17,13 +17,14 @@
             ['label' => 'Active Opportunities', 'value' => $activeOpportunityCount, 'description' => 'Worth attention right now'],
             ['label' => 'Actions Due Today', 'value' => $actionsDueTodayCount, 'description' => 'Follow-ups and next steps'],
             ['label' => 'Overdue Actions', 'value' => $overdueActionCount, 'description' => 'Need attention now'],
+            ['label' => 'Applications This Week', 'value' => $applicationsThisWeekCount, 'description' => 'Recent submissions made'],
         ];
 
         $pipeline = [
             ['label' => 'Opportunities', 'count' => $opportunityCount],
             ['label' => 'Contacts', 'count' => $contactCount],
             ['label' => 'Actions', 'count' => $actionCount],
-            ['label' => 'Applications', 'count' => 0],
+            ['label' => 'Applications', 'count' => $applicationCount],
             ['label' => 'Projects', 'count' => 0],
         ];
     @endphp
@@ -40,7 +41,7 @@
                 </div>
             </section>
 
-            <section aria-label="Dashboard metrics" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <section aria-label="Dashboard metrics" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
                 @foreach ($metrics as $metric)
                     <article class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                         <p class="text-sm font-medium text-gray-500">{{ $metric['label'] }}</p>
