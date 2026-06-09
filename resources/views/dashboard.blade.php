@@ -21,7 +21,7 @@
 
         $pipeline = [
             ['label' => 'Opportunities', 'count' => $opportunityCount],
-            ['label' => 'Contacts', 'count' => 0],
+            ['label' => 'Contacts', 'count' => $contactCount],
             ['label' => 'Actions', 'count' => $actionCount],
             ['label' => 'Applications', 'count' => 0],
             ['label' => 'Projects', 'count' => 0],

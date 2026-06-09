@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Controllers\ActionController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\OpportunityController;
 use App\Http\Controllers\ProfileController;
 use App\Models\Action;
+use App\Models\Contact;
 use App\Models\Opportunity;
 use Illuminate\Support\Facades\Route;
 
@@ -15,6 +17,7 @@ Route::get('/dashboard', function () {
     $opportunityCount = Opportunity::count();
     $activeOpportunityCount = Opportunity::whereNotIn('status', ['rejected', 'closed'])->count();
     $actionCount = Action::count();
+    $contactCount = Contact::count();
     $actionsDueTodayCount = Action::whereDate('due_date', today())
         ->whereNull('completed_at')
         ->count();
@@ -26,6 +29,7 @@ Route::get('/dashboard', function () {
         'opportunityCount' => $opportunityCount,
         'activeOpportunityCount' => $activeOpportunityCount,
         'actionCount' => $actionCount,
+        'contactCount' => $contactCount,
         'actionsDueTodayCount' => $actionsDueTodayCount,
         'overdueActionCount' => $overdueActionCount,
     ]);
@@ -33,6 +37,7 @@ Route::get('/dashboard', function () {
 
 Route::middleware('auth')->group(function () {
     Route::resource('opportunities', OpportunityController::class);
+    Route::resource('contacts', ContactController::class);
     Route::resource('actions', ActionController::class);
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
