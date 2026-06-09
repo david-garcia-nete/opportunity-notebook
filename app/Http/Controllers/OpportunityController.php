@@ -33,7 +33,7 @@ class OpportunityController extends Controller
     public function show(Opportunity $opportunity): View
     {
         return view('opportunities.show', [
-            'opportunity' => $opportunity,
+            'opportunity' => $opportunity->load(['actions' => fn ($query) => $query->latest('due_date')->latest()]),
         ]);
     }
 
