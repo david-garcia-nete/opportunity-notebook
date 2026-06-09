@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Opportunity;
 use App\Models\Project;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -33,7 +34,8 @@ class ProjectController extends Controller
     public function show(Project $project): View
     {
         return view('projects.show', [
-            'project' => $project,
+            'availableOpportunities' => Opportunity::orderBy('title')->get(),
+            'project' => $project->load(['opportunities' => fn ($query) => $query->orderBy('title')]),
         ]);
     }
 

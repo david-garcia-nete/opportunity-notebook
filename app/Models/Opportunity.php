@@ -34,6 +34,13 @@ class Opportunity extends Model
             ->withTimestamps();
     }
 
+    public function projects(): BelongsToMany
+    {
+        return $this->belongsToMany(Project::class)
+            ->withPivot('notes')
+            ->withTimestamps();
+    }
+
     protected function casts(): array
     {
         return [

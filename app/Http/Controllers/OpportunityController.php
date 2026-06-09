@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Contact;
 use App\Models\Opportunity;
+use App\Models\Project;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -35,10 +36,12 @@ class OpportunityController extends Controller
     {
         return view('opportunities.show', [
             'availableContacts' => Contact::orderBy('name')->get(),
+            'availableProjects' => Project::orderBy('name')->get(),
             'opportunity' => $opportunity->load([
                 'actions' => fn ($query) => $query->latest('due_date')->latest(),
                 'applications' => fn ($query) => $query->latest('applied_at')->latest(),
                 'contacts' => fn ($query) => $query->orderBy('name'),
+                'projects' => fn ($query) => $query->orderBy('name'),
             ]),
         ]);
     }
