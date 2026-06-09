@@ -25,7 +25,7 @@
             ['label' => 'Contacts', 'count' => $contactCount],
             ['label' => 'Actions', 'count' => $actionCount],
             ['label' => 'Applications', 'count' => $applicationCount],
-            ['label' => 'Projects', 'count' => 0],
+            ['label' => 'Projects', 'count' => $projectCount],
         ];
     @endphp
 
