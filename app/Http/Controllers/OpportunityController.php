@@ -37,6 +37,7 @@ class OpportunityController extends Controller
             'availableContacts' => Contact::orderBy('name')->get(),
             'opportunity' => $opportunity->load([
                 'actions' => fn ($query) => $query->latest('due_date')->latest(),
+                'applications' => fn ($query) => $query->latest('applied_at')->latest(),
                 'contacts' => fn ($query) => $query->orderBy('name'),
             ]),
         ]);

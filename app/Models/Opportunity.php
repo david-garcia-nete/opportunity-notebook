@@ -22,6 +22,11 @@ class Opportunity extends Model
         return $this->hasMany(Action::class);
     }
 
+    public function applications(): HasMany
+    {
+        return $this->hasMany(Application::class);
+    }
+
     public function contacts(): BelongsToMany
     {
         return $this->belongsToMany(Contact::class)
