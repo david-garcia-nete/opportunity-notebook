@@ -69,7 +69,7 @@ class ActionTest extends TestCase
             'opportunity_id' => $opportunity->id,
             'title' => 'Apply to role',
             'description' => 'Tailor resume and submit application.',
-            'due_date' => today()->toDateString(),
+            'due_date' => today()->startOfDay()->format('Y-m-d H:i:s'),
             'completed_at' => null,
         ]);
     }
@@ -104,7 +104,7 @@ class ActionTest extends TestCase
             'opportunity_id' => $newOpportunity->id,
             'title' => 'Schedule interview',
             'description' => 'Confirm availability with the recruiter.',
-            'due_date' => today()->addDay()->toDateString(),
+            'due_date' => today()->addDay()->startOfDay()->format('Y-m-d H:i:s'),
         ]);
         $this->assertNotNull($action->fresh()->completed_at);
     }
