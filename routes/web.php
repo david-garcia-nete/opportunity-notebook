@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ActionController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\ContactOpportunityController;
 use App\Http\Controllers\OpportunityController;
 use App\Http\Controllers\ProfileController;
 use App\Models\Action;
@@ -37,7 +38,16 @@ Route::get('/dashboard', function () {
 
 Route::middleware('auth')->group(function () {
     Route::resource('opportunities', OpportunityController::class);
+    Route::post('/opportunities/{opportunity}/contacts', [ContactOpportunityController::class, 'storeForOpportunity'])
+        ->name('opportunities.contacts.store');
+    Route::delete('/opportunities/{opportunity}/contacts/{contact}', [ContactOpportunityController::class, 'destroyFromOpportunity'])
+        ->name('opportunities.contacts.destroy');
+
     Route::resource('contacts', ContactController::class);
+    Route::post('/contacts/{contact}/opportunities', [ContactOpportunityController::class, 'storeForContact'])
+        ->name('contacts.opportunities.store');
+    Route::delete('/contacts/{contact}/opportunities/{opportunity}', [ContactOpportunityController::class, 'destroyFromContact'])
+        ->name('contacts.opportunities.destroy');
     Route::resource('actions', ActionController::class);
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

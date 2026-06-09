@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Contact;
+use App\Models\Opportunity;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -33,7 +34,8 @@ class ContactController extends Controller
     public function show(Contact $contact): View
     {
         return view('contacts.show', [
-            'contact' => $contact,
+            'availableOpportunities' => Opportunity::orderBy('title')->get(),
+            'contact' => $contact->load(['opportunities' => fn ($query) => $query->orderBy('title')]),
         ]);
     }
 

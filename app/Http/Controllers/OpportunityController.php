@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Contact;
 use App\Models\Opportunity;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -33,7 +34,11 @@ class OpportunityController extends Controller
     public function show(Opportunity $opportunity): View
     {
         return view('opportunities.show', [
-            'opportunity' => $opportunity->load(['actions' => fn ($query) => $query->latest('due_date')->latest()]),
+            'availableContacts' => Contact::orderBy('name')->get(),
+            'opportunity' => $opportunity->load([
+                'actions' => fn ($query) => $query->latest('due_date')->latest(),
+                'contacts' => fn ($query) => $query->orderBy('name'),
+            ]),
         ]);
     }
 

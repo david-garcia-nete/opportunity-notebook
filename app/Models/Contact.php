@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Contact extends Model
 {
@@ -13,4 +14,11 @@ class Contact extends Model
         'phone',
         'notes',
     ];
+
+    public function opportunities(): BelongsToMany
+    {
+        return $this->belongsToMany(Opportunity::class)
+            ->withPivot(['id', 'relationship_type', 'notes'])
+            ->withTimestamps();
+    }
 }
