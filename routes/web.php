@@ -6,10 +6,12 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ContactOpportunityController;
 use App\Http\Controllers\OpportunityController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProjectController;
 use App\Models\Action;
 use App\Models\Application;
 use App\Models\Contact;
 use App\Models\Opportunity;
+use App\Models\Project;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -22,6 +24,7 @@ Route::get('/dashboard', function () {
     $actionCount = Action::count();
     $contactCount = Contact::count();
     $applicationCount = Application::count();
+    $projectCount = Project::count();
     $applicationsThisWeekCount = Application::where('applied_at', '>=', now()->subDays(7))->count();
     $actionsDueTodayCount = Action::whereDate('due_date', today())
         ->whereNull('completed_at')
@@ -36,6 +39,7 @@ Route::get('/dashboard', function () {
         'actionCount' => $actionCount,
         'contactCount' => $contactCount,
         'applicationCount' => $applicationCount,
+        'projectCount' => $projectCount,
         'applicationsThisWeekCount' => $applicationsThisWeekCount,
         'actionsDueTodayCount' => $actionsDueTodayCount,
         'overdueActionCount' => $overdueActionCount,
@@ -56,6 +60,7 @@ Route::middleware('auth')->group(function () {
         ->name('contacts.opportunities.destroy');
     Route::resource('actions', ActionController::class);
     Route::resource('applications', ApplicationController::class);
+    Route::resource('projects', ProjectController::class);
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

@@ -27,7 +27,7 @@
                     <x-nav-link :href="route('applications.index')" :active="request()->routeIs('applications.*')">
                         {{ __('Applications') }}
                     </x-nav-link>
-                    <x-nav-link href="#" :active="false">
+                    <x-nav-link :href="route('projects.index')" :active="request()->routeIs('projects.*')">
                         {{ __('Projects') }}
                     </x-nav-link>
                 </div>
@@ -97,7 +97,7 @@
             <x-responsive-nav-link :href="route('applications.index')" :active="request()->routeIs('applications.*')">
                 {{ __('Applications') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link href="#" :active="false">
+            <x-responsive-nav-link :href="route('projects.index')" :active="request()->routeIs('projects.*')">
                 {{ __('Projects') }}
             </x-responsive-nav-link>
         </div>
