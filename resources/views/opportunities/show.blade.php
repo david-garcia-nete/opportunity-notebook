@@ -51,6 +51,90 @@
                 </dl>
             </div>
 
+
+            <section class="mt-8 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Contacts</h3>
+                        <p class="mt-1 text-sm text-gray-500">People connected to this opportunity.</p>
+                    </div>
+                </div>
+
+                <form method="POST" action="{{ route('opportunities.contacts.store', $opportunity) }}" class="mt-5 grid gap-4 rounded-xl bg-gray-50 p-4 ring-1 ring-inset ring-gray-100 sm:grid-cols-2">
+                    @csrf
+                    <div>
+                        <label for="contact_id" class="block text-sm font-medium text-gray-700">Contact</label>
+                        <select id="contact_id" name="contact_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="">Choose a contact</option>
+                            @foreach ($availableContacts as $contact)
+                                <option value="{{ $contact->id }}" @selected(old('contact_id') == $contact->id)>{{ $contact->name }}{{ $contact->organization ? ' — '.$contact->organization : '' }}</option>
+                            @endforeach
+                        </select>
+                        @error('contact_id')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div>
+                        <label for="relationship_type" class="block text-sm font-medium text-gray-700">Relationship Type</label>
+                        <input id="relationship_type" name="relationship_type" type="text" value="{{ old('relationship_type') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Recruiter, referral, hiring manager">
+                        @error('relationship_type')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="contact_notes" class="block text-sm font-medium text-gray-700">Notes</label>
+                        <textarea id="contact_notes" name="notes" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Context for this relationship">{{ old('notes') }}</textarea>
+                        @error('notes')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div class="sm:col-span-2">
+                        <button type="submit" class="inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                            Attach Contact
+                        </button>
+                    </div>
+                </form>
+
+                @if ($opportunity->contacts->isEmpty())
+                    <div class="mt-5 rounded-xl bg-gray-50 p-4 text-sm text-gray-500 ring-1 ring-inset ring-gray-100">
+                        No contacts linked to this opportunity yet.
+                    </div>
+                @else
+                    <div class="mt-5 overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Name</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Organization</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Email</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Relationship Type</th>
+                                    <th scope="col" class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 bg-white">
+                                @foreach ($opportunity->contacts as $contact)
+                                    <tr>
+                                        <td class="whitespace-nowrap px-4 py-4 text-sm font-semibold text-gray-900">
+                                            <a href="{{ route('contacts.show', $contact) }}" class="text-indigo-600 hover:text-indigo-900">{{ $contact->name }}</a>
+                                        </td>
+                                        <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-600">{{ $contact->organization ?? '—' }}</td>
+                                        <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-600">{{ $contact->email ?? '—' }}</td>
+                                        <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-600">{{ $contact->pivot->relationship_type ?? '—' }}</td>
+                                        <td class="whitespace-nowrap px-4 py-4 text-right text-sm">
+                                            <form method="POST" action="{{ route('opportunities.contacts.destroy', [$opportunity, $contact]) }}">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="font-semibold text-red-600 hover:text-red-900">Detach</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </section>
+
             <section class="mt-8 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
