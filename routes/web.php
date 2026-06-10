@@ -3,49 +3,21 @@
 use App\Http\Controllers\ActionController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ContactOpportunityController;
 use App\Http\Controllers\OpportunityController;
 use App\Http\Controllers\OpportunityProjectController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
-use App\Models\Action;
-use App\Models\Application;
-use App\Models\Contact;
-use App\Models\Opportunity;
-use App\Models\Project;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    $opportunityCount = Opportunity::count();
-    $activeOpportunityCount = Opportunity::whereNotIn('status', ['rejected', 'closed'])->count();
-    $actionCount = Action::count();
-    $contactCount = Contact::count();
-    $applicationCount = Application::count();
-    $projectCount = Project::count();
-    $applicationsThisWeekCount = Application::where('applied_at', '>=', now()->subDays(7))->count();
-    $actionsDueTodayCount = Action::whereDate('due_date', today())
-        ->whereNull('completed_at')
-        ->count();
-    $overdueActionCount = Action::whereDate('due_date', '<', today())
-        ->whereNull('completed_at')
-        ->count();
-
-    return view('dashboard', [
-        'opportunityCount' => $opportunityCount,
-        'activeOpportunityCount' => $activeOpportunityCount,
-        'actionCount' => $actionCount,
-        'contactCount' => $contactCount,
-        'applicationCount' => $applicationCount,
-        'projectCount' => $projectCount,
-        'applicationsThisWeekCount' => $applicationsThisWeekCount,
-        'actionsDueTodayCount' => $actionsDueTodayCount,
-        'overdueActionCount' => $overdueActionCount,
-    ]);
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', DashboardController::class)
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/opportunities/compare', [OpportunityController::class, 'compare'])
