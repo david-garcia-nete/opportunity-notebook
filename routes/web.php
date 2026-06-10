@@ -48,6 +48,8 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/opportunities/compare', [OpportunityController::class, 'compare'])
+        ->name('opportunities.compare');
     Route::resource('opportunities', OpportunityController::class);
     Route::post('/opportunities/{opportunity}/contacts', [ContactOpportunityController::class, 'storeForOpportunity'])
         ->name('opportunities.contacts.store');

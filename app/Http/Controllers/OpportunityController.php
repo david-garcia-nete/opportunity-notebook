@@ -23,6 +23,26 @@ class OpportunityController extends Controller
         ]);
     }
 
+    public function compare(): View
+    {
+        $opportunities = Opportunity::query()
+            ->whereNotIn('status', ['rejected', 'closed'])
+            ->withCount([
+                'contacts',
+                'projects',
+                'applications',
+                'actions as open_actions_count' => fn ($query) => $query->whereNull('completed_at'),
+            ])
+            ->latest()
+            ->get()
+            ->sortByDesc(fn (Opportunity $opportunity) => $opportunity->computedScore() ?? PHP_INT_MIN)
+            ->values();
+
+        return view('opportunities.compare', [
+            'opportunities' => $opportunities,
+        ]);
+    }
+
     public function create(): View
     {
         return view('opportunities.create');

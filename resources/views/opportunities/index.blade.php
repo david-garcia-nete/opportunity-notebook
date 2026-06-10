@@ -7,9 +7,14 @@
                     {{ __('Opportunity Pipeline') }}
                 </h2>
             </div>
-            <a href="{{ route('opportunities.create') }}" class="inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                New Opportunity
-            </a>
+            <div class="flex flex-col gap-2 sm:flex-row">
+                <a href="{{ route('opportunities.compare') }}" class="inline-flex items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                    Compare Opportunities
+                </a>
+                <a href="{{ route('opportunities.create') }}" class="inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                    New Opportunity
+                </a>
+            </div>
         </div>
     </x-slot>
 
