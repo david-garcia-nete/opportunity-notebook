@@ -2,7 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Models\Action;
+use App\Models\Application;
+use App\Models\Contact;
 use App\Models\Opportunity;
+use App\Models\Project;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -30,6 +34,128 @@ class OpportunityTest extends TestCase
             ->assertSee('Acme Inc.')
             ->assertSee('idea')
             ->assertSee('80');
+    }
+
+    public function test_authenticated_users_can_access_opportunity_comparison_page(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->get(route('opportunities.compare'));
+
+        $response
+            ->assertOk()
+            ->assertSee('Compare Opportunities')
+            ->assertSee('Create opportunities first, then compare them here.');
+    }
+
+    public function test_opportunity_comparison_page_displays_active_opportunities(): void
+    {
+        $user = User::factory()->create();
+        Opportunity::create([
+            'title' => 'Fractional CTO Advisory',
+            'company' => 'Acme Inc.',
+            'status' => 'active',
+            'income_potential' => 8,
+            'probability_of_success' => 7,
+            'time_to_revenue' => 2,
+            'strategic_alignment' => 9,
+            'personal_interest' => 8,
+            'skill_growth' => 7,
+            'family_fit' => 6,
+            'risk_level' => 3,
+        ]);
+        Opportunity::create([
+            'title' => 'Closed Staff Role',
+            'company' => 'Globex',
+            'status' => 'closed',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('opportunities.compare'));
+
+        $response
+            ->assertOk()
+            ->assertSee('Title')
+            ->assertSee('Company')
+            ->assertSee('Computed Score')
+            ->assertSee('Income Potential')
+            ->assertSee('Linked Contacts Count')
+            ->assertSee('Fractional CTO Advisory')
+            ->assertSee('Acme Inc.')
+            ->assertSee('40')
+            ->assertDontSee('Closed Staff Role');
+    }
+
+    public function test_opportunity_comparison_page_orders_by_computed_score(): void
+    {
+        $user = User::factory()->create();
+        Opportunity::create([
+            'title' => 'Lower Comparison Priority',
+            'status' => 'active',
+            'income_potential' => 4,
+            'probability_of_success' => 4,
+            'time_to_revenue' => 8,
+            'strategic_alignment' => 4,
+            'personal_interest' => 4,
+            'skill_growth' => 4,
+            'family_fit' => 4,
+            'risk_level' => 8,
+        ]);
+        Opportunity::create([
+            'title' => 'Higher Comparison Priority',
+            'status' => 'active',
+            'income_potential' => 9,
+            'probability_of_success' => 9,
+            'time_to_revenue' => 2,
+            'strategic_alignment' => 9,
+            'personal_interest' => 9,
+            'skill_growth' => 9,
+            'family_fit' => 9,
+            'risk_level' => 2,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('opportunities.compare'));
+
+        $response
+            ->assertOk()
+            ->assertSeeInOrder(['Higher Comparison Priority', 'Lower Comparison Priority']);
+    }
+
+    public function test_opportunity_comparison_page_shows_relationship_counts(): void
+    {
+        $user = User::factory()->create();
+        $opportunity = Opportunity::create([
+            'title' => 'Counted Opportunity',
+            'status' => 'active',
+        ]);
+
+        $contacts = collect([
+            Contact::create(['name' => 'First Contact']),
+            Contact::create(['name' => 'Second Contact']),
+            Contact::create(['name' => 'Third Contact']),
+        ]);
+        $projects = collect([
+            Project::create(['name' => 'Portfolio Project']),
+            Project::create(['name' => 'Case Study Project']),
+        ]);
+
+        $opportunity->contacts()->attach($contacts->pluck('id'));
+        $opportunity->projects()->attach($projects->pluck('id'));
+
+        Action::create(['opportunity_id' => $opportunity->id, 'title' => 'Open follow up']);
+        Action::create(['opportunity_id' => $opportunity->id, 'title' => 'Completed prep', 'completed_at' => now()]);
+
+        Application::create(['opportunity_id' => $opportunity->id, 'applied_at' => now(), 'status' => 'submitted']);
+        Application::create(['opportunity_id' => $opportunity->id, 'applied_at' => now(), 'status' => 'interviewing']);
+
+        $response = $this->actingAs($user)->get(route('opportunities.compare'));
+
+        $response
+            ->assertOk()
+            ->assertSee('Linked Contacts Count')
+            ->assertSee('Linked Projects Count')
+            ->assertSee('Open Actions Count')
+            ->assertSee('Applications Count')
+            ->assertSeeInOrder(['Counted Opportunity', '3', '2', '1', '2']);
     }
 
     public function test_authenticated_users_can_create_opportunities(): void
@@ -227,6 +353,7 @@ class OpportunityTest extends TestCase
         ]);
 
         $this->get(route('opportunities.index'))->assertRedirect(route('login'));
+        $this->get(route('opportunities.compare'))->assertRedirect(route('login'));
         $this->get(route('opportunities.create'))->assertRedirect(route('login'));
         $this->post(route('opportunities.store'), [
             'title' => 'Guest Role',
