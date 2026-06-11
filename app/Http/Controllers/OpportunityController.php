@@ -14,9 +14,12 @@ use Illuminate\View\View;
 
 class OpportunityController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $focusFilter = $request->boolean('focus');
+
         $opportunities = Opportunity::query()
+            ->when($focusFilter, fn ($query) => $query->where('is_focus', true))
             ->with(['actions' => fn ($query) => $query->orderByRaw('due_date is null')->orderBy('due_date')->orderBy('id')])
             ->latest()
             ->get()
@@ -24,6 +27,7 @@ class OpportunityController extends Controller
             ->values();
 
         return view('opportunities.index', [
+            'focusFilter' => $focusFilter,
             'opportunities' => $opportunities,
         ]);
     }
@@ -99,7 +103,7 @@ class OpportunityController extends Controller
 
     public function update(Request $request, Opportunity $opportunity): RedirectResponse
     {
-        $opportunity->update($this->validatedOpportunity($request));
+        $opportunity->update($this->validatedOpportunity($request, $opportunity));
 
         return redirect()
             ->route('opportunities.show', $opportunity)
@@ -122,9 +126,9 @@ class OpportunityController extends Controller
             : $opportunity->computedScore() ?? PHP_INT_MIN;
     }
 
-    private function validatedOpportunity(Request $request): array
+    private function validatedOpportunity(Request $request, ?Opportunity $opportunity = null): array
     {
-        return $request->validate([
+        $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'company' => ['nullable', 'string', 'max:255'],
             'type' => ['nullable', 'string', 'max:255'],
@@ -138,7 +142,20 @@ class OpportunityController extends Controller
             'skill_growth' => ['nullable', 'integer', 'min:1', 'max:10'],
             'family_fit' => ['nullable', 'integer', 'min:1', 'max:10'],
             'risk_level' => ['nullable', 'integer', 'min:1', 'max:10'],
+            'is_focus' => ['nullable', 'boolean'],
+            'focus_reason' => ['nullable', 'string'],
             'notes' => ['nullable', 'string'],
         ]);
+
+        $validated['is_focus'] = $request->boolean('is_focus');
+
+        if ($validated['is_focus']) {
+            $validated['focused_at'] = $opportunity?->focused_at ?? now();
+        } else {
+            $validated['focused_at'] = null;
+            $validated['focus_reason'] = null;
+        }
+
+        return $validated;
     }
 }

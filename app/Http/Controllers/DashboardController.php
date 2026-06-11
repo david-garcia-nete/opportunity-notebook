@@ -34,6 +34,8 @@ class DashboardController extends Controller
             ->whereNull('completed_at')
             ->count();
 
+        $currentFocusOpportunities = $this->currentFocusOpportunities($preference);
+
         return view('dashboard', [
             'opportunityCount' => $opportunityCount,
             'activeOpportunityCount' => $activeOpportunityCount,
@@ -45,6 +47,8 @@ class DashboardController extends Controller
             'actionsDueTodayCount' => $actionsDueTodayCount,
             'overdueActionCount' => $overdueActionCount,
             'preference' => $preference,
+            'currentFocusOpportunities' => $currentFocusOpportunities,
+            'hasTooManyFocusOpportunities' => $currentFocusOpportunities->count() > 5,
             'topRankedOpportunities' => $rankedOpportunities->take(5),
             'highValueOpportunitiesMissingNextAction' => $rankedOpportunities
                 ->filter(fn (Opportunity $opportunity) => $opportunity->missingNextAction())
@@ -59,6 +63,18 @@ class DashboardController extends Controller
         ]);
     }
 
+
+    private function currentFocusOpportunities(?UserPreference $preference = null): Collection
+    {
+        return Opportunity::query()
+            ->where('is_focus', true)
+            ->with(['actions' => fn ($query) => $query->orderByRaw('due_date is null')->orderBy('due_date')->orderBy('id')])
+            ->latest('focused_at')
+            ->latest()
+            ->get()
+            ->sortByDesc(fn (Opportunity $opportunity) => $this->rankedScore($opportunity, $preference) ?? PHP_INT_MIN)
+            ->values();
+    }
 
     private function contactsRequiringFollowUp(): Collection
     {
