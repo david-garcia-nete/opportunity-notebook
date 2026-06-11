@@ -218,6 +218,87 @@ class OpportunityTest extends TestCase
         $this->assertSame(34, $opportunity->computedScore());
     }
 
+
+    public function test_opportunity_detects_nearest_incomplete_next_action(): void
+    {
+        $opportunity = Opportunity::create([
+            'title' => 'Next Action Opportunity',
+            'status' => 'active',
+        ]);
+        Action::create([
+            'opportunity_id' => $opportunity->id,
+            'title' => 'Later incomplete action',
+            'due_date' => today()->addDays(5),
+        ]);
+        $nearestAction = Action::create([
+            'opportunity_id' => $opportunity->id,
+            'title' => 'Nearest incomplete action',
+            'due_date' => today()->addDay(),
+        ]);
+
+        $this->assertTrue($nearestAction->is($opportunity->nextAction()));
+    }
+
+    public function test_opportunity_next_action_ignores_completed_actions(): void
+    {
+        $opportunity = Opportunity::create([
+            'title' => 'Completed Action Opportunity',
+            'status' => 'active',
+        ]);
+        Action::create([
+            'opportunity_id' => $opportunity->id,
+            'title' => 'Completed sooner action',
+            'due_date' => today(),
+            'completed_at' => now(),
+        ]);
+        $openAction = Action::create([
+            'opportunity_id' => $opportunity->id,
+            'title' => 'Open later action',
+            'due_date' => today()->addDay(),
+        ]);
+
+        $this->assertTrue($openAction->is($opportunity->nextAction()));
+    }
+
+    public function test_opportunity_next_action_sorts_undated_actions_after_dated_actions(): void
+    {
+        $opportunity = Opportunity::create([
+            'title' => 'Undated Action Opportunity',
+            'status' => 'active',
+        ]);
+        Action::create([
+            'opportunity_id' => $opportunity->id,
+            'title' => 'Undated open action',
+        ]);
+        $datedAction = Action::create([
+            'opportunity_id' => $opportunity->id,
+            'title' => 'Dated open action',
+            'due_date' => today()->addWeek(),
+        ]);
+
+        $this->assertTrue($datedAction->is($opportunity->nextAction()));
+    }
+
+    public function test_opportunity_missing_next_action_is_detected_for_open_opportunities_without_incomplete_actions(): void
+    {
+        $openOpportunity = Opportunity::create([
+            'title' => 'Missing Next Action Opportunity',
+            'status' => 'active',
+        ]);
+        Action::create([
+            'opportunity_id' => $openOpportunity->id,
+            'title' => 'Completed action only',
+            'completed_at' => now(),
+        ]);
+        $parkedOpportunity = Opportunity::create([
+            'title' => 'Parked Opportunity',
+            'status' => 'parked',
+        ]);
+
+        $this->assertTrue($openOpportunity->missingNextAction());
+        $this->assertFalse($parkedOpportunity->missingNextAction());
+    }
+
     public function test_opportunity_show_displays_evaluation_data(): void
     {
         $user = User::factory()->create();
@@ -280,6 +361,70 @@ class OpportunityTest extends TestCase
             ->assertOk()
             ->assertSee('Computed Score')
             ->assertSeeInOrder(['Higher Priority Opportunity', 'Lower Priority Opportunity']);
+    }
+
+
+    public function test_opportunity_index_displays_next_action_information_and_missing_badge(): void
+    {
+        $user = User::factory()->create();
+        $opportunityWithAction = Opportunity::create([
+            'title' => 'Opportunity With Next Action',
+            'status' => 'active',
+            'income_potential' => 8,
+        ]);
+        Action::create([
+            'opportunity_id' => $opportunityWithAction->id,
+            'title' => 'Send proposal follow-up',
+            'due_date' => today()->addDay(),
+        ]);
+        Opportunity::create([
+            'title' => 'Opportunity Missing Action',
+            'status' => 'active',
+            'income_potential' => 7,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('opportunities.index'));
+
+        $response
+            ->assertOk()
+            ->assertSeeText('Next Action')
+            ->assertSeeText('Send proposal follow-up')
+            ->assertSeeText('Due '.today()->addDay()->toFormattedDateString())
+            ->assertSeeText('Missing next action');
+    }
+
+    public function test_opportunity_show_displays_next_action_information_and_create_action_prompt(): void
+    {
+        $user = User::factory()->create();
+        $opportunityWithAction = Opportunity::create([
+            'title' => 'Opportunity With Show Next Action',
+            'status' => 'active',
+        ]);
+        $nextAction = Action::create([
+            'opportunity_id' => $opportunityWithAction->id,
+            'title' => 'Schedule hiring manager call',
+            'due_date' => today()->addDays(2),
+        ]);
+        $missingOpportunity = Opportunity::create([
+            'title' => 'Missing Show Next Action',
+            'status' => 'active',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('opportunities.show', $opportunityWithAction))
+            ->assertOk()
+            ->assertSeeText('Next Action')
+            ->assertSeeText('Schedule hiring manager call')
+            ->assertSeeText($nextAction->due_date->toFormattedDateString())
+            ->assertSeeText('Open')
+            ->assertSee(route('actions.show', $nextAction), false)
+            ->assertSee(route('actions.edit', $nextAction), false);
+
+        $this->actingAs($user)
+            ->get(route('opportunities.show', $missingOpportunity))
+            ->assertOk()
+            ->assertSeeText('Missing next action')
+            ->assertSee(route('actions.create', ['opportunity_id' => $missingOpportunity->id]), false);
     }
 
     public function test_authenticated_users_can_update_opportunities(): void
