@@ -7,6 +7,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ContactOpportunityController;
 use App\Http\Controllers\ContactInteractionController;
 use App\Http\Controllers\DailyActionQueueController;
+use App\Http\Controllers\ForecastController;
 use App\Http\Controllers\OpportunityController;
 use App\Http\Controllers\OpportunityGapController;
 use App\Http\Controllers\OutcomeAnalyticsController;
@@ -35,6 +36,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/timeline', TimelineController::class)->name('timeline.index');
     Route::get('/portfolio-readiness', PortfolioReadinessController::class)->name('portfolio-readiness');
     Route::get('/outcome-analytics', OutcomeAnalyticsController::class)->name('outcome-analytics');
+    Route::get('/forecasts', ForecastController::class)->name('forecasts');
 
     Route::get('/opportunities/compare', [OpportunityController::class, 'compare'])
         ->name('opportunities.compare');

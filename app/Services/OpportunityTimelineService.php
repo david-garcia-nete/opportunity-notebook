@@ -13,6 +13,10 @@ use Illuminate\Support\Collection;
 
 class OpportunityTimelineService
 {
+    public function __construct(private OpportunityForecastService $forecast)
+    {
+    }
+
     public function forOpportunity(Opportunity $opportunity): array
     {
         $opportunity->loadMissing([
@@ -27,7 +31,8 @@ class OpportunityTimelineService
             ->merge($this->applicationItems($opportunity->applications))
             ->merge($this->contactInteractionItems($opportunity->contactInteractions))
             ->merge($this->gapItems($opportunity->opportunityGaps))
-            ->merge($this->gapActionItems($opportunity));
+            ->merge($this->gapActionItems($opportunity))
+            ->merge($this->forecastItems($opportunity));
 
         return $this->splitAndSort($items);
     }
@@ -189,6 +194,42 @@ class OpportunityTimelineService
             ->each(fn (Action $action) => $action->setRelation('opportunityGap', $action->opportunityGap ?? $opportunity->opportunityGaps->firstWhere('id', $action->opportunity_gap_id)));
 
         return $this->actionItems($gapActions, true);
+    }
+
+
+    private function forecastItems(Opportunity $opportunity): Collection
+    {
+        $score = $this->forecast->score($opportunity, auth()->user()?->preference);
+
+        if ($score < 60) {
+            return collect([
+                $this->item(
+                    date: now(),
+                    typeLabel: 'Forecast Alert',
+                    title: 'Forecast dropped below 60',
+                    status: $this->forecast->statusForScore($score),
+                    opportunity: $opportunity,
+                    url: route('opportunities.show', $opportunity),
+                    source: $opportunity,
+                ),
+            ]);
+        }
+
+        if ($score >= 75) {
+            return collect([
+                $this->item(
+                    date: now(),
+                    typeLabel: 'Forecast Update',
+                    title: 'Forecast improved above 75',
+                    status: $this->forecast->statusForScore($score),
+                    opportunity: $opportunity,
+                    url: route('opportunities.show', $opportunity),
+                    source: $opportunity,
+                ),
+            ]);
+        }
+
+        return collect();
     }
 
     private function item(

@@ -13,6 +13,7 @@ use App\Models\StrategicObjective;
 use App\Models\UserPreference;
 use App\Services\DailyActionQueueService;
 use App\Services\OpportunityReadinessService;
+use App\Services\OpportunityForecastService;
 use App\Services\OutcomeAnalyticsService;
 use App\Services\OpportunityTimelineService;
 use App\Support\Statuses;
@@ -21,7 +22,7 @@ use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function __invoke(DailyActionQueueService $dailyActionQueue, OpportunityTimelineService $timeline, OpportunityReadinessService $readiness, OutcomeAnalyticsService $outcomeAnalytics): View
+    public function __invoke(DailyActionQueueService $dailyActionQueue, OpportunityTimelineService $timeline, OpportunityReadinessService $readiness, OpportunityForecastService $forecast, OutcomeAnalyticsService $outcomeAnalytics): View
     {
         $preference = request()->user()?->preference;
         $rankedOpportunities = $this->rankedOpportunities($preference);
@@ -42,6 +43,8 @@ class DashboardController extends Controller
             ->count();
 
         $currentFocusOpportunities = $this->currentFocusOpportunities($preference);
+        $forecastOpportunities = $this->forecastOpportunities();
+        $forecastSummaries = $forecast->ranked($forecastOpportunities, $preference);
 
         return view('dashboard', [
             'opportunityCount' => $opportunityCount,
@@ -58,6 +61,8 @@ class DashboardController extends Controller
             'dailyQueueSummary' => $dailyActionQueue->summary($dailyQueueItems),
             'currentFocusOpportunities' => $currentFocusOpportunities,
             'currentFocusReadiness' => $readiness->dashboardSummaries($currentFocusOpportunities),
+            'forecastedBestOpportunities' => $forecastSummaries->take(5),
+            'focusOpportunitiesAtRisk' => $forecast->focusAtRisk($forecastOpportunities, $preference)->take(5),
             'hasTooManyFocusOpportunities' => $currentFocusOpportunities->count() > 5,
             'topRankedOpportunities' => $rankedOpportunities->take(5),
             'highValueOpportunitiesMissingNextAction' => $rankedOpportunities
@@ -84,7 +89,7 @@ class DashboardController extends Controller
             ->with([
                 'actions' => fn ($query) => $query->orderByRaw('due_date is null')->orderBy('due_date')->orderBy('id'),
                 'applications',
-                'opportunityGaps',
+                'opportunityGaps.actions',
                 'projects',
                 'strategicObjectives',
             ])
@@ -93,6 +98,19 @@ class DashboardController extends Controller
             ->get()
             ->sortByDesc(fn (Opportunity $opportunity) => $this->rankedScore($opportunity, $preference) ?? PHP_INT_MIN)
             ->values();
+    }
+
+
+    private function forecastOpportunities(): Collection
+    {
+        return Opportunity::query()
+            ->whereNotIn('status', Statuses::terminalOpportunities())
+            ->with([
+                'actions' => fn ($query) => $query->orderByRaw('due_date is null')->orderBy('due_date')->orderBy('id'),
+                'opportunityGaps.actions',
+                'projects',
+            ])
+            ->get();
     }
 
     private function contactsRequiringFollowUp(): Collection
