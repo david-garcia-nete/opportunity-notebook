@@ -7,6 +7,7 @@ use App\Models\Application;
 use App\Models\Contact;
 use App\Models\ContactInteraction;
 use App\Models\Opportunity;
+use App\Models\OpportunityGap;
 use App\Models\Project;
 use App\Models\StrategicObjective;
 use App\Models\UserPreference;
@@ -59,6 +60,7 @@ class DashboardController extends Controller
                 ->take(5)
                 ->values(),
             'highValueOpportunitiesWithCriticalGaps' => $this->highValueOpportunitiesWithCriticalGaps($rankedOpportunities),
+            'gapsWithoutActionPlans' => $this->gapsWithoutActionPlans(),
             'overdueActionsOnHighValueOpportunities' => $this->overdueActionsOnHighValueOpportunities(),
             'recentApplicationsForHighValueOpportunities' => $this->recentApplicationsForHighValueOpportunities(),
             'contactsRequiringFollowUp' => $this->contactsRequiringFollowUp(),
@@ -196,6 +198,19 @@ class DashboardController extends Controller
             ->filter(fn (array $summary) => $summary['open_gap_count'] > 0)
             ->take(5)
             ->values();
+    }
+
+    private function gapsWithoutActionPlans(): Collection
+    {
+        return OpportunityGap::query()
+            ->with('opportunity')
+            ->where('status', 'Open')
+            ->whereIn('priority', ['Critical', 'High'])
+            ->whereDoesntHave('actions')
+            ->orderByRaw("case priority when 'Critical' then 1 else 2 end")
+            ->orderBy('title')
+            ->take(5)
+            ->get();
     }
 
     private function overdueActionsOnHighValueOpportunities(): Collection

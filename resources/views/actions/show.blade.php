@@ -43,6 +43,16 @@
                         <dd class="mt-1 text-base font-semibold text-gray-900">{{ $action->status() }}</dd>
                     </div>
                     <div>
+                        <dt class="text-sm font-medium text-gray-500">Opportunity Gap</dt>
+                        <dd class="mt-1 text-base font-semibold text-gray-900">
+                            @if ($action->opportunityGap)
+                                <a href="{{ route('opportunities.gaps.show', [$action->opportunityGap->opportunity, $action->opportunityGap]) }}" class="text-indigo-600 hover:text-indigo-900">{{ $action->opportunityGap->title }}</a>
+                            @else
+                                —
+                            @endif
+                        </dd>
+                    </div>
+                    <div>
                         <dt class="text-sm font-medium text-gray-500">Due Date</dt>
                         <dd class="mt-1 text-base font-semibold text-gray-900">{{ $action->due_date?->toFormattedDateString() ?? '—' }}</dd>
                     </div>

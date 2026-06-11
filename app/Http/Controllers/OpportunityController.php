@@ -76,19 +76,25 @@ class OpportunityController extends Controller
             'applications' => fn ($query) => $query->latest('applied_at')->latest(),
             'contactInteractions' => fn ($query) => $query->with('contact')->latest('interaction_date')->latest(),
             'contacts' => fn ($query) => $query->orderBy('name'),
-            'opportunityGaps' => fn ($query) => $query->orderByRaw("case priority when 'Critical' then 1 when 'High' then 2 when 'Medium' then 3 else 4 end")->orderBy('title'),
+            'opportunityGaps' => fn ($query) => $query->with(['actions' => fn ($actionQuery) => $actionQuery->orderByRaw('completed_at is not null')->orderByRaw('due_date is null')->orderBy('due_date')->orderBy('id')])->orderByRaw("case priority when 'Critical' then 1 when 'High' then 2 when 'Medium' then 3 else 4 end")->orderBy('title'),
             'projects' => fn ($query) => $query->orderBy('name'),
             'strategicObjectives' => fn ($query) => $query->orderByDesc('priority')->orderBy('name'),
         ]);
 
         $gapCounts = collect(OpportunityGap::STATUSES)
             ->mapWithKeys(fn (string $status) => [$status => $opportunity->opportunityGaps->where('status', $status)->count()]);
+        $gapPriorityCounts = collect(['Critical', 'High'])
+            ->mapWithKeys(fn (string $priority) => [$priority => $opportunity->opportunityGaps->where('status', 'Open')->where('priority', $priority)->count()]);
+        $gapActions = $opportunity->opportunityGaps->flatMap->actions;
 
         return view('opportunities.show', [
             'availableContacts' => Contact::orderBy('name')->get(),
             'availableProjects' => Project::orderBy('name')->get(),
             'availableStrategicObjectives' => StrategicObjective::orderByDesc('active')->orderByDesc('priority')->orderBy('name')->get(),
+            'gapActionCompletedCount' => $gapActions->whereNotNull('completed_at')->count(),
+            'gapActionOpenCount' => $gapActions->whereNull('completed_at')->count(),
             'gapCounts' => $gapCounts,
+            'gapPriorityCounts' => $gapPriorityCounts,
             'gapStatuses' => OpportunityGap::STATUSES,
             'opportunity' => $opportunity,
         ]);

@@ -132,14 +132,40 @@ class DailyActionQueueTest extends TestCase
             ->assertSeeText('Reach out to John Smith and log the outcome.');
     }
 
-    public function test_critical_gaps_appear(): void
+    public function test_critical_gaps_with_actions_appear_as_gap_reminders(): void
     {
         $user = User::factory()->create();
         $opportunity = $this->createFocusOpportunity('Portfolio Consulting');
-        OpportunityGap::create([
+        $gap = OpportunityGap::create([
             'opportunity_id' => $opportunity->id,
             'title' => 'Portfolio gap',
             'category' => 'Portfolio',
+            'status' => 'Open',
+            'priority' => 'Critical',
+        ]);
+        Action::create([
+            'opportunity_id' => $opportunity->id,
+            'opportunity_gap_id' => $gap->id,
+            'title' => 'Start portfolio case study',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('daily-queue'));
+
+        $response
+            ->assertOk()
+            ->assertSeeText('Portfolio gap remains open')
+            ->assertSeeText('Priority 6 · Critical focus gap')
+            ->assertSeeText('Close this critical gap before investing in lower-priority work.');
+    }
+
+    public function test_daily_queue_includes_gaps_without_action_plans(): void
+    {
+        $user = User::factory()->create();
+        $opportunity = $this->createFocusOpportunity('Cloud Consulting');
+        OpportunityGap::create([
+            'opportunity_id' => $opportunity->id,
+            'title' => 'AWS Certification',
+            'category' => 'Certification',
             'status' => 'Open',
             'priority' => 'Critical',
         ]);
@@ -148,9 +174,10 @@ class DailyActionQueueTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertSeeText('Portfolio gap remains open')
-            ->assertSeeText('Priority 5 · Critical focus gap')
-            ->assertSeeText('Close this critical gap before investing in lower-priority work.');
+            ->assertSeeText('Gap has no action plan: AWS Certification')
+            ->assertSeeText('Priority 5 · Gap has no action plan')
+            ->assertSeeText('Create one action that starts closing this Critical gap.')
+            ->assertSeeText('Cloud Consulting');
     }
 
     public function test_queue_summary_counts_are_correct(): void

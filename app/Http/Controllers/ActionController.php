@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Action;
 use App\Models\Opportunity;
+use App\Models\OpportunityGap;
+use App\Services\GapActionTemplateService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -18,11 +20,26 @@ class ActionController extends Controller
         ]);
     }
 
-    public function create(Request $request): View
+    public function create(Request $request, GapActionTemplateService $gapActionTemplate): View
     {
+        $sourceGap = null;
+        $defaults = [
+            'title' => '',
+            'description' => '',
+            'opportunity_id' => $request->integer('opportunity_id') ?: null,
+            'opportunity_gap_id' => null,
+        ];
+
+        if ($request->filled('opportunity_gap_id')) {
+            $sourceGap = OpportunityGap::with('opportunity')->findOrFail($request->integer('opportunity_gap_id'));
+            $defaults = $gapActionTemplate->defaults($sourceGap);
+        }
+
         return view('actions.create', [
+            'defaults' => $defaults,
             'opportunities' => Opportunity::orderBy('title')->get(),
-            'selectedOpportunityId' => $request->integer('opportunity_id') ?: null,
+            'selectedOpportunityId' => $defaults['opportunity_id'],
+            'sourceGap' => $sourceGap,
         ]);
     }
 
@@ -38,7 +55,7 @@ class ActionController extends Controller
     public function show(Action $action): View
     {
         return view('actions.show', [
-            'action' => $action->load('opportunity'),
+            'action' => $action->load(['opportunity', 'opportunityGap.opportunity']),
         ]);
     }
 
@@ -70,12 +87,20 @@ class ActionController extends Controller
 
     private function validatedAction(Request $request): array
     {
-        return $request->validate([
+        $validated = $request->validate([
             'opportunity_id' => ['nullable', 'integer', Rule::exists('opportunities', 'id')],
+            'opportunity_gap_id' => ['nullable', 'integer', Rule::exists('opportunity_gaps', 'id')],
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'due_date' => ['nullable', 'date'],
             'completed_at' => ['nullable', 'date'],
         ]);
+
+        if (! empty($validated['opportunity_gap_id'])) {
+            $gap = OpportunityGap::findOrFail($validated['opportunity_gap_id']);
+            $validated['opportunity_id'] = $gap->opportunity_id;
+        }
+
+        return $validated;
     }
 }
