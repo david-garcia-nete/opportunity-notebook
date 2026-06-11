@@ -9,6 +9,7 @@ use App\Http\Controllers\ContactInteractionController;
 use App\Http\Controllers\DailyActionQueueController;
 use App\Http\Controllers\ForecastController;
 use App\Http\Controllers\OpportunityController;
+use App\Http\Controllers\OpportunityDecisionController;
 use App\Http\Controllers\OpportunityGapController;
 use App\Http\Controllers\OutcomeAnalyticsController;
 use App\Http\Controllers\OpportunityProjectController;
@@ -43,6 +44,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/opportunities/compare', [OpportunityController::class, 'compare'])
         ->name('opportunities.compare');
     Route::resource('opportunities', OpportunityController::class);
+    Route::post('/opportunities/{opportunity}/decisions', [OpportunityDecisionController::class, 'store'])
+        ->name('opportunities.decisions.store');
     Route::get('/opportunities/{opportunity}/gaps/create', [OpportunityGapController::class, 'create'])
         ->name('opportunities.gaps.create');
     Route::post('/opportunities/{opportunity}/gaps', [OpportunityGapController::class, 'store'])

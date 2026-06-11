@@ -167,6 +167,11 @@ class Opportunity extends Model
         return $this->hasMany(OpportunityGap::class);
     }
 
+    public function decisions(): HasMany
+    {
+        return $this->hasMany(OpportunityDecision::class);
+    }
+
     public function openOpportunityGaps(): HasMany
     {
         return $this->opportunityGaps()->where('status', Statuses::GAP_OPEN);

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Contact;
 use App\Models\Opportunity;
+use App\Models\OpportunityDecision;
 use App\Models\OpportunityGap;
 use App\Models\Project;
 use App\Models\StrategicObjective;
@@ -84,6 +85,7 @@ class OpportunityController extends Controller
             'applications' => fn ($query) => $query->latest('applied_at')->latest(),
             'contactInteractions' => fn ($query) => $query->with('contact')->latest('interaction_date')->latest(),
             'contacts' => fn ($query) => $query->orderBy('name'),
+            'decisions' => fn ($query) => $query->latest('decided_at')->latest(),
             'opportunityGaps' => fn ($query) => $query->with(['actions' => fn ($actionQuery) => $actionQuery->orderByRaw('completed_at is not null')->orderByRaw('due_date is null')->orderBy('due_date')->orderBy('id')])->orderByRaw("case priority when 'Critical' then 1 when 'High' then 2 when 'Medium' then 3 else 4 end")->orderBy('title'),
             'projects' => fn ($query) => $query->orderBy('name'),
             'strategicObjectives' => fn ($query) => $query->orderByDesc('priority')->orderBy('name'),
@@ -108,6 +110,8 @@ class OpportunityController extends Controller
             'forecastBreakdown' => $forecast->breakdown($opportunity, request()->user()?->preference),
             'forecastScore' => $forecast->score($opportunity, request()->user()?->preference),
             'forecastStatus' => $forecast->status($opportunity, request()->user()?->preference),
+            'decisionTypes' => OpportunityDecision::decisionTypeOptions(),
+            'reasonCategories' => OpportunityDecision::reasonCategoryOptions(),
             'readinessBreakdown' => $readiness->breakdown($opportunity),
             'readinessIndicators' => $readiness->indicators($opportunity),
             'timeline' => $timeline->forOpportunity($opportunity),

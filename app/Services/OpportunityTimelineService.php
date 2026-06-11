@@ -6,6 +6,7 @@ use App\Models\Action;
 use App\Models\Application;
 use App\Models\ContactInteraction;
 use App\Models\Opportunity;
+use App\Models\OpportunityDecision;
 use App\Models\OpportunityGap;
 use App\Support\Statuses;
 use Illuminate\Support\Carbon;
@@ -24,6 +25,7 @@ class OpportunityTimelineService
             'applications',
             'contactInteractions.contact',
             'opportunityGaps.actions',
+            'decisions',
         ]);
 
         $items = collect()
@@ -32,6 +34,7 @@ class OpportunityTimelineService
             ->merge($this->contactInteractionItems($opportunity->contactInteractions))
             ->merge($this->gapItems($opportunity->opportunityGaps))
             ->merge($this->gapActionItems($opportunity))
+            ->merge($this->decisionItems($opportunity->decisions))
             ->merge($this->forecastItems($opportunity));
 
         return $this->splitAndSort($items);
@@ -47,6 +50,7 @@ class OpportunityTimelineService
                 'applications',
                 'contactInteractions.contact',
                 'opportunityGaps.actions',
+                'decisions',
             ])
             ->get();
 
@@ -197,6 +201,18 @@ class OpportunityTimelineService
         return $this->actionItems($gapActions, true);
     }
 
+    private function decisionItems(Collection $decisions): Collection
+    {
+        return $decisions->map(fn (OpportunityDecision $decision) => $this->item(
+            date: $decision->decided_at,
+            typeLabel: 'Decision Logged',
+            title: $decision->decisionTypeLabel().' decision: '.$decision->reasonCategoryLabel(),
+            status: $decision->decisionTypeLabel(),
+            opportunity: $decision->opportunity,
+            url: route('opportunities.show', $decision->opportunity),
+            source: $decision,
+        ));
+    }
 
     private function forecastItems(Opportunity $opportunity): Collection
     {
