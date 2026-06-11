@@ -344,6 +344,66 @@
                 @endif
             </section>
 
+
+            <section class="mt-8 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Related Contact Activity</h3>
+                        <p class="mt-1 text-sm text-gray-500">Interactions connected to this opportunity, newest first.</p>
+                    </div>
+                    <a href="{{ route('contact-interactions.create', ['opportunity_id' => $opportunity->id, 'redirect_to' => 'opportunity']) }}" class="inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                        Add Interaction
+                    </a>
+                </div>
+
+                @if ($opportunity->contactInteractions->isEmpty())
+                    <div class="mt-5 rounded-xl bg-gray-50 p-4 text-sm text-gray-500 ring-1 ring-inset ring-gray-100">
+                        No contact interactions linked to this opportunity yet.
+                    </div>
+                @else
+                    <div class="mt-5 overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Date</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Contact</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Type</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Summary</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Outcome</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Follow-up</th>
+                                    <th scope="col" class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 bg-white">
+                                @foreach ($opportunity->contactInteractions as $interaction)
+                                    <tr>
+                                        <td class="whitespace-nowrap px-4 py-4 text-sm font-semibold text-gray-900">{{ $interaction->interaction_date->toFormattedDateString() }}</td>
+                                        <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-600">
+                                            <a href="{{ route('contacts.show', $interaction->contact) }}" class="font-semibold text-indigo-600 hover:text-indigo-900">{{ $interaction->contact->name }}</a>
+                                        </td>
+                                        <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-600">{{ $interaction->interaction_type }}</td>
+                                        <td class="px-4 py-4 text-sm text-gray-600">{{ $interaction->summary }}</td>
+                                        <td class="px-4 py-4 text-sm text-gray-600">{{ $interaction->outcome ?? '—' }}</td>
+                                        <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-600">{{ $interaction->next_follow_up_date?->toFormattedDateString() ?? '—' }}</td>
+                                        <td class="whitespace-nowrap px-4 py-4 text-right text-sm">
+                                            <div class="flex justify-end gap-3">
+                                                <a href="{{ route('contact-interactions.edit', ['contact_interaction' => $interaction, 'redirect_to' => 'opportunity']) }}" class="font-semibold text-indigo-600 hover:text-indigo-900">Edit</a>
+                                                <form method="POST" action="{{ route('contact-interactions.destroy', $interaction) }}">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <input type="hidden" name="redirect_to" value="opportunity">
+                                                    <button type="submit" class="font-semibold text-red-600 hover:text-red-900">Delete</button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </section>
+
             <section class="mt-8 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                 <div>
                     <h3 class="text-lg font-semibold text-gray-900">Projects</h3>

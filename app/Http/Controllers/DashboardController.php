@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Action;
 use App\Models\Application;
 use App\Models\Contact;
+use App\Models\ContactInteraction;
 use App\Models\Opportunity;
 use App\Models\Project;
 use App\Models\StrategicObjective;
@@ -49,8 +50,61 @@ class DashboardController extends Controller
             'highValueOpportunitiesWithCriticalGaps' => $this->highValueOpportunitiesWithCriticalGaps($rankedOpportunities),
             'overdueActionsOnHighValueOpportunities' => $this->overdueActionsOnHighValueOpportunities(),
             'recentApplicationsForHighValueOpportunities' => $this->recentApplicationsForHighValueOpportunities(),
+            'contactsRequiringFollowUp' => $this->contactsRequiringFollowUp(),
+            'dormantHighValueRelationships' => $this->dormantHighValueRelationships(),
             'topObjectives' => $this->topObjectives(),
         ]);
+    }
+
+
+    private function contactsRequiringFollowUp(): Collection
+    {
+        return ContactInteraction::query()
+            ->with(['contact', 'opportunity'])
+            ->whereNotNull('next_follow_up_date')
+            ->whereDate('next_follow_up_date', '<=', today())
+            ->orderBy('next_follow_up_date')
+            ->get()
+            ->take(5)
+            ->values();
+    }
+
+    private function dormantHighValueRelationships(): Collection
+    {
+        return Contact::query()
+            ->with([
+                'contactInteractions' => fn ($query) => $query->latest('interaction_date')->latest(),
+                'opportunities',
+            ])
+            ->orderBy('name')
+            ->get()
+            ->map(function (Contact $contact) {
+                $highValueOpportunities = $contact->opportunities
+                    ->filter(fn (Opportunity $opportunity) => ($opportunity->computedScore() ?? PHP_INT_MIN) >= 30)
+                    ->sortByDesc(fn (Opportunity $opportunity) => $opportunity->computedScore())
+                    ->values();
+                $lastInteraction = $contact->contactInteractions->first();
+
+                return [
+                    'contact' => $contact,
+                    'high_value_opportunities' => $highValueOpportunities,
+                    'last_interaction' => $lastInteraction,
+                    'average_opportunity_score' => $contact->averageOpportunityScore(),
+                ];
+            })
+            ->filter(function (array $summary) {
+                if ($summary['high_value_opportunities']->isEmpty()) {
+                    return false;
+                }
+
+                $lastInteraction = $summary['last_interaction'];
+
+                return $lastInteraction === null
+                    || $lastInteraction->interaction_date->lte(today()->subDays(30));
+            })
+            ->sortByDesc(fn (array $summary) => $summary['average_opportunity_score'] ?? PHP_INT_MIN)
+            ->take(5)
+            ->values();
     }
 
     private function topObjectives(): Collection

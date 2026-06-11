@@ -5,6 +5,7 @@ use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ContactOpportunityController;
+use App\Http\Controllers\ContactInteractionController;
 use App\Http\Controllers\OpportunityController;
 use App\Http\Controllers\OpportunityGapController;
 use App\Http\Controllers\OpportunityProjectController;
@@ -50,6 +51,8 @@ Route::middleware('auth')->group(function () {
         ->name('opportunities.strategic-objectives.destroy');
 
     Route::resource('contacts', ContactController::class);
+    Route::resource('contact-interactions', ContactInteractionController::class)
+        ->except(['index', 'show']);
     Route::post('/contacts/{contact}/opportunities', [ContactOpportunityController::class, 'storeForContact'])
         ->name('contacts.opportunities.store');
     Route::delete('/contacts/{contact}/opportunities/{opportunity}', [ContactOpportunityController::class, 'destroyFromContact'])

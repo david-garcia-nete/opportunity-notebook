@@ -289,6 +289,74 @@
                 </section>
             </div>
 
+
+            <div class="grid gap-8 lg:grid-cols-2">
+                <section class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                    <h3 class="text-lg font-semibold text-gray-900">Contacts Requiring Follow-Up</h3>
+                    <p class="mt-1 text-sm text-gray-500">Contact interactions with follow-up dates due today or earlier.</p>
+
+                    @if ($contactsRequiringFollowUp->isEmpty())
+                        <div class="mt-5 rounded-xl bg-gray-50 p-4 text-sm text-gray-500 ring-1 ring-inset ring-gray-100">
+                            No contact follow-ups are due right now.
+                        </div>
+                    @else
+                        <div class="mt-5 space-y-3">
+                            @foreach ($contactsRequiringFollowUp as $interaction)
+                                <article class="rounded-xl bg-gray-50 p-4 ring-1 ring-inset ring-gray-100">
+                                    <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                        <div>
+                                            <a href="{{ route('contacts.show', $interaction->contact) }}" class="font-semibold text-gray-900 hover:text-indigo-700">{{ $interaction->contact->name }}</a>
+                                            <p class="mt-1 text-sm text-gray-500">Follow up by {{ $interaction->next_follow_up_date->toFormattedDateString() }}</p>
+                                        </div>
+                                        <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">{{ $interaction->interaction_type }}</span>
+                                    </div>
+                                    <p class="mt-3 text-sm text-gray-600">{{ $interaction->summary }}</p>
+                                    @if ($interaction->opportunity)
+                                        <p class="mt-2 text-sm text-gray-600">
+                                            Opportunity:
+                                            <a href="{{ route('opportunities.show', $interaction->opportunity) }}" class="font-medium text-indigo-600 hover:text-indigo-900">{{ $interaction->opportunity->title }}</a>
+                                        </p>
+                                    @endif
+                                </article>
+                            @endforeach
+                        </div>
+                    @endif
+                </section>
+
+                <section class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                    <h3 class="text-lg font-semibold text-gray-900">Dormant High-Value Relationships</h3>
+                    <p class="mt-1 text-sm text-gray-500">Contacts tied to strong opportunities with no interaction in 30+ days.</p>
+
+                    @if ($dormantHighValueRelationships->isEmpty())
+                        <div class="mt-5 rounded-xl bg-gray-50 p-4 text-sm text-gray-500 ring-1 ring-inset ring-gray-100">
+                            No high-value relationships are dormant right now.
+                        </div>
+                    @else
+                        <div class="mt-5 space-y-3">
+                            @foreach ($dormantHighValueRelationships as $relationship)
+                                <article class="rounded-xl bg-gray-50 p-4 ring-1 ring-inset ring-gray-100">
+                                    <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                        <div>
+                                            <a href="{{ route('contacts.show', $relationship['contact']) }}" class="font-semibold text-gray-900 hover:text-indigo-700">{{ $relationship['contact']->name }}</a>
+                                            <p class="mt-1 text-sm text-gray-500">
+                                                Last interaction: {{ $relationship['last_interaction']?->interaction_date->toFormattedDateString() ?? 'No interactions recorded' }}
+                                            </p>
+                                        </div>
+                                        <span class="rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700">Avg score {{ $relationship['average_opportunity_score'] ?? '—' }}</span>
+                                    </div>
+                                    <p class="mt-3 text-sm text-gray-600">
+                                        Helping with:
+                                        @foreach ($relationship['high_value_opportunities']->take(3) as $opportunity)
+                                            <a href="{{ route('opportunities.show', $opportunity) }}" class="font-medium text-indigo-600 hover:text-indigo-900">{{ $opportunity->title }}</a>@if (! $loop->last), @endif
+                                        @endforeach
+                                    </p>
+                                </article>
+                            @endforeach
+                        </div>
+                    @endif
+                </section>
+            </div>
+
             <section class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                 <div class="flex items-center justify-between">
                     <div>
