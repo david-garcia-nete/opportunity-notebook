@@ -15,6 +15,7 @@ use App\Services\DailyActionQueueService;
 use App\Services\OpportunityReadinessService;
 use App\Services\OpportunityForecastService;
 use App\Services\OutcomeAnalyticsService;
+use App\Services\PortfolioAnalysisService;
 use App\Services\OpportunityTimelineService;
 use App\Support\Statuses;
 use Illuminate\Support\Collection;
@@ -22,7 +23,7 @@ use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function __invoke(DailyActionQueueService $dailyActionQueue, OpportunityTimelineService $timeline, OpportunityReadinessService $readiness, OpportunityForecastService $forecast, OutcomeAnalyticsService $outcomeAnalytics): View
+    public function __invoke(DailyActionQueueService $dailyActionQueue, OpportunityTimelineService $timeline, OpportunityReadinessService $readiness, OpportunityForecastService $forecast, OutcomeAnalyticsService $outcomeAnalytics, PortfolioAnalysisService $portfolio): View
     {
         $preference = request()->user()?->preference;
         $rankedOpportunities = $this->rankedOpportunities($preference);
@@ -78,6 +79,7 @@ class DashboardController extends Controller
             'topObjectives' => $this->topObjectives(),
             'recentActivityItems' => $timeline->recentHistory(),
             'outcomeSnapshot' => $outcomeAnalytics->summary(),
+            'portfolioHealth' => $portfolio->dashboardHealth($preference),
         ]);
     }
 
