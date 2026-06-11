@@ -10,15 +10,17 @@ use App\Models\Opportunity;
 use App\Models\Project;
 use App\Models\StrategicObjective;
 use App\Models\UserPreference;
+use App\Services\DailyActionQueueService;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function __invoke(): View
+    public function __invoke(DailyActionQueueService $dailyActionQueue): View
     {
         $preference = request()->user()?->preference;
         $rankedOpportunities = $this->rankedOpportunities($preference);
+        $dailyQueueItems = $dailyActionQueue->build();
 
         $opportunityCount = Opportunity::count();
         $activeOpportunityCount = Opportunity::whereNotIn('status', ['rejected', 'closed'])->count();
@@ -47,6 +49,8 @@ class DashboardController extends Controller
             'actionsDueTodayCount' => $actionsDueTodayCount,
             'overdueActionCount' => $overdueActionCount,
             'preference' => $preference,
+            'dailyQueueItems' => $dailyQueueItems,
+            'dailyQueueSummary' => $dailyActionQueue->summary($dailyQueueItems),
             'currentFocusOpportunities' => $currentFocusOpportunities,
             'hasTooManyFocusOpportunities' => $currentFocusOpportunities->count() > 5,
             'topRankedOpportunities' => $rankedOpportunities->take(5),

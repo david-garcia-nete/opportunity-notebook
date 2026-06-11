@@ -156,16 +156,29 @@
                 </section>
 
                 <section class="rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm">
-                    <p class="text-sm font-semibold uppercase tracking-wide text-indigo-600">Today's Focus</p>
-                    <div class="mt-4 rounded-2xl bg-indigo-50 p-6 text-center ring-1 ring-inset ring-indigo-100">
-                        <h3 class="text-xl font-semibold text-gray-900">What needs attention?</h3>
-                        @if ($overdueActionCount > 0)
-                            <p class="mt-2 text-sm font-medium text-indigo-700">You have overdue actions that need attention.</p>
-                        @elseif ($actionsDueTodayCount > 0)
-                            <p class="mt-2 text-sm font-medium text-indigo-700">You have actions due today.</p>
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="text-sm font-semibold uppercase tracking-wide text-indigo-600">Today's Queue</p>
+                            <h3 class="mt-1 text-xl font-semibold text-gray-900">What needs attention?</h3>
+                        </div>
+                        <span class="rounded-full bg-indigo-100 px-3 py-1 text-sm font-semibold text-indigo-700">{{ $dailyQueueSummary['queue_item_count'] }} items</span>
+                    </div>
+
+                    <div class="mt-4 rounded-2xl bg-indigo-50 p-5 ring-1 ring-inset ring-indigo-100">
+                        @if ($dailyQueueItems->isEmpty())
+                            <p class="text-sm font-medium text-indigo-700">No urgent actions. Consider creating new opportunities.</p>
                         @else
-                            <p class="mt-2 text-sm font-medium text-indigo-700">No urgent actions. Consider creating new opportunities.</p>
+                            <ul class="space-y-3 text-sm">
+                                @foreach ($dailyQueueItems->take(3) as $item)
+                                    <li>
+                                        <a href="{{ $item['url'] }}" class="font-semibold text-indigo-700 hover:text-indigo-900">{{ $item['title'] }}</a>
+                                        <p class="mt-1 text-indigo-900">{{ $item['type_label'] }} · {{ $item['priority_label'] }}</p>
+                                    </li>
+                                @endforeach
+                            </ul>
                         @endif
+
+                        <a href="{{ route('daily-queue') }}" class="mt-5 inline-flex items-center text-sm font-semibold text-indigo-700 hover:text-indigo-900">Open Daily Queue →</a>
                     </div>
                 </section>
             </div>
