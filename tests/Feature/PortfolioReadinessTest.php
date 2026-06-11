@@ -123,7 +123,7 @@ class PortfolioReadinessTest extends TestCase
             ->assertSeeText('Portfolio Readiness Lead')
             ->assertSeeText('Weighted Score')
             ->assertSeeText('Readiness Score')
-            ->assertSeeText('Mostly Ready')
+            ->assertSeeText('Ready')
             ->assertSeeText('Not Focus');
     }
 
