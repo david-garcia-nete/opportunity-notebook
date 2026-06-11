@@ -41,7 +41,9 @@ class DailyActionQueueService
         $queueItems ??= $this->build();
 
         return [
-            'focus_opportunities_count' => Opportunity::where('is_focus', true)->count(),
+            'focus_opportunities_count' => Opportunity::where('is_focus', true)
+                ->whereIn('status', Statuses::currentOpportunities())
+                ->count(),
             'queue_item_count' => $queueItems->count(),
             'overdue_action_count' => $this->focusActionQuery()
                 ->whereDate('due_date', '<', today())
@@ -52,11 +54,17 @@ class DailyActionQueueService
             'follow_ups_due_count' => ContactInteraction::query()
                 ->whereNotNull('next_follow_up_date')
                 ->whereDate('next_follow_up_date', '<=', today())
+                ->where(function ($query) {
+                    $query->whereNull('opportunity_id')
+                        ->orWhereHas('opportunity', fn ($opportunityQuery) => $opportunityQuery->whereIn('status', Statuses::currentOpportunities()));
+                })
                 ->count(),
             'critical_gap_count' => OpportunityGap::query()
                 ->where('status', Statuses::GAP_OPEN)
                 ->where('priority', 'Critical')
-                ->whereHas('opportunity', fn ($query) => $query->where('is_focus', true))
+                ->whereHas('opportunity', fn ($query) => $query
+                    ->where('is_focus', true)
+                    ->whereIn('status', Statuses::currentOpportunities()))
                 ->count(),
         ];
     }
@@ -94,6 +102,7 @@ class DailyActionQueueService
     {
         return Opportunity::query()
             ->where('is_focus', true)
+            ->whereIn('status', Statuses::currentOpportunities())
             ->with(['actions' => fn ($query) => $query->orderByRaw('due_date is null')->orderBy('due_date')->orderBy('id')])
             ->orderBy('title')
             ->get()
@@ -119,6 +128,10 @@ class DailyActionQueueService
             ->with(['contact', 'opportunity'])
             ->whereNotNull('next_follow_up_date')
             ->whereDate('next_follow_up_date', '<=', today())
+            ->where(function ($query) {
+                $query->whereNull('opportunity_id')
+                    ->orWhereHas('opportunity', fn ($opportunityQuery) => $opportunityQuery->whereIn('status', Statuses::currentOpportunities()));
+            })
             ->orderBy('next_follow_up_date')
             ->orderBy('id')
             ->get()
@@ -140,6 +153,7 @@ class DailyActionQueueService
     {
         return Opportunity::query()
             ->where('is_focus', true)
+            ->whereIn('status', Statuses::currentOpportunities())
             ->with(['opportunityGaps', 'projects', 'applications', 'strategicObjectives'])
             ->orderBy('title')
             ->get()
@@ -166,7 +180,9 @@ class DailyActionQueueService
             ->where('status', Statuses::GAP_OPEN)
             ->whereIn('priority', ['Critical', 'High'])
             ->whereDoesntHave('actions')
-            ->whereHas('opportunity', fn ($query) => $query->where('is_focus', true))
+            ->whereHas('opportunity', fn ($query) => $query
+                ->where('is_focus', true)
+                ->whereIn('status', Statuses::currentOpportunities()))
             ->orderByRaw("case priority when 'Critical' then 1 else 2 end")
             ->orderBy('title')
             ->get()
@@ -191,7 +207,9 @@ class DailyActionQueueService
             ->where('status', Statuses::GAP_OPEN)
             ->where('priority', $gapPriority)
             ->whereHas('actions')
-            ->whereHas('opportunity', fn ($query) => $query->where('is_focus', true))
+            ->whereHas('opportunity', fn ($query) => $query
+                ->where('is_focus', true)
+                ->whereIn('status', Statuses::currentOpportunities()))
             ->orderBy('title')
             ->get()
             ->map(fn (OpportunityGap $gap) => [
@@ -214,7 +232,9 @@ class DailyActionQueueService
             ->with('opportunity')
             ->whereNull('completed_at')
             ->whereNotNull('due_date')
-            ->whereHas('opportunity', fn ($query) => $query->where('is_focus', true));
+            ->whereHas('opportunity', fn ($query) => $query
+                ->where('is_focus', true)
+                ->whereIn('status', Statuses::currentOpportunities()));
     }
 
     private function actionItem(Action $action, int $priority, string $priorityLabel, string $recommendedNextStep): array

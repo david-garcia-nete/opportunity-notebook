@@ -141,7 +141,8 @@
                     <div class="rounded-xl bg-indigo-50 px-5 py-4 text-right ring-1 ring-inset ring-indigo-100">
                         <p class="text-sm font-medium text-indigo-700">Forecast Score</p>
                         <p class="mt-1 text-3xl font-bold text-indigo-950">{{ $forecastScore }}</p>
-                        <span class="mt-2 inline-flex rounded-full bg-white px-3 py-1 text-xs font-semibold text-indigo-700 ring-1 ring-inset ring-indigo-200">{{ $forecastStatus }}</span>
+                        <p class="mt-3 text-xs font-semibold uppercase tracking-wide text-indigo-700">Forecast Status</p>
+                        <span class="mt-1 inline-flex rounded-full bg-white px-3 py-1 text-xs font-semibold text-indigo-700 ring-1 ring-inset ring-indigo-200">{{ $forecastStatus }}</span>
                     </div>
                 </div>
 

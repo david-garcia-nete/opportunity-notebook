@@ -40,6 +40,7 @@ class OpportunityTimelineService
     public function global(bool $focusOnly = false): array
     {
         $opportunities = Opportunity::query()
+            ->whereIn('status', Statuses::currentOpportunities())
             ->when($focusOnly, fn ($query) => $query->where('is_focus', true))
             ->with([
                 'actions.opportunityGap',

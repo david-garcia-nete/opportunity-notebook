@@ -97,6 +97,14 @@ class Statuses
         ];
     }
 
+    public static function currentOpportunities(): array
+    {
+        return array_values(array_diff(
+            self::opportunities(),
+            self::unavailableForNextActionOpportunities()
+        ));
+    }
+
     public static function normalizeOpportunity(?string $status): ?string
     {
         return self::normalize($status, [
