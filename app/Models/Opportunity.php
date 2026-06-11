@@ -158,6 +158,12 @@ class Opportunity extends Model
             ->withTimestamps();
     }
 
+    public function strategicObjectives(): BelongsToMany
+    {
+        return $this->belongsToMany(StrategicObjective::class)
+            ->withTimestamps();
+    }
+
     protected function casts(): array
     {
         return [

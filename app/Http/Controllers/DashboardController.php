@@ -7,6 +7,7 @@ use App\Models\Application;
 use App\Models\Contact;
 use App\Models\Opportunity;
 use App\Models\Project;
+use App\Models\StrategicObjective;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
@@ -47,7 +48,35 @@ class DashboardController extends Controller
                 ->values(),
             'overdueActionsOnHighValueOpportunities' => $this->overdueActionsOnHighValueOpportunities(),
             'recentApplicationsForHighValueOpportunities' => $this->recentApplicationsForHighValueOpportunities(),
+            'topObjectives' => $this->topObjectives(),
         ]);
+    }
+
+    private function topObjectives(): Collection
+    {
+        return StrategicObjective::query()
+            ->where('active', true)
+            ->with('opportunities')
+            ->orderByDesc('priority')
+            ->orderBy('name')
+            ->get()
+            ->map(function (StrategicObjective $objective) {
+                $scoredOpportunities = $objective->opportunities
+                    ->filter(fn (Opportunity $opportunity) => $opportunity->computedScore() !== null);
+
+                return [
+                    'objective' => $objective,
+                    'linked_opportunity_count' => $objective->opportunities->count(),
+                    'highest_ranked_opportunity' => $scoredOpportunities
+                        ->sortByDesc(fn (Opportunity $opportunity) => $opportunity->computedScore())
+                        ->first(),
+                    'average_opportunity_score' => $scoredOpportunities->isEmpty()
+                        ? null
+                        : round($scoredOpportunities->avg(fn (Opportunity $opportunity) => $opportunity->computedScore()), 1),
+                ];
+            })
+            ->take(5)
+            ->values();
     }
 
     private function rankedOpportunities(): Collection

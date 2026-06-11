@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Action;
 use App\Models\Application;
 use App\Models\Opportunity;
+use App\Models\StrategicObjective;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -175,6 +176,43 @@ class DashboardTest extends TestCase
             ->assertSeeTextInOrder(['Higher Priority Opportunity', 'Lower Priority Opportunity'])
             ->assertSeeTextInOrder(['Higher priority overdue action', 'Lower priority overdue action'])
             ->assertSeeTextInOrder(['Recent Applications for High-Value Opportunities', 'Higher Priority Opportunity', 'Lower Priority Opportunity']);
+    }
+
+    public function test_dashboard_shows_top_objectives_summary(): void
+    {
+        $user = User::factory()->create();
+        $objective = StrategicObjective::create([
+            'name' => 'Increase household income',
+            'priority' => 10,
+            'active' => true,
+        ]);
+        $inactiveObjective = StrategicObjective::create([
+            'name' => 'Inactive outcome',
+            'priority' => 10,
+            'active' => false,
+        ]);
+        $lowerScoreOpportunity = $this->createScoredOpportunity([
+            'title' => 'Lower value consulting lead',
+            'status' => 'active',
+        ], 4);
+        $higherScoreOpportunity = $this->createScoredOpportunity([
+            'title' => 'Premium advisory package',
+            'status' => 'active',
+        ], 8);
+        $objective->opportunities()->attach([$lowerScoreOpportunity->id, $higherScoreOpportunity->id]);
+        $inactiveObjective->opportunities()->attach($higherScoreOpportunity->id);
+
+        $response = $this->actingAs($user)->get(route('dashboard'));
+
+        $response
+            ->assertOk()
+            ->assertSeeText('Top Objectives')
+            ->assertSeeText('Increase household income')
+            ->assertSeeText('2 linked')
+            ->assertSeeText('Premium advisory package')
+            ->assertSeeText('Average opportunity score')
+            ->assertSeeText('34')
+            ->assertDontSeeText('Inactive outcome');
     }
 
     private function createScoredOpportunity(array $attributes, int $factorValue): Opportunity

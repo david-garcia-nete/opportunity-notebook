@@ -109,6 +109,51 @@
                 </section>
             </div>
 
+            <section class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Top Objectives</h3>
+                        <p class="mt-1 text-sm text-gray-500">Active outcomes and the opportunities currently supporting them.</p>
+                    </div>
+                </div>
+
+                @if ($topObjectives->isEmpty())
+                    <div class="mt-5 rounded-xl bg-gray-50 p-4 text-sm text-gray-500 ring-1 ring-inset ring-gray-100">
+                        Add active strategic objectives to connect opportunities to outcomes.
+                    </div>
+                @else
+                    <div class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                        @foreach ($topObjectives as $objectiveSummary)
+                            <article class="rounded-xl bg-gray-50 p-4 ring-1 ring-inset ring-gray-100">
+                                <div class="flex items-start justify-between gap-4">
+                                    <div>
+                                        <a href="{{ route('strategic-objectives.show', $objectiveSummary['objective']) }}" class="font-semibold text-indigo-600 hover:text-indigo-900">{{ $objectiveSummary['objective']->name }}</a>
+                                        <p class="mt-1 text-sm text-gray-500">Priority {{ $objectiveSummary['objective']->priority }}</p>
+                                    </div>
+                                    <span class="rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700">{{ $objectiveSummary['linked_opportunity_count'] }} linked</span>
+                                </div>
+                                <dl class="mt-4 space-y-3 text-sm">
+                                    <div>
+                                        <dt class="font-medium text-gray-500">Highest-ranked linked opportunity</dt>
+                                        <dd class="mt-1 font-semibold text-gray-900">
+                                            @if ($objectiveSummary['highest_ranked_opportunity'])
+                                                <a href="{{ route('opportunities.show', $objectiveSummary['highest_ranked_opportunity']) }}" class="text-indigo-600 hover:text-indigo-900">{{ $objectiveSummary['highest_ranked_opportunity']->title }}</a>
+                                            @else
+                                                —
+                                            @endif
+                                        </dd>
+                                    </div>
+                                    <div>
+                                        <dt class="font-medium text-gray-500">Average opportunity score</dt>
+                                        <dd class="mt-1 font-semibold text-gray-900">{{ $objectiveSummary['average_opportunity_score'] ?? '—' }}</dd>
+                                    </div>
+                                </dl>
+                            </article>
+                        @endforeach
+                    </div>
+                @endif
+            </section>
+
             <section class="rounded-2xl border border-amber-100 bg-white p-6 shadow-sm">
                 <h3 class="text-lg font-semibold text-gray-900">High-Value Opportunities Missing Next Action</h3>
                 <p class="mt-1 text-sm text-gray-500">Important opportunities with no incomplete/open action are stalled.</p>
