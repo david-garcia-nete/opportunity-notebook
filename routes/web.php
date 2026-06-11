@@ -10,6 +10,7 @@ use App\Http\Controllers\DailyActionQueueController;
 use App\Http\Controllers\OpportunityController;
 use App\Http\Controllers\OpportunityGapController;
 use App\Http\Controllers\OpportunityProjectController;
+use App\Http\Controllers\PortfolioReadinessController;
 use App\Http\Controllers\OpportunityStrategicObjectiveController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
@@ -31,6 +32,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/daily-queue', DailyActionQueueController::class)->name('daily-queue');
     Route::get('/weekly-review', WeeklyReviewController::class)->name('weekly-review');
     Route::get('/timeline', TimelineController::class)->name('timeline.index');
+    Route::get('/portfolio-readiness', PortfolioReadinessController::class)->name('portfolio-readiness');
 
     Route::get('/opportunities/compare', [OpportunityController::class, 'compare'])
         ->name('opportunities.compare');
