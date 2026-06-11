@@ -37,7 +37,7 @@ class OutcomeAnalyticsTest extends TestCase
         $this->assertDatabaseHas('opportunities', [
             'id' => $opportunity->id,
             'outcome' => 'Won',
-            'outcome_date' => '2026-06-10',
+            'outcome_date' => '2026-06-10 00:00:00',
             'outcome_notes' => 'Converted after a warm referral and focused portfolio review.',
         ]);
     }
