@@ -12,12 +12,13 @@ use App\Models\Project;
 use App\Models\StrategicObjective;
 use App\Models\UserPreference;
 use App\Services\DailyActionQueueService;
+use App\Services\OpportunityTimelineService;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function __invoke(DailyActionQueueService $dailyActionQueue): View
+    public function __invoke(DailyActionQueueService $dailyActionQueue, OpportunityTimelineService $timeline): View
     {
         $preference = request()->user()?->preference;
         $rankedOpportunities = $this->rankedOpportunities($preference);
@@ -66,6 +67,7 @@ class DashboardController extends Controller
             'contactsRequiringFollowUp' => $this->contactsRequiringFollowUp(),
             'dormantHighValueRelationships' => $this->dormantHighValueRelationships(),
             'topObjectives' => $this->topObjectives(),
+            'recentActivityItems' => $timeline->recentHistory(),
         ]);
     }
 

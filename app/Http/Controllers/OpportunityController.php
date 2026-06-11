@@ -8,6 +8,7 @@ use App\Models\OpportunityGap;
 use App\Models\Project;
 use App\Models\StrategicObjective;
 use App\Models\UserPreference;
+use App\Services\OpportunityTimelineService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -69,7 +70,7 @@ class OpportunityController extends Controller
             ->with('status', 'Opportunity created.');
     }
 
-    public function show(Opportunity $opportunity): View
+    public function show(Opportunity $opportunity, OpportunityTimelineService $timeline): View
     {
         $opportunity->load([
             'actions' => fn ($query) => $query->orderByRaw('due_date is null')->orderBy('due_date')->orderBy('id'),
@@ -97,6 +98,7 @@ class OpportunityController extends Controller
             'gapPriorityCounts' => $gapPriorityCounts,
             'gapStatuses' => OpportunityGap::STATUSES,
             'opportunity' => $opportunity,
+            'timeline' => $timeline->forOpportunity($opportunity),
         ]);
     }
 

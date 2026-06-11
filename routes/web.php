@@ -14,6 +14,7 @@ use App\Http\Controllers\OpportunityStrategicObjectiveController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\StrategicObjectiveController;
+use App\Http\Controllers\TimelineController;
 use App\Http\Controllers\UserPreferenceController;
 use App\Http\Controllers\WeeklyReviewController;
 use Illuminate\Support\Facades\Route;
@@ -29,6 +30,7 @@ Route::get('/dashboard', DashboardController::class)
 Route::middleware('auth')->group(function () {
     Route::get('/daily-queue', DailyActionQueueController::class)->name('daily-queue');
     Route::get('/weekly-review', WeeklyReviewController::class)->name('weekly-review');
+    Route::get('/timeline', TimelineController::class)->name('timeline.index');
 
     Route::get('/opportunities/compare', [OpportunityController::class, 'compare'])
         ->name('opportunities.compare');

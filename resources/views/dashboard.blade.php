@@ -31,7 +31,7 @@
 
     <div class="bg-gray-50 py-10">
         <div class="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
-            <section class="rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-slate-900 p-8 text-white shadow-xl">
+            <section data-testid="dashboard-hero" class="rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-slate-900 p-8 text-white shadow-xl">
                 <div class="max-w-3xl">
                     <p class="text-sm font-semibold uppercase tracking-wide text-indigo-100">Today's command center</p>
                     <h1 class="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">What deserves attention today?</h1>
@@ -42,7 +42,7 @@
             </section>
 
 
-            <section class="rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm">
+            <section data-testid="current-focus-opportunities" class="rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm">
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                         <p class="text-sm font-semibold uppercase tracking-wide text-indigo-600">Current Focus Opportunities</p>
@@ -100,7 +100,7 @@
                 @endif
             </section>
 
-            <section aria-label="Dashboard metrics" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+            <section aria-label="Dashboard metrics" data-testid="dashboard-metrics" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
                 @foreach ($metrics as $metric)
                     <article class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                         <p class="text-sm font-medium text-gray-500">{{ $metric['label'] }}</p>
@@ -167,7 +167,7 @@
                     @endif
                 </section>
 
-                <section class="rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm">
+                <section data-testid="daily-queue-preview" class="rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm">
                     <div class="flex items-start justify-between gap-4">
                         <div>
                             <p class="text-sm font-semibold uppercase tracking-wide text-indigo-600">Today's Queue</p>
@@ -195,7 +195,21 @@
                 </section>
             </div>
 
-            <section class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+            <section data-testid="recent-activity" class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Recent Activity</h3>
+                        <p class="mt-1 text-sm text-gray-500">The latest timeline history across actions, applications, contacts, and gaps.</p>
+                    </div>
+                    <a href="{{ route('timeline.index') }}" class="inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                        View Timeline
+                    </a>
+                </div>
+
+                @include('timeline.partials.items', ['items' => $recentActivityItems, 'emptyMessage' => 'No recent activity yet.'])
+            </section>
+
+            <section data-testid="top-objectives" class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                 <div class="flex items-center justify-between">
                     <div>
                         <h3 class="text-lg font-semibold text-gray-900">Top Objectives</h3>
@@ -240,7 +254,7 @@
                 @endif
             </section>
 
-            <section class="rounded-2xl border border-amber-100 bg-white p-6 shadow-sm">
+            <section data-testid="high-value-missing-next-action" class="rounded-2xl border border-amber-100 bg-white p-6 shadow-sm">
                 <h3 class="text-lg font-semibold text-gray-900">High-Value Opportunities Missing Next Action</h3>
                 <p class="mt-1 text-sm text-gray-500">Important opportunities with no incomplete/open action are stalled.</p>
 
@@ -263,7 +277,7 @@
                 @endif
             </section>
 
-            <section class="rounded-2xl border border-orange-100 bg-white p-6 shadow-sm">
+            <section data-testid="gaps-without-action-plans" class="rounded-2xl border border-orange-100 bg-white p-6 shadow-sm">
                 <h3 class="text-lg font-semibold text-gray-900">Gaps Without Action Plans</h3>
                 <p class="mt-1 text-sm text-gray-500">Critical and high open gaps that have not been converted into actions yet.</p>
 
@@ -302,7 +316,7 @@
             </section>
 
 
-            <section class="rounded-2xl border border-red-100 bg-white p-6 shadow-sm">
+            <section data-testid="dashboard-gap-summary" class="rounded-2xl border border-red-100 bg-white p-6 shadow-sm">
                 <h3 class="text-lg font-semibold text-gray-900">High-Value Opportunities With Critical Gaps</h3>
                 <p class="mt-1 text-sm text-gray-500">Scored opportunities that look valuable but still have open manual gaps to close.</p>
 
@@ -347,7 +361,7 @@
             </section>
 
             <div class="grid gap-8 lg:grid-cols-2">
-                <section class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                <section data-testid="overdue-high-value-actions" class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                     <h3 class="text-lg font-semibold text-gray-900">Overdue Actions on High-Value Opportunities</h3>
                     <p class="mt-1 text-sm text-gray-500">Overdue open actions prioritized by related opportunity score.</p>
 
@@ -379,7 +393,7 @@
                     @endif
                 </section>
 
-                <section class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                <section data-testid="recent-high-value-applications" class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                     <h3 class="text-lg font-semibold text-gray-900">Recent Applications for High-Value Opportunities</h3>
                     <p class="mt-1 text-sm text-gray-500">Recent applications prioritized by related opportunity score.</p>
 
@@ -415,7 +429,7 @@
 
 
             <div class="grid gap-8 lg:grid-cols-2">
-                <section class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                <section data-testid="contacts-requiring-follow-up" class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                     <h3 class="text-lg font-semibold text-gray-900">Contacts Requiring Follow-Up</h3>
                     <p class="mt-1 text-sm text-gray-500">Contact interactions with follow-up dates due today or earlier.</p>
 
@@ -447,7 +461,7 @@
                     @endif
                 </section>
 
-                <section class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                <section data-testid="dormant-high-value-relationships" class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                     <h3 class="text-lg font-semibold text-gray-900">Dormant High-Value Relationships</h3>
                     <p class="mt-1 text-sm text-gray-500">Contacts tied to strong opportunities with no interaction in 30+ days.</p>
 
@@ -481,7 +495,7 @@
                 </section>
             </div>
 
-            <section class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+            <section data-testid="opportunity-pipeline-summary" class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                 <div class="flex items-center justify-between">
                     <div>
                         <h3 class="text-lg font-semibold text-gray-900">Opportunity Pipeline Summary</h3>
