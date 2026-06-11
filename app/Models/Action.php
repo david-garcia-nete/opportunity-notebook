@@ -10,6 +10,7 @@ class Action extends Model
 {
     protected $fillable = [
         'opportunity_id',
+        'opportunity_gap_id',
         'title',
         'description',
         'due_date',
@@ -27,6 +28,11 @@ class Action extends Model
     public function opportunity(): BelongsTo
     {
         return $this->belongsTo(Opportunity::class);
+    }
+
+    public function opportunityGap(): BelongsTo
+    {
+        return $this->belongsTo(OpportunityGap::class);
     }
 
     public function status(): string

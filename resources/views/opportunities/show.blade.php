@@ -149,6 +149,28 @@
                     </div>
                 </dl>
 
+                <section class="mt-6 rounded-xl bg-slate-50 p-5 ring-1 ring-inset ring-slate-100">
+                    <h4 class="text-base font-semibold text-gray-900">Gap Progress</h4>
+                    <dl class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Critical Gaps</dt>
+                            <dd class="mt-1 text-2xl font-bold text-gray-900">{{ $gapPriorityCounts['Critical'] }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">High Gaps</dt>
+                            <dd class="mt-1 text-2xl font-bold text-gray-900">{{ $gapPriorityCounts['High'] }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Gap Actions Open</dt>
+                            <dd class="mt-1 text-2xl font-bold text-gray-900">{{ $gapActionOpenCount }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Gap Actions Completed</dt>
+                            <dd class="mt-1 text-2xl font-bold text-gray-900">{{ $gapActionCompletedCount }}</dd>
+                        </div>
+                    </dl>
+                </section>
+
                 @if ($opportunity->opportunityGaps->isEmpty())
                     <div class="mt-5 rounded-xl bg-gray-50 p-4 text-sm text-gray-500 ring-1 ring-inset ring-gray-100">
                         No gaps recorded yet. Add the manual blockers or investments needed before this opportunity is realistic.
@@ -168,16 +190,27 @@
                                                 <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                                                     <div>
                                                         <div class="flex flex-wrap items-center gap-2">
-                                                            <h5 class="font-semibold text-gray-900">{{ $gap->title }}</h5>
+                                                            <a href="{{ route('opportunities.gaps.show', [$opportunity, $gap]) }}" class="font-semibold text-indigo-700 hover:text-indigo-900">{{ $gap->title }}</a>
                                                             <span class="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-gray-600 ring-1 ring-inset ring-gray-200">{{ $gap->category }}</span>
                                                             <span class="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 ring-1 ring-inset ring-indigo-100">{{ $gap->priority }}</span>
                                                         </div>
                                                         @if ($gap->description)
                                                             <p class="mt-2 whitespace-pre-line text-sm leading-6 text-gray-600">{{ $gap->description }}</p>
                                                         @endif
+                                                        <dl class="mt-3 grid gap-3 text-sm sm:grid-cols-2">
+                                                            <div>
+                                                                <dt class="font-medium text-gray-500">Open Actions Linked To This Gap</dt>
+                                                                <dd class="mt-1 font-semibold text-gray-900">{{ $gap->actions->whereNull('completed_at')->count() }}</dd>
+                                                            </div>
+                                                            <div>
+                                                                <dt class="font-medium text-gray-500">Completed Actions Linked To This Gap</dt>
+                                                                <dd class="mt-1 font-semibold text-gray-900">{{ $gap->actions->whereNotNull('completed_at')->count() }}</dd>
+                                                            </div>
+                                                        </dl>
                                                     </div>
                                                     <div class="flex items-center gap-3 text-sm">
-                                                        <a href="{{ route('opportunities.gaps.edit', [$opportunity, $gap]) }}" class="font-semibold text-indigo-600 hover:text-indigo-900">Edit</a>
+                                                        <a href="{{ route('actions.create', ['opportunity_gap_id' => $gap->id]) }}" class="font-semibold text-indigo-600 hover:text-indigo-900">Create Action</a>
+                                                        <a href="{{ route('opportunities.gaps.edit', [$opportunity, $gap]) }}" class="font-semibold text-gray-600 hover:text-gray-900">Edit</a>
                                                         <form method="POST" action="{{ route('opportunities.gaps.destroy', [$opportunity, $gap]) }}">
                                                             @csrf
                                                             @method('DELETE')

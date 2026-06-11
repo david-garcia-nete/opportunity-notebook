@@ -30,6 +30,19 @@ class OpportunityGapController extends Controller
             ->with('status', 'Opportunity gap created.');
     }
 
+    public function show(Opportunity $opportunity, OpportunityGap $gap): View
+    {
+        $this->authorizeOpportunityGap($opportunity, $gap);
+
+        return view('opportunity-gaps.show', [
+            'gap' => $gap->load([
+                'opportunity',
+                'actions' => fn ($query) => $query->orderByRaw('completed_at is not null')->orderByRaw('due_date is null')->orderBy('due_date')->orderBy('id'),
+            ]),
+            'opportunity' => $opportunity,
+        ]);
+    }
+
     public function edit(Opportunity $opportunity, OpportunityGap $gap): View
     {
         $this->authorizeOpportunityGap($opportunity, $gap);

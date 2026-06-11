@@ -7,6 +7,7 @@ use App\Models\Application;
 use App\Models\Contact;
 use App\Models\ContactInteraction;
 use App\Models\Opportunity;
+use App\Models\OpportunityGap;
 use App\Models\StrategicObjective;
 use App\Models\UserPreference;
 use App\Models\User;
@@ -443,6 +444,45 @@ class DashboardTest extends TestCase
         $sectionEnd = strpos($content, $endText, $sectionStart);
 
         return substr($content, $sectionStart, $sectionEnd - $sectionStart);
+    }
+
+
+    public function test_dashboard_shows_gaps_without_action_plans(): void
+    {
+        $user = User::factory()->create();
+        $opportunity = $this->createScoredOpportunity([
+            'title' => 'Cloud Advisory',
+            'status' => 'active',
+        ], 8);
+        OpportunityGap::create([
+            'opportunity_id' => $opportunity->id,
+            'title' => 'AWS Certification',
+            'category' => 'Certification',
+            'status' => 'Open',
+            'priority' => 'Critical',
+        ]);
+        $plannedGap = OpportunityGap::create([
+            'opportunity_id' => $opportunity->id,
+            'title' => 'Portfolio Project',
+            'category' => 'Portfolio',
+            'status' => 'Open',
+            'priority' => 'High',
+        ]);
+        Action::create([
+            'opportunity_id' => $opportunity->id,
+            'opportunity_gap_id' => $plannedGap->id,
+            'title' => 'Build portfolio project',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('dashboard'));
+
+        $response
+            ->assertOk()
+            ->assertSeeText('Gaps Without Action Plans')
+            ->assertSeeText('AWS Certification')
+            ->assertSeeText('Critical')
+            ->assertSeeText('Cloud Advisory')
+            ->assertDontSeeText('Portfolio Project');
     }
 
     private function createScoredOpportunity(array $attributes, int $factorValue): Opportunity

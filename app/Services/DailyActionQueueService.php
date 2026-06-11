@@ -18,8 +18,9 @@ class DailyActionQueueService
             ->merge($this->dueTodayFocusActions())
             ->merge($this->focusOpportunitiesMissingNextAction())
             ->merge($this->dueContactFollowUps())
-            ->merge($this->focusOpportunityGaps('Critical', 5, 'Close this critical gap before investing in lower-priority work.'))
-            ->merge($this->focusOpportunityGaps('High', 6, 'Make progress on this high-priority gap.'))
+            ->merge($this->focusOpportunityGapsWithoutActionPlans())
+            ->merge($this->focusOpportunityGaps('Critical', 6, 'Close this critical gap before investing in lower-priority work.'))
+            ->merge($this->focusOpportunityGaps('High', 7, 'Make progress on this high-priority gap.'))
             ->sortBy([
                 ['priority', 'asc'],
                 ['due_date_sort', 'asc'],
@@ -129,12 +130,38 @@ class DailyActionQueueService
             ]);
     }
 
+    private function focusOpportunityGapsWithoutActionPlans(): Collection
+    {
+        return OpportunityGap::query()
+            ->with('opportunity')
+            ->where('status', 'Open')
+            ->whereIn('priority', ['Critical', 'High'])
+            ->whereDoesntHave('actions')
+            ->whereHas('opportunity', fn ($query) => $query->where('is_focus', true))
+            ->orderByRaw("case priority when 'Critical' then 1 else 2 end")
+            ->orderBy('title')
+            ->get()
+            ->map(fn (OpportunityGap $gap) => [
+                'type' => 'gap-action-plan',
+                'type_label' => 'Gap',
+                'opportunity' => $gap->opportunity,
+                'title' => 'Gap has no action plan: '.$gap->title,
+                'due_date' => null,
+                'due_date_sort' => today()->addYears(10),
+                'priority' => 5,
+                'priority_label' => 'Priority 5 · Gap has no action plan',
+                'recommended_next_step' => 'Create one action that starts closing this '.$gap->priority.' gap.',
+                'url' => route('actions.create', ['opportunity_gap_id' => $gap->id]),
+            ]);
+    }
+
     private function focusOpportunityGaps(string $gapPriority, int $queuePriority, string $recommendedNextStep): Collection
     {
         return OpportunityGap::query()
             ->with('opportunity')
             ->where('status', 'Open')
             ->where('priority', $gapPriority)
+            ->whereHas('actions')
             ->whereHas('opportunity', fn ($query) => $query->where('is_focus', true))
             ->orderBy('title')
             ->get()

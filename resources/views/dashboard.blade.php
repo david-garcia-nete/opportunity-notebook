@@ -263,6 +263,44 @@
                 @endif
             </section>
 
+            <section class="rounded-2xl border border-orange-100 bg-white p-6 shadow-sm">
+                <h3 class="text-lg font-semibold text-gray-900">Gaps Without Action Plans</h3>
+                <p class="mt-1 text-sm text-gray-500">Critical and high open gaps that have not been converted into actions yet.</p>
+
+                @if ($gapsWithoutActionPlans->isEmpty())
+                    <div class="mt-5 rounded-xl bg-gray-50 p-4 text-sm text-gray-500 ring-1 ring-inset ring-gray-100">
+                        Every critical or high open gap has at least one linked action.
+                    </div>
+                @else
+                    <div class="mt-5 overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Gap</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Priority</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Opportunity</th>
+                                    <th scope="col" class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 bg-white">
+                                @foreach ($gapsWithoutActionPlans as $gap)
+                                    <tr>
+                                        <td class="px-4 py-4 text-sm font-semibold text-gray-900">{{ $gap->title }}</td>
+                                        <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-600">{{ $gap->priority }}</td>
+                                        <td class="px-4 py-4 text-sm">
+                                            <a href="{{ route('opportunities.show', $gap->opportunity) }}" class="text-indigo-600 hover:text-indigo-900">{{ $gap->opportunity->title }}</a>
+                                        </td>
+                                        <td class="whitespace-nowrap px-4 py-4 text-right text-sm font-semibold">
+                                            <a href="{{ route('actions.create', ['opportunity_gap_id' => $gap->id]) }}" class="text-indigo-600 hover:text-indigo-900">Create Action</a>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </section>
+
 
             <section class="rounded-2xl border border-red-100 bg-white p-6 shadow-sm">
                 <h3 class="text-lg font-semibold text-gray-900">High-Value Opportunities With Critical Gaps</h3>

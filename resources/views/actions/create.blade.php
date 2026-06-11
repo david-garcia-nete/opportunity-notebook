@@ -15,24 +15,37 @@
 
                 <div>
                     <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
-                    <input id="title" name="title" type="text" value="{{ old('title') }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
+                    <input id="title" name="title" type="text" value="{{ old('title', $defaults['title']) }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
                     @error('title')
                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
 
-                <div>
-                    <label for="opportunity_id" class="block text-sm font-medium text-gray-700">Opportunity</label>
-                    <select id="opportunity_id" name="opportunity_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                        <option value="">No related opportunity</option>
-                        @foreach ($opportunities as $opportunity)
-                            <option value="{{ $opportunity->id }}" @selected((int) old('opportunity_id', $selectedOpportunityId) === $opportunity->id)>{{ $opportunity->title }}</option>
-                        @endforeach
-                    </select>
-                    @error('opportunity_id')
-                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
+                @if ($sourceGap)
+                    <div class="rounded-xl bg-indigo-50 p-4 text-sm text-indigo-900 ring-1 ring-inset ring-indigo-100">
+                        <p class="font-semibold">Creating an action from gap: {{ $sourceGap->title }}</p>
+                        <p class="mt-1">This action will be linked to {{ $sourceGap->opportunity->title }} automatically.</p>
+                    </div>
+                    <input type="hidden" name="opportunity_id" value="{{ $defaults['opportunity_id'] }}">
+                    <input type="hidden" name="opportunity_gap_id" value="{{ $defaults['opportunity_gap_id'] }}">
+                @else
+                    <div>
+                        <label for="opportunity_id" class="block text-sm font-medium text-gray-700">Opportunity</label>
+                        <select id="opportunity_id" name="opportunity_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="">No related opportunity</option>
+                            @foreach ($opportunities as $opportunity)
+                                <option value="{{ $opportunity->id }}" @selected((int) old('opportunity_id', $selectedOpportunityId) === $opportunity->id)>{{ $opportunity->title }}</option>
+                            @endforeach
+                        </select>
+                        @error('opportunity_id')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                @endif
+
+                @error('opportunity_gap_id')
+                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                @enderror
 
                 <div>
                     <label for="due_date" class="block text-sm font-medium text-gray-700">Due Date</label>
@@ -52,7 +65,7 @@
 
                 <div>
                     <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
-                    <textarea id="description" name="description" rows="5" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('description') }}</textarea>
+                    <textarea id="description" name="description" rows="5" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('description', $defaults['description']) }}</textarea>
                     @error('description')
                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                     @enderror

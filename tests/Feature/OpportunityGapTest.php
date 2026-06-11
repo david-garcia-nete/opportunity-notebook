@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Action;
 use App\Models\Opportunity;
 use App\Models\OpportunityGap;
 use App\Models\StrategicObjective;
@@ -258,4 +259,200 @@ class OpportunityGapTest extends TestCase
             'risk_level' => 1,
         ], $attributes));
     }
+
+    public function test_create_action_from_gap_prefills_action_fields(): void
+    {
+        $user = User::factory()->create();
+        $opportunity = Opportunity::create([
+            'title' => 'Cloud Architect Role',
+            'status' => 'active',
+        ]);
+        $gap = OpportunityGap::create([
+            'opportunity_id' => $opportunity->id,
+            'title' => 'AWS Certification',
+            'description' => 'Certification is expected for this role.',
+            'category' => 'Certification',
+            'status' => 'Open',
+            'priority' => 'Critical',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('actions.create', ['opportunity_gap_id' => $gap->id]));
+
+        $response
+            ->assertOk()
+            ->assertSee('Close Gap: AWS Certification')
+            ->assertSeeText('Gap title: AWS Certification')
+            ->assertSeeText('Gap description: Certification is expected for this role.')
+            ->assertSeeText('Gap category: Certification')
+            ->assertSeeText('Gap priority: Critical')
+            ->assertSeeText('Related opportunity: Cloud Architect Role')
+            ->assertSeeText('Opportunity name: Cloud Architect Role')
+            ->assertSeeText('This action will be linked to Cloud Architect Role automatically.');
+    }
+
+    public function test_created_action_from_gap_links_to_correct_opportunity_and_gap(): void
+    {
+        $user = User::factory()->create();
+        $opportunity = Opportunity::create([
+            'title' => 'Portfolio Consulting',
+            'status' => 'active',
+        ]);
+        $otherOpportunity = Opportunity::create([
+            'title' => 'Wrong Opportunity',
+            'status' => 'active',
+        ]);
+        $gap = OpportunityGap::create([
+            'opportunity_id' => $opportunity->id,
+            'title' => 'Build Portfolio Project',
+            'description' => 'Need proof of work.',
+            'category' => 'Portfolio',
+            'status' => 'Open',
+            'priority' => 'High',
+        ]);
+
+        $response = $this->actingAs($user)->post(route('actions.store'), [
+            'opportunity_id' => $otherOpportunity->id,
+            'opportunity_gap_id' => $gap->id,
+            'title' => 'Close Gap: Build Portfolio Project',
+            'description' => 'Gap title: Build Portfolio Project',
+        ]);
+
+        $action = Action::firstOrFail();
+        $response->assertRedirect(route('actions.show', $action));
+        $this->assertTrue($action->opportunity->is($opportunity));
+        $this->assertTrue($action->opportunityGap->is($gap));
+        $this->assertDatabaseHas('actions', [
+            'id' => $action->id,
+            'opportunity_id' => $opportunity->id,
+            'opportunity_gap_id' => $gap->id,
+            'title' => 'Close Gap: Build Portfolio Project',
+        ]);
+    }
+
+    public function test_multiple_actions_can_be_linked_to_a_gap(): void
+    {
+        $opportunity = Opportunity::create([
+            'title' => 'Data Engineering Contract',
+            'status' => 'active',
+        ]);
+        $gap = OpportunityGap::create([
+            'opportunity_id' => $opportunity->id,
+            'title' => 'Spark Experience',
+            'category' => 'Experience',
+            'status' => 'Open',
+            'priority' => 'High',
+        ]);
+
+        Action::create([
+            'opportunity_id' => $opportunity->id,
+            'opportunity_gap_id' => $gap->id,
+            'title' => 'Complete Spark tutorial',
+        ]);
+        Action::create([
+            'opportunity_id' => $opportunity->id,
+            'opportunity_gap_id' => $gap->id,
+            'title' => 'Publish Spark notes',
+            'completed_at' => now(),
+        ]);
+
+        $this->assertSame(2, $gap->actions()->count());
+        $this->assertSame(1, $gap->openActions()->count());
+        $this->assertSame(1, $gap->completedActions()->count());
+    }
+
+    public function test_gap_detail_page_shows_execution_counts(): void
+    {
+        $user = User::factory()->create();
+        $opportunity = Opportunity::create([
+            'title' => 'Security Role',
+            'status' => 'active',
+        ]);
+        $gap = OpportunityGap::create([
+            'opportunity_id' => $opportunity->id,
+            'title' => 'Security Certification',
+            'category' => 'Certification',
+            'status' => 'Open',
+            'priority' => 'Critical',
+        ]);
+        Action::create([
+            'opportunity_id' => $opportunity->id,
+            'opportunity_gap_id' => $gap->id,
+            'title' => 'Register for exam',
+        ]);
+        Action::create([
+            'opportunity_id' => $opportunity->id,
+            'opportunity_gap_id' => $gap->id,
+            'title' => 'Choose study guide',
+            'completed_at' => now(),
+        ]);
+
+        $response = $this->actingAs($user)->get(route('opportunities.gaps.show', [$opportunity, $gap]));
+
+        $response
+            ->assertOk()
+            ->assertSeeText('Gap Execution')
+            ->assertSeeTextInOrder(['Open Actions Linked To This Gap', '1'])
+            ->assertSeeTextInOrder(['Completed Actions Linked To This Gap', '1'])
+            ->assertSeeText('Register for exam')
+            ->assertSeeText('Choose study guide')
+            ->assertSeeText('Create Action');
+    }
+
+
+    public function test_opportunity_show_page_displays_gap_progress_counts(): void
+    {
+        $user = User::factory()->create();
+        $opportunity = Opportunity::create([
+            'title' => 'Cloud Consultant',
+            'status' => 'active',
+        ]);
+        $criticalOne = OpportunityGap::create([
+            'opportunity_id' => $opportunity->id,
+            'title' => 'AWS Certification',
+            'category' => 'Certification',
+            'status' => 'Open',
+            'priority' => 'Critical',
+        ]);
+        $criticalTwo = OpportunityGap::create([
+            'opportunity_id' => $opportunity->id,
+            'title' => 'Architecture Experience',
+            'category' => 'Experience',
+            'status' => 'Open',
+            'priority' => 'Critical',
+        ]);
+        $highGap = OpportunityGap::create([
+            'opportunity_id' => $opportunity->id,
+            'title' => 'Portfolio Case Study',
+            'category' => 'Portfolio',
+            'status' => 'Open',
+            'priority' => 'High',
+        ]);
+        Action::create([
+            'opportunity_id' => $opportunity->id,
+            'opportunity_gap_id' => $criticalOne->id,
+            'title' => 'Schedule exam',
+        ]);
+        Action::create([
+            'opportunity_id' => $opportunity->id,
+            'opportunity_gap_id' => $criticalTwo->id,
+            'title' => 'Finish lab',
+            'completed_at' => now(),
+        ]);
+        Action::create([
+            'opportunity_id' => $opportunity->id,
+            'opportunity_gap_id' => $highGap->id,
+            'title' => 'Draft case study',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('opportunities.show', $opportunity));
+
+        $response
+            ->assertOk()
+            ->assertSeeText('Gap Progress')
+            ->assertSeeTextInOrder(['Critical Gaps', '2'])
+            ->assertSeeTextInOrder(['High Gaps', '1'])
+            ->assertSeeTextInOrder(['Gap Actions Open', '2'])
+            ->assertSeeTextInOrder(['Gap Actions Completed', '1']);
+    }
+
 }

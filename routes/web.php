@@ -37,6 +37,8 @@ Route::middleware('auth')->group(function () {
         ->name('opportunities.gaps.create');
     Route::post('/opportunities/{opportunity}/gaps', [OpportunityGapController::class, 'store'])
         ->name('opportunities.gaps.store');
+    Route::get('/opportunities/{opportunity}/gaps/{gap}', [OpportunityGapController::class, 'show'])
+        ->name('opportunities.gaps.show');
     Route::get('/opportunities/{opportunity}/gaps/{gap}/edit', [OpportunityGapController::class, 'edit'])
         ->name('opportunities.gaps.edit');
     Route::patch('/opportunities/{opportunity}/gaps/{gap}', [OpportunityGapController::class, 'update'])

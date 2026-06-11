@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class OpportunityGap extends Model
 {
@@ -43,6 +44,21 @@ class OpportunityGap extends Model
     public function opportunity(): BelongsTo
     {
         return $this->belongsTo(Opportunity::class);
+    }
+
+    public function actions(): HasMany
+    {
+        return $this->hasMany(Action::class);
+    }
+
+    public function openActions(): HasMany
+    {
+        return $this->actions()->whereNull('completed_at');
+    }
+
+    public function completedActions(): HasMany
+    {
+        return $this->actions()->whereNotNull('completed_at');
     }
 
     public function priorityRank(): int
