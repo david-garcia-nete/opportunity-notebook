@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 class Opportunity extends Model
 {
@@ -65,6 +66,65 @@ class Opportunity extends Model
         $adjustmentScore = collect($adjustmentFactors)->sum(fn (string $field) => $this->{$field} ?? 0);
 
         return $positiveScore - $adjustmentScore;
+    }
+
+    public function weightedScore(?UserPreference $preference = null): ?int
+    {
+        $weightedFactors = $this->weightedScoreFactors($preference);
+
+        if ($weightedFactors->isEmpty()) {
+            return null;
+        }
+
+        $totalWeight = $weightedFactors->sum('weight');
+
+        if ($totalWeight === 0) {
+            return null;
+        }
+
+        $weightedValue = $weightedFactors->sum(fn (array $factor) => $factor['score'] * $factor['weight']);
+
+        return (int) round(($weightedValue / $totalWeight) * 10);
+    }
+
+    public function weightedScoreContributors(?UserPreference $preference = null, int $limit = 3): Collection
+    {
+        return $this->weightedScoreFactors($preference)
+            ->sortByDesc(fn (array $factor) => $factor['score'] * $factor['weight'])
+            ->take($limit)
+            ->pluck('label')
+            ->values();
+    }
+
+    private function weightedScoreFactors(?UserPreference $preference = null): Collection
+    {
+        $preference ??= auth()->user()?->preference;
+
+        if (! $preference) {
+            return collect();
+        }
+
+        return collect([
+            ['field' => 'income_potential', 'weight' => 'income_weight', 'label' => 'Income Potential'],
+            ['field' => 'probability_of_success', 'weight' => 'probability_weight', 'label' => 'Probability of Success'],
+            ['field' => 'time_to_revenue', 'weight' => 'time_to_revenue_weight', 'label' => 'Fast Time to Revenue', 'invert' => true],
+            ['field' => 'strategic_alignment', 'weight' => 'strategic_alignment_weight', 'label' => 'Strategic Alignment'],
+            ['field' => 'personal_interest', 'weight' => 'personal_interest_weight', 'label' => 'Personal Interest'],
+            ['field' => 'skill_growth', 'weight' => 'skill_growth_weight', 'label' => 'Skill Growth'],
+            ['field' => 'family_fit', 'weight' => 'family_fit_weight', 'label' => 'Family Fit'],
+            ['field' => 'risk_level', 'weight' => 'risk_weight', 'label' => 'Lower Risk', 'invert' => true],
+        ])->filter(fn (array $factor) => $this->{$factor['field']} !== null)
+            ->map(function (array $factor) use ($preference) {
+                $value = $this->{$factor['field']};
+
+                return [
+                    'label' => $factor['label'],
+                    'score' => ($factor['invert'] ?? false) ? 11 - $value : $value,
+                    'weight' => $preference->{$factor['weight']},
+                ];
+            })
+            ->filter(fn (array $factor) => $factor['weight'] > 0)
+            ->values();
     }
 
     public function actions(): HasMany

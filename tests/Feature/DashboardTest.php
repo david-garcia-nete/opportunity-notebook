@@ -8,6 +8,7 @@ use App\Models\Contact;
 use App\Models\ContactInteraction;
 use App\Models\Opportunity;
 use App\Models\StrategicObjective;
+use App\Models\UserPreference;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -71,6 +72,56 @@ class DashboardTest extends TestCase
             ->assertSee(route('opportunities.show', $highValueOpportunity), false);
     }
 
+
+    public function test_dashboard_top_opportunities_use_weighted_score_when_preferences_exist(): void
+    {
+        $user = User::factory()->create();
+        UserPreference::create(array_merge(UserPreference::defaults(), [
+            'user_id' => $user->id,
+            'income_weight' => 0,
+            'probability_weight' => 0,
+            'time_to_revenue_weight' => 0,
+            'strategic_alignment_weight' => 10,
+            'personal_interest_weight' => 0,
+            'skill_growth_weight' => 0,
+            'family_fit_weight' => 10,
+            'risk_weight' => 0,
+        ]));
+        $higherBase = Opportunity::create([
+            'title' => 'Higher Base Score Option',
+            'company' => 'Base Co',
+            'status' => 'active',
+            'income_potential' => 10,
+            'probability_of_success' => 10,
+            'time_to_revenue' => 1,
+            'strategic_alignment' => 1,
+            'personal_interest' => 10,
+            'skill_growth' => 10,
+            'family_fit' => 1,
+            'risk_level' => 1,
+        ]);
+        $weightedBest = Opportunity::create([
+            'title' => 'Priority Fit Option',
+            'company' => 'Fit Co',
+            'status' => 'active',
+            'income_potential' => 4,
+            'probability_of_success' => 1,
+            'time_to_revenue' => 10,
+            'strategic_alignment' => 10,
+            'personal_interest' => 1,
+            'skill_growth' => 1,
+            'family_fit' => 10,
+            'risk_level' => 10,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('dashboard'));
+
+        $response
+            ->assertOk()
+            ->assertSeeText('Weighted Score')
+            ->assertSeeInOrder(['Priority Fit Option', (string) $weightedBest->weightedScore($user->preference), 'Higher Base Score Option', (string) $higherBase->weightedScore($user->preference)]);
+    }
+
     public function test_high_value_opportunity_with_no_open_action_appears(): void
     {
         $user = User::factory()->create();
@@ -102,7 +153,7 @@ class DashboardTest extends TestCase
             ->assertOk()
             ->assertSeeText('High-Value Opportunities Missing Next Action')
             ->assertSeeText('Stalled High Value Opportunity')
-            ->assertSeeText('Computed score: '.$stalledOpportunity->computedScore());
+            ->assertSeeText('Base score: '.$stalledOpportunity->computedScore().' · Weighted score: —');
 
         $missingSectionStart = strpos($response->getContent(), 'High-Value Opportunities Missing Next Action');
         $missingSectionEnd = strpos($response->getContent(), 'Overdue Actions on High-Value Opportunities', $missingSectionStart);

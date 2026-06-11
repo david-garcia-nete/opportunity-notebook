@@ -13,6 +13,7 @@ use App\Http\Controllers\OpportunityStrategicObjectiveController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\StrategicObjectiveController;
+use App\Http\Controllers\UserPreferenceController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -65,6 +66,9 @@ Route::middleware('auth')->group(function () {
         ->name('projects.opportunities.store');
     Route::delete('/projects/{project}/opportunities/{opportunity}', [OpportunityProjectController::class, 'destroyFromProject'])
         ->name('projects.opportunities.destroy');
+
+    Route::get('/preferences', [UserPreferenceController::class, 'edit'])->name('preferences.edit');
+    Route::patch('/preferences', [UserPreferenceController::class, 'update'])->name('preferences.update');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

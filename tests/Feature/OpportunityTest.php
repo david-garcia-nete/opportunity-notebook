@@ -7,6 +7,7 @@ use App\Models\Application;
 use App\Models\Contact;
 use App\Models\Opportunity;
 use App\Models\Project;
+use App\Models\UserPreference;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -76,7 +77,8 @@ class OpportunityTest extends TestCase
             ->assertOk()
             ->assertSee('Title')
             ->assertSee('Company')
-            ->assertSee('Computed Score')
+            ->assertSee('Base Score')
+            ->assertSee('Weighted Score')
             ->assertSee('Income Potential')
             ->assertSee('Linked Contacts Count')
             ->assertSee('Fractional CTO Advisory')
@@ -85,7 +87,7 @@ class OpportunityTest extends TestCase
             ->assertDontSee('Closed Staff Role');
     }
 
-    public function test_opportunity_comparison_page_orders_by_computed_score(): void
+    public function test_opportunity_comparison_page_orders_by_computed_score_without_preferences(): void
     {
         $user = User::factory()->create();
         Opportunity::create([
@@ -118,6 +120,86 @@ class OpportunityTest extends TestCase
         $response
             ->assertOk()
             ->assertSeeInOrder(['Higher Comparison Priority', 'Lower Comparison Priority']);
+    }
+
+
+    public function test_weighted_score_uses_user_preferences(): void
+    {
+        $user = User::factory()->create();
+        $preference = UserPreference::create(array_merge(UserPreference::defaults(), [
+            'user_id' => $user->id,
+            'income_weight' => 10,
+            'probability_weight' => 0,
+            'time_to_revenue_weight' => 0,
+            'strategic_alignment_weight' => 0,
+            'personal_interest_weight' => 0,
+            'skill_growth_weight' => 0,
+            'family_fit_weight' => 0,
+            'risk_weight' => 0,
+        ]));
+        $opportunity = Opportunity::create([
+            'title' => 'Income Weighted Opportunity',
+            'status' => 'active',
+            'income_potential' => 9,
+            'probability_of_success' => 2,
+            'time_to_revenue' => 10,
+            'strategic_alignment' => 2,
+            'personal_interest' => 2,
+            'skill_growth' => 2,
+            'family_fit' => 2,
+            'risk_level' => 10,
+        ]);
+
+        $this->assertSame(90, $opportunity->weightedScore($preference));
+        $this->assertSame(['Income Potential'], $opportunity->weightedScoreContributors($preference)->all());
+    }
+
+    public function test_opportunity_comparison_page_orders_by_weighted_score_when_preferences_exist(): void
+    {
+        $user = User::factory()->create();
+        UserPreference::create(array_merge(UserPreference::defaults(), [
+            'user_id' => $user->id,
+            'income_weight' => 1,
+            'strategic_alignment_weight' => 10,
+            'family_fit_weight' => 10,
+            'risk_weight' => 0,
+            'time_to_revenue_weight' => 0,
+            'probability_weight' => 0,
+            'personal_interest_weight' => 0,
+            'skill_growth_weight' => 0,
+        ]));
+        Opportunity::create([
+            'title' => 'Higher Base Income Option',
+            'status' => 'active',
+            'income_potential' => 10,
+            'probability_of_success' => 10,
+            'time_to_revenue' => 1,
+            'strategic_alignment' => 1,
+            'personal_interest' => 10,
+            'skill_growth' => 10,
+            'family_fit' => 1,
+            'risk_level' => 1,
+        ]);
+        Opportunity::create([
+            'title' => 'Better Personal Priority Fit',
+            'status' => 'active',
+            'income_potential' => 4,
+            'probability_of_success' => 1,
+            'time_to_revenue' => 10,
+            'strategic_alignment' => 10,
+            'personal_interest' => 1,
+            'skill_growth' => 1,
+            'family_fit' => 10,
+            'risk_level' => 10,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('opportunities.compare'));
+
+        $response
+            ->assertOk()
+            ->assertSeeText('Weighted Score')
+            ->assertSeeText('Major contributors: Strategic Alignment, Family Fit')
+            ->assertSeeInOrder(['Better Personal Priority Fit', 'Higher Base Income Option']);
     }
 
     public function test_opportunity_comparison_page_shows_relationship_counts(): void
