@@ -33,6 +33,7 @@ class DashboardTest extends TestCase
         $response->assertSeeText('No urgent actions. Consider creating new opportunities.');
         $response->assertSeeText('Top Ranked Opportunities');
         $response->assertSeeText('High-Value Opportunities Missing Next Action');
+        $response->assertSeeText('High-Value Opportunities With Critical Gaps');
         $response->assertSeeText('Overdue Actions on High-Value Opportunities');
         $response->assertSeeText('Recent Applications for High-Value Opportunities');
         $response->assertSeeText('Opportunity Pipeline Summary');

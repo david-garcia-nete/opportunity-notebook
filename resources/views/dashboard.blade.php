@@ -177,6 +177,51 @@
                 @endif
             </section>
 
+
+            <section class="rounded-2xl border border-red-100 bg-white p-6 shadow-sm">
+                <h3 class="text-lg font-semibold text-gray-900">High-Value Opportunities With Critical Gaps</h3>
+                <p class="mt-1 text-sm text-gray-500">Scored opportunities that look valuable but still have open manual gaps to close.</p>
+
+                @if ($highValueOpportunitiesWithCriticalGaps->isEmpty())
+                    <div class="mt-5 rounded-xl bg-gray-50 p-4 text-sm text-gray-500 ring-1 ring-inset ring-gray-100">
+                        No high-value scored opportunities currently have open gaps.
+                    </div>
+                @else
+                    <div class="mt-5 overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Opportunity</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Score</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Open Gap Count</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Highest Priority Gap</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 bg-white">
+                                @foreach ($highValueOpportunitiesWithCriticalGaps as $gapSummary)
+                                    <tr>
+                                        <td class="px-4 py-4 text-sm font-semibold">
+                                            <a href="{{ route('opportunities.show', $gapSummary['opportunity']) }}" class="text-indigo-600 hover:text-indigo-900">{{ $gapSummary['opportunity']->title }}</a>
+                                            <div class="mt-1 font-normal text-gray-500">{{ $gapSummary['opportunity']->company ?? '—' }}</div>
+                                        </td>
+                                        <td class="whitespace-nowrap px-4 py-4 text-sm font-semibold text-gray-900">{{ $gapSummary['opportunity']->computedScore() }}</td>
+                                        <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-600">{{ $gapSummary['open_gap_count'] }}</td>
+                                        <td class="px-4 py-4 text-sm text-gray-600">
+                                            @if ($gapSummary['highest_priority_gap'])
+                                                <span class="font-semibold text-gray-900">{{ $gapSummary['highest_priority_gap']->title }}</span>
+                                                <span class="ml-2 rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 ring-1 ring-inset ring-red-100">{{ $gapSummary['highest_priority_gap']->priority }}</span>
+                                            @else
+                                                —
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </section>
+
             <div class="grid gap-8 lg:grid-cols-2">
                 <section class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                     <h3 class="text-lg font-semibold text-gray-900">Overdue Actions on High-Value Opportunities</h3>

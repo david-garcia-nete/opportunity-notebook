@@ -38,7 +38,10 @@ class StrategicObjectiveController extends Controller
 
     public function show(StrategicObjective $strategicObjective): View
     {
-        $strategicObjective->load(['opportunities.actions' => fn ($query) => $query->orderByRaw('due_date is null')->orderBy('due_date')->orderBy('id')]);
+        $strategicObjective->load([
+            'opportunities.actions' => fn ($query) => $query->orderByRaw('due_date is null')->orderBy('due_date')->orderBy('id'),
+            'opportunities.opportunityGaps',
+        ]);
 
         $linkedOpportunities = $strategicObjective->opportunities
             ->sortByDesc(fn (Opportunity $opportunity) => $opportunity->computedScore() ?? PHP_INT_MIN)

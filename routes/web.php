@@ -6,6 +6,7 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ContactOpportunityController;
 use App\Http\Controllers\OpportunityController;
+use App\Http\Controllers\OpportunityGapController;
 use App\Http\Controllers\OpportunityProjectController;
 use App\Http\Controllers\OpportunityStrategicObjectiveController;
 use App\Http\Controllers\ProfileController;
@@ -25,6 +26,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/opportunities/compare', [OpportunityController::class, 'compare'])
         ->name('opportunities.compare');
     Route::resource('opportunities', OpportunityController::class);
+    Route::get('/opportunities/{opportunity}/gaps/create', [OpportunityGapController::class, 'create'])
+        ->name('opportunities.gaps.create');
+    Route::post('/opportunities/{opportunity}/gaps', [OpportunityGapController::class, 'store'])
+        ->name('opportunities.gaps.store');
+    Route::get('/opportunities/{opportunity}/gaps/{gap}/edit', [OpportunityGapController::class, 'edit'])
+        ->name('opportunities.gaps.edit');
+    Route::patch('/opportunities/{opportunity}/gaps/{gap}', [OpportunityGapController::class, 'update'])
+        ->name('opportunities.gaps.update');
+    Route::delete('/opportunities/{opportunity}/gaps/{gap}', [OpportunityGapController::class, 'destroy'])
+        ->name('opportunities.gaps.destroy');
     Route::post('/opportunities/{opportunity}/contacts', [ContactOpportunityController::class, 'storeForOpportunity'])
         ->name('opportunities.contacts.store');
     Route::delete('/opportunities/{opportunity}/contacts/{contact}', [ContactOpportunityController::class, 'destroyFromOpportunity'])

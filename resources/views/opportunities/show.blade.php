@@ -120,6 +120,80 @@
                 </dl>
             </section>
 
+
+
+            <section class="mt-8 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                        <p class="text-sm font-semibold uppercase tracking-wide text-indigo-600">Gap Analysis</p>
+                        <h3 class="mt-1 text-lg font-semibold text-gray-900">What stands between me and this opportunity?</h3>
+                        <p class="mt-1 text-sm text-gray-500">Manually track skills, experience, credentials, portfolio work, and other missing pieces.</p>
+                    </div>
+                    <a href="{{ route('opportunities.gaps.create', $opportunity) }}" class="inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                        Add Gap
+                    </a>
+                </div>
+
+                <dl class="mt-6 grid gap-4 sm:grid-cols-3">
+                    <div class="rounded-xl bg-red-50 p-4 ring-1 ring-inset ring-red-100">
+                        <dt class="text-sm font-medium text-red-700">Open</dt>
+                        <dd class="mt-1 text-3xl font-bold text-red-900">{{ $gapCounts['Open'] }}</dd>
+                    </div>
+                    <div class="rounded-xl bg-amber-50 p-4 ring-1 ring-inset ring-amber-100">
+                        <dt class="text-sm font-medium text-amber-700">In Progress</dt>
+                        <dd class="mt-1 text-3xl font-bold text-amber-900">{{ $gapCounts['In Progress'] }}</dd>
+                    </div>
+                    <div class="rounded-xl bg-green-50 p-4 ring-1 ring-inset ring-green-100">
+                        <dt class="text-sm font-medium text-green-700">Completed</dt>
+                        <dd class="mt-1 text-3xl font-bold text-green-900">{{ $gapCounts['Complete'] }}</dd>
+                    </div>
+                </dl>
+
+                @if ($opportunity->opportunityGaps->isEmpty())
+                    <div class="mt-5 rounded-xl bg-gray-50 p-4 text-sm text-gray-500 ring-1 ring-inset ring-gray-100">
+                        No gaps recorded yet. Add the manual blockers or investments needed before this opportunity is realistic.
+                    </div>
+                @else
+                    <div class="mt-6 space-y-6">
+                        @foreach ($gapStatuses as $status)
+                            @php($gapsForStatus = $opportunity->opportunityGaps->where('status', $status))
+                            <div>
+                                <h4 class="text-sm font-semibold uppercase tracking-wide text-gray-500">{{ $status }} gaps ({{ $gapsForStatus->count() }})</h4>
+                                @if ($gapsForStatus->isEmpty())
+                                    <p class="mt-2 rounded-xl bg-gray-50 p-4 text-sm text-gray-500 ring-1 ring-inset ring-gray-100">No {{ strtolower($status) }} gaps.</p>
+                                @else
+                                    <div class="mt-3 space-y-3">
+                                        @foreach ($gapsForStatus as $gap)
+                                            <article class="rounded-xl bg-gray-50 p-4 ring-1 ring-inset ring-gray-100">
+                                                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                                    <div>
+                                                        <div class="flex flex-wrap items-center gap-2">
+                                                            <h5 class="font-semibold text-gray-900">{{ $gap->title }}</h5>
+                                                            <span class="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-gray-600 ring-1 ring-inset ring-gray-200">{{ $gap->category }}</span>
+                                                            <span class="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 ring-1 ring-inset ring-indigo-100">{{ $gap->priority }}</span>
+                                                        </div>
+                                                        @if ($gap->description)
+                                                            <p class="mt-2 whitespace-pre-line text-sm leading-6 text-gray-600">{{ $gap->description }}</p>
+                                                        @endif
+                                                    </div>
+                                                    <div class="flex items-center gap-3 text-sm">
+                                                        <a href="{{ route('opportunities.gaps.edit', [$opportunity, $gap]) }}" class="font-semibold text-indigo-600 hover:text-indigo-900">Edit</a>
+                                                        <form method="POST" action="{{ route('opportunities.gaps.destroy', [$opportunity, $gap]) }}">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="font-semibold text-red-600 hover:text-red-900">Delete</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </article>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </section>
             <section class="mt-8 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div>
