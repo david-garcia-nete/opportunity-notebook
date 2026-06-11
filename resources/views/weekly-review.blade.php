@@ -66,8 +66,11 @@
                                             @if ($nextAction)
                                                 {{ $nextAction->title }}
                                                 <span class="text-gray-500">· Due {{ $nextAction->due_date?->toFormattedDateString() ?? 'not scheduled' }}</span>
+                                            @elseif ($opportunity->missingNextAction())
+                                                <span class="font-semibold text-amber-800">Missing next action</span>
+                                                <span class="mt-1 block text-amber-700">Create a concrete next step to keep this focus opportunity moving.</span>
                                             @else
-                                                No open next action.
+                                                <span class="text-gray-500">No next action required for this status.</span>
                                             @endif
                                         </dd>
                                     </div>

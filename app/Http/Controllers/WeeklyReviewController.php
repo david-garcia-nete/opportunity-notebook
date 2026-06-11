@@ -28,6 +28,10 @@ class WeeklyReviewController extends Controller
             ->where('is_focus', true)
             ->with([
                 'actions' => fn ($query) => $query
+                    ->whereNull('completed_at')
+                    ->where(fn ($query) => $query
+                        ->whereDate('due_date', '>=', today())
+                        ->orWhereNull('due_date'))
                     ->orderByRaw('due_date is null')
                     ->orderBy('due_date')
                     ->orderBy('id'),
