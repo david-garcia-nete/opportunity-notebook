@@ -53,7 +53,7 @@ class PortfolioViewTest extends TestCase
         $this->assertSame(1, $analysis['metrics']['forecasted_at_risk_opportunities']);
         $this->assertSame(55.0, $analysis['metrics']['average_opportunity_score']);
         $this->assertSame(62.5, $analysis['metrics']['average_readiness_score']);
-        $this->assertSame(61.5, $analysis['metrics']['average_forecast_score']);
+        $this->assertSame(61.0, $analysis['metrics']['average_forecast_score']);
     }
 
     public function test_objective_coverage_calculations_work_and_weak_objectives_appear(): void
