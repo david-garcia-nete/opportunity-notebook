@@ -48,6 +48,23 @@
                     </div>
                 </div>
 
+                <div class="rounded-xl bg-indigo-50 p-4 ring-1 ring-inset ring-indigo-100">
+                    <label for="is_focus" class="flex items-start gap-3">
+                        <input id="is_focus" name="is_focus" type="checkbox" value="1" @checked(old('is_focus', $opportunity->is_focus)) class="mt-1 rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" />
+                        <span>
+                            <span class="block text-sm font-semibold text-gray-900">Current focus opportunity</span>
+                            <span class="mt-1 block text-sm text-gray-600">Mark this when the opportunity deserves active attention right now.</span>
+                        </span>
+                    </label>
+                    <x-input-error class="mt-2" :messages="$errors->get('is_focus')" />
+
+                    <div class="mt-4">
+                        <x-input-label for="focus_reason" :value="__('Focus reason')" />
+                        <textarea id="focus_reason" name="focus_reason" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('focus_reason', $opportunity->focus_reason) }}</textarea>
+                        <x-input-error class="mt-2" :messages="$errors->get('focus_reason')" />
+                    </div>
+                </div>
+
                 @include('opportunities.partials.evaluation-fields', ['opportunity' => $opportunity])
 
                 <div>

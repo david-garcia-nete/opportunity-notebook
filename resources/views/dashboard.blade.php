@@ -41,6 +41,65 @@
                 </div>
             </section>
 
+
+            <section class="rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                        <p class="text-sm font-semibold uppercase tracking-wide text-indigo-600">Current Focus Opportunities</p>
+                        <h3 class="mt-1 text-lg font-semibold text-gray-900">What am I focused on right now?</h3>
+                        <p class="mt-1 text-sm text-gray-500">A small, intentional set of opportunities receiving active attention.</p>
+                    </div>
+                    <a href="{{ route('opportunities.index', ['focus' => 1]) }}" class="inline-flex items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                        Focus Opportunities
+                    </a>
+                </div>
+
+                @if ($hasTooManyFocusOpportunities)
+                    <div class="mt-5 rounded-xl bg-amber-50 p-4 text-sm font-semibold text-amber-900 ring-1 ring-inset ring-amber-200">
+                        You have more than 5 focus opportunities. Consider narrowing your attention.
+                    </div>
+                @endif
+
+                @if ($currentFocusOpportunities->isEmpty())
+                    <div class="mt-5 rounded-xl bg-gray-50 p-4 text-sm text-gray-500 ring-1 ring-inset ring-gray-100">
+                        Mark opportunities as current focus opportunities to make your active priorities visible here.
+                    </div>
+                @else
+                    <div class="mt-6 grid gap-4 lg:grid-cols-2">
+                        @foreach ($currentFocusOpportunities as $opportunity)
+                            @php($nextAction = $opportunity->nextAction())
+                            @php($focusScore = $preference ? $opportunity->weightedScore($preference) : $opportunity->computedScore())
+                            <article class="rounded-xl bg-indigo-50 p-5 ring-1 ring-inset ring-indigo-100">
+                                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                    <div>
+                                        <a href="{{ route('opportunities.show', $opportunity) }}" class="text-base font-semibold text-indigo-700 hover:text-indigo-900">{{ $opportunity->title }}</a>
+                                        <p class="mt-1 text-sm text-gray-700">{{ $opportunity->company ?? 'No company listed' }}</p>
+                                        <p class="mt-2 text-sm text-gray-600">{{ $opportunity->type ?? 'No type' }} · {{ $opportunity->status }}</p>
+                                    </div>
+                                    <span class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-indigo-700 ring-1 ring-inset ring-indigo-100">Score {{ $focusScore ?? '—' }}</span>
+                                </div>
+
+                                <div class="mt-4 rounded-lg bg-white p-3 text-sm ring-1 ring-inset ring-indigo-100">
+                                    @if ($nextAction)
+                                        <p class="font-semibold text-gray-900">Next action: {{ $nextAction->title }}</p>
+                                        <p class="mt-1 text-gray-500">Due {{ $nextAction->due_date?->toFormattedDateString() ?? 'No due date' }}</p>
+                                    @elseif ($opportunity->missingNextAction())
+                                        <p class="font-semibold text-amber-800">Missing next action</p>
+                                        <p class="mt-1 text-amber-700">Create a concrete next step to keep this focus opportunity moving.</p>
+                                    @else
+                                        <p class="text-gray-500">No next action required for this status.</p>
+                                    @endif
+                                </div>
+
+                                @if ($opportunity->focus_reason)
+                                    <p class="mt-4 whitespace-pre-line text-sm leading-6 text-gray-700">{{ $opportunity->focus_reason }}</p>
+                                @endif
+                            </article>
+                        @endforeach
+                    </div>
+                @endif
+            </section>
+
             <section aria-label="Dashboard metrics" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
                 @foreach ($metrics as $metric)
                     <article class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">

@@ -23,6 +23,9 @@ class Opportunity extends Model
         'skill_growth',
         'family_fit',
         'risk_level',
+        'is_focus',
+        'focused_at',
+        'focus_reason',
         'notes',
     ];
 
@@ -251,6 +254,8 @@ class Opportunity extends Model
             'skill_growth' => 'integer',
             'family_fit' => 'integer',
             'risk_level' => 'integer',
+            'is_focus' => 'boolean',
+            'focused_at' => 'datetime',
         ];
     }
 }

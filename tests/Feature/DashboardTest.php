@@ -34,6 +34,7 @@ class DashboardTest extends TestCase
         $response->assertSeeText('What deserves attention today?');
         $response->assertSeeText('What needs attention?');
         $response->assertSeeText('No urgent actions. Consider creating new opportunities.');
+        $response->assertSeeText('Current Focus Opportunities');
         $response->assertSeeText('Top Ranked Opportunities');
         $response->assertSeeText('High-Value Opportunities Missing Next Action');
         $response->assertSeeText('High-Value Opportunities With Critical Gaps');
@@ -120,6 +121,80 @@ class DashboardTest extends TestCase
             ->assertOk()
             ->assertSeeText('Weighted Score')
             ->assertSeeInOrder(['Priority Fit Option', (string) $weightedBest->weightedScore($user->preference), 'Higher Base Score Option', (string) $higherBase->weightedScore($user->preference)]);
+    }
+
+
+    public function test_focused_opportunity_appears_in_dashboard_focus_section(): void
+    {
+        $user = User::factory()->create();
+        $focusedOpportunity = $this->createScoredOpportunity([
+            'title' => 'Focused Client Advisory',
+            'company' => 'Acme Inc.',
+            'type' => 'consulting',
+            'status' => 'active',
+            'is_focus' => true,
+            'focused_at' => now(),
+            'focus_reason' => 'Highest leverage income path.',
+        ], 8);
+        Action::create([
+            'opportunity_id' => $focusedOpportunity->id,
+            'title' => 'Schedule scope call',
+            'due_date' => today()->addDay(),
+        ]);
+
+        $response = $this->actingAs($user)->get(route('dashboard'));
+        $focusSection = $this->dashboardSection($response->getContent(), 'Current Focus Opportunities', 'Dashboard metrics');
+
+        $response->assertOk();
+        $this->assertStringContainsString('Focused Client Advisory', $focusSection);
+        $this->assertStringContainsString('Acme Inc.', $focusSection);
+        $this->assertStringContainsString('consulting', $focusSection);
+        $this->assertStringContainsString('active', $focusSection);
+        $this->assertStringContainsString('Score '.$focusedOpportunity->computedScore(), $focusSection);
+        $this->assertStringContainsString('Next action: Schedule scope call', $focusSection);
+        $this->assertStringContainsString('Highest leverage income path.', $focusSection);
+    }
+
+    public function test_non_focused_opportunity_does_not_appear_in_dashboard_focus_section(): void
+    {
+        $user = User::factory()->create();
+        $this->createScoredOpportunity([
+            'title' => 'Focused Retainer Lead',
+            'status' => 'active',
+            'is_focus' => true,
+            'focused_at' => now(),
+        ], 8);
+        $this->createScoredOpportunity([
+            'title' => 'Non Focused Strong Lead',
+            'status' => 'active',
+        ], 9);
+
+        $response = $this->actingAs($user)->get(route('dashboard'));
+        $focusSection = $this->dashboardSection($response->getContent(), 'Current Focus Opportunities', 'Dashboard metrics');
+
+        $response->assertOk();
+        $this->assertStringContainsString('Focused Retainer Lead', $focusSection);
+        $this->assertStringNotContainsString('Non Focused Strong Lead', $focusSection);
+    }
+
+    public function test_dashboard_warns_when_more_than_five_opportunities_are_focused(): void
+    {
+        $user = User::factory()->create();
+
+        foreach (range(1, 6) as $number) {
+            $this->createScoredOpportunity([
+                'title' => 'Focus Opportunity '.$number,
+                'status' => 'active',
+                'is_focus' => true,
+                'focused_at' => now(),
+            ], 7);
+        }
+
+        $response = $this->actingAs($user)->get(route('dashboard'));
+
+        $response
+            ->assertOk()
+            ->assertSeeText('You have more than 5 focus opportunities. Consider narrowing your attention.');
     }
 
     public function test_high_value_opportunity_with_no_open_action_appears(): void
@@ -360,6 +435,14 @@ class DashboardTest extends TestCase
             ->assertSeeText('Executive Advisory Lead')
             ->assertDontSeeText('Recently Active Contact')
             ->assertDontSeeText('Dormant Low Value Contact');
+    }
+
+    private function dashboardSection(string $content, string $startText, string $endText): string
+    {
+        $sectionStart = strpos($content, $startText);
+        $sectionEnd = strpos($content, $endText, $sectionStart);
+
+        return substr($content, $sectionStart, $sectionEnd - $sectionStart);
     }
 
     private function createScoredOpportunity(array $attributes, int $factorValue): Opportunity

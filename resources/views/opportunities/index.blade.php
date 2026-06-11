@@ -26,11 +26,20 @@
                 </div>
             @endif
 
+            <div class="mb-6 flex flex-wrap gap-2">
+                <a href="{{ route('opportunities.index') }}" class="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset transition focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 {{ $focusFilter ? 'bg-white text-gray-700 ring-gray-300 hover:bg-gray-50' : 'bg-indigo-600 text-white ring-indigo-600 hover:bg-indigo-700' }}">
+                    All Opportunities
+                </a>
+                <a href="{{ route('opportunities.index', ['focus' => 1]) }}" class="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset transition focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 {{ $focusFilter ? 'bg-indigo-600 text-white ring-indigo-600 hover:bg-indigo-700' : 'bg-white text-gray-700 ring-gray-300 hover:bg-gray-50' }}">
+                    Focus Opportunities
+                </a>
+            </div>
+
             <div class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
                 @if ($opportunities->isEmpty())
                     <div class="p-10 text-center">
-                        <h3 class="text-lg font-semibold text-gray-900">No opportunities yet</h3>
-                        <p class="mt-2 text-sm text-gray-500">Start by adding a role, client lead, project idea, or income path worth evaluating.</p>
+                        <h3 class="text-lg font-semibold text-gray-900">{{ $focusFilter ? 'No focus opportunities yet' : 'No opportunities yet' }}</h3>
+                        <p class="mt-2 text-sm text-gray-500">{{ $focusFilter ? 'Mark a small number of opportunities as current focus opportunities to see them here.' : 'Start by adding a role, client lead, project idea, or income path worth evaluating.' }}</p>
                         <a href="{{ route('opportunities.create') }}" class="mt-6 inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                             New Opportunity
                         </a>
@@ -57,7 +66,14 @@
                                 @foreach ($opportunities as $opportunity)
                                     @php($nextAction = $opportunity->nextAction())
                                     <tr>
-                                        <td class="whitespace-nowrap px-6 py-4 text-sm font-semibold text-gray-900">{{ $opportunity->title }}</td>
+                                        <td class="whitespace-nowrap px-6 py-4 text-sm font-semibold text-gray-900">
+                                            <div class="flex items-center gap-2">
+                                                <span>{{ $opportunity->title }}</span>
+                                                @if ($opportunity->is_focus)
+                                                    <span class="rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-semibold text-indigo-700">Focus</span>
+                                                @endif
+                                            </div>
+                                        </td>
                                         <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-600">{{ $opportunity->company ?? '—' }}</td>
                                         <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-600">{{ $opportunity->status }}</td>
                                         <td class="whitespace-nowrap px-6 py-4 text-sm font-semibold text-gray-900">{{ $opportunity->computedScore() ?? '—' }}</td>

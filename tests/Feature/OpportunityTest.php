@@ -282,6 +282,73 @@ class OpportunityTest extends TestCase
         ]);
     }
 
+
+    public function test_user_can_mark_an_opportunity_as_focus(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->post(route('opportunities.store'), [
+            'title' => 'Focused Advisory Lead',
+            'company' => 'Acme Strategy',
+            'status' => 'active',
+            'is_focus' => '1',
+            'focus_reason' => 'Best near-term income path.',
+        ]);
+
+        $opportunity = Opportunity::first();
+
+        $response->assertRedirect(route('opportunities.show', $opportunity));
+        $this->assertTrue($opportunity->refresh()->is_focus);
+        $this->assertNotNull($opportunity->focused_at);
+        $this->assertSame('Best near-term income path.', $opportunity->focus_reason);
+    }
+
+    public function test_unmarking_focus_clears_focus_metadata(): void
+    {
+        $user = User::factory()->create();
+        $opportunity = Opportunity::create([
+            'title' => 'Former Focus Lead',
+            'status' => 'active',
+            'is_focus' => true,
+            'focused_at' => now(),
+            'focus_reason' => 'Previously important.',
+        ]);
+
+        $this->actingAs($user)->patch(route('opportunities.update', $opportunity), [
+            'title' => 'Former Focus Lead',
+            'status' => 'parked',
+        ])->assertRedirect(route('opportunities.show', $opportunity));
+
+        $opportunity->refresh();
+
+        $this->assertFalse($opportunity->is_focus);
+        $this->assertNull($opportunity->focused_at);
+        $this->assertNull($opportunity->focus_reason);
+    }
+
+    public function test_opportunity_index_can_filter_to_focus_opportunities(): void
+    {
+        $user = User::factory()->create();
+        Opportunity::create([
+            'title' => 'Focused Opportunity',
+            'status' => 'active',
+            'is_focus' => true,
+            'focused_at' => now(),
+        ]);
+        Opportunity::create([
+            'title' => 'Regular Opportunity',
+            'status' => 'active',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('opportunities.index', ['focus' => 1]));
+
+        $response
+            ->assertOk()
+            ->assertSeeText('Focus Opportunities')
+            ->assertSeeText('Focused Opportunity')
+            ->assertDontSeeText('Regular Opportunity');
+    }
+
     public function test_computed_score_uses_positive_factors_minus_time_and_risk(): void
     {
         $opportunity = Opportunity::create([
