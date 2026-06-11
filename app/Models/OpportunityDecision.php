@@ -32,6 +32,7 @@ class OpportunityDecision extends Model
 
     protected $fillable = [
         'opportunity_id',
+        'review_id',
         'decision_type',
         'reason_category',
         'notes',
@@ -48,6 +49,11 @@ class OpportunityDecision extends Model
     public function opportunity(): BelongsTo
     {
         return $this->belongsTo(Opportunity::class);
+    }
+
+    public function review(): BelongsTo
+    {
+        return $this->belongsTo(Review::class);
     }
 
     public function decisionTypeLabel(): string

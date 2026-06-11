@@ -17,6 +17,7 @@ use App\Http\Controllers\PortfolioController;
 use App\Http\Controllers\PortfolioReadinessController;
 use App\Http\Controllers\OpportunityStrategicObjectiveController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\StrategicObjectiveController;
 use App\Http\Controllers\TimelineController;
@@ -81,6 +82,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('actions', ActionController::class);
     Route::resource('applications', ApplicationController::class);
     Route::resource('projects', ProjectController::class);
+    Route::resource('reviews', ReviewController::class)
+        ->only(['index', 'create', 'store', 'show']);
     Route::resource('strategic-objectives', StrategicObjectiveController::class);
     Route::post('/projects/{project}/opportunities', [OpportunityProjectController::class, 'storeForProject'])
         ->name('projects.opportunities.store');
