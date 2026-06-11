@@ -77,6 +77,19 @@ class DashboardTest extends TestCase
             'title' => 'Completed historical follow-up',
             'completed_at' => now(),
         ]);
+        $movingOpportunity = $this->createScoredOpportunity([
+            'title' => 'High Value With Next Action',
+            'status' => 'active',
+        ], 8);
+        Action::create([
+            'opportunity_id' => $movingOpportunity->id,
+            'title' => 'Open follow-up',
+        ]);
+        $parkedOpportunity = $this->createScoredOpportunity([
+            'title' => 'Parked High Value Opportunity',
+            'status' => 'parked',
+        ], 8);
+
         $response = $this->actingAs($user)->get(route('dashboard'));
 
         $response
@@ -84,6 +97,13 @@ class DashboardTest extends TestCase
             ->assertSeeText('High-Value Opportunities Missing Next Action')
             ->assertSeeText('Stalled High Value Opportunity')
             ->assertSeeText('Computed score: '.$stalledOpportunity->computedScore());
+
+        $missingSectionStart = strpos($response->getContent(), 'High-Value Opportunities Missing Next Action');
+        $missingSectionEnd = strpos($response->getContent(), 'Overdue Actions on High-Value Opportunities', $missingSectionStart);
+        $missingSection = substr($response->getContent(), $missingSectionStart, $missingSectionEnd - $missingSectionStart);
+
+        $this->assertStringNotContainsString('High Value With Next Action', $missingSection);
+        $this->assertStringNotContainsString('Parked High Value Opportunity', $missingSection);
     }
 
     public function test_overdue_actions_tied_to_high_value_opportunities_appear(): void

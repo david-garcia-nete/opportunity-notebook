@@ -42,7 +42,7 @@ class DashboardController extends Controller
             'overdueActionCount' => $overdueActionCount,
             'topRankedOpportunities' => $rankedOpportunities->take(5),
             'highValueOpportunitiesMissingNextAction' => $rankedOpportunities
-                ->filter(fn (Opportunity $opportunity) => $opportunity->open_actions_count === 0)
+                ->filter(fn (Opportunity $opportunity) => $opportunity->missingNextAction())
                 ->take(5)
                 ->values(),
             'overdueActionsOnHighValueOpportunities' => $this->overdueActionsOnHighValueOpportunities(),
@@ -54,9 +54,7 @@ class DashboardController extends Controller
     {
         return Opportunity::query()
             ->whereNotIn('status', ['rejected', 'closed'])
-            ->withCount([
-                'actions as open_actions_count' => fn ($query) => $query->whereNull('completed_at'),
-            ])
+            ->with(['actions' => fn ($query) => $query->orderByRaw('due_date is null')->orderBy('due_date')->orderBy('id')])
             ->latest()
             ->get()
             ->filter(fn (Opportunity $opportunity) => $opportunity->computedScore() !== null)

@@ -72,6 +72,73 @@ class Opportunity extends Model
         return $this->hasMany(Action::class);
     }
 
+    public function incompleteActions(): HasMany
+    {
+        return $this->actions()->whereNull('completed_at');
+    }
+
+    public function nextAction(): ?Action
+    {
+        if ($this->relationLoaded('actions')) {
+            return $this->actions
+                ->filter(fn (Action $action) => $action->completed_at === null)
+                ->sort(function (Action $first, Action $second) {
+                    $firstHasNoDueDate = $first->due_date === null;
+                    $secondHasNoDueDate = $second->due_date === null;
+
+                    if ($firstHasNoDueDate !== $secondHasNoDueDate) {
+                        return $firstHasNoDueDate <=> $secondHasNoDueDate;
+                    }
+
+                    if (! $firstHasNoDueDate && ! $secondHasNoDueDate) {
+                        $dueDateComparison = $first->due_date->getTimestamp() <=> $second->due_date->getTimestamp();
+
+                        if ($dueDateComparison !== 0) {
+                            return $dueDateComparison;
+                        }
+                    }
+
+                    return $first->id <=> $second->id;
+                })
+                ->first();
+        }
+
+        return $this->orderedIncompleteActions()->first();
+    }
+
+    public function isOpenForNextAction(): bool
+    {
+        $status = str($this->status ?? '')->lower()->trim()->toString();
+
+        if ($status === '') {
+            return true;
+        }
+
+        return ! str($status)->contains(['closed', 'rejected', 'archived', 'parked']);
+    }
+
+    public function missingNextAction(): bool
+    {
+        if (! $this->isOpenForNextAction()) {
+            return false;
+        }
+
+        if ($this->relationLoaded('actions')) {
+            return $this->actions->doesntContain(fn (Action $action) => $action->completed_at === null);
+        }
+
+        return ! $this->incompleteActions()->exists();
+    }
+
+    private function orderedIncompleteActions(): HasMany
+    {
+        return $this->actions()
+            ->whereNull('completed_at')
+            ->orderByRaw('due_date is null')
+            ->orderBy('due_date')
+            ->orderBy('id');
+    }
+
     public function applications(): HasMany
     {
         return $this->hasMany(Application::class);

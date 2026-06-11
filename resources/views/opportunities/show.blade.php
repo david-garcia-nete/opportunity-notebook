@@ -51,6 +51,53 @@
                 </dl>
             </div>
 
+
+
+            @php($nextAction = $opportunity->nextAction())
+
+            <section class="mt-8 rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                        <p class="text-sm font-semibold uppercase tracking-wide text-indigo-600">Next Action</p>
+                        <h3 class="mt-1 text-lg font-semibold text-gray-900">Keep this opportunity moving</h3>
+                        <p class="mt-1 text-sm text-gray-500">Every active opportunity should have a clear next step or be intentionally parked.</p>
+                    </div>
+                    <a href="{{ route('actions.create', ['opportunity_id' => $opportunity->id]) }}" class="inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                        Create Action
+                    </a>
+                </div>
+
+                @if ($nextAction)
+                    <div class="mt-5 rounded-xl bg-indigo-50 p-5 ring-1 ring-inset ring-indigo-100">
+                        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                            <div>
+                                <a href="{{ route('actions.show', $nextAction) }}" class="text-lg font-semibold text-indigo-700 hover:text-indigo-900">{{ $nextAction->title }}</a>
+                                <dl class="mt-3 grid gap-3 text-sm sm:grid-cols-2">
+                                    <div>
+                                        <dt class="font-medium text-indigo-900">Due date</dt>
+                                        <dd class="mt-1 text-indigo-800">{{ $nextAction->due_date?->toFormattedDateString() ?? 'No due date' }}</dd>
+                                    </div>
+                                    <div>
+                                        <dt class="font-medium text-indigo-900">Status</dt>
+                                        <dd class="mt-1 text-indigo-800">{{ $nextAction->status() }}</dd>
+                                    </div>
+                                </dl>
+                            </div>
+                            <a href="{{ route('actions.edit', $nextAction) }}" class="text-sm font-semibold text-indigo-700 hover:text-indigo-900">Edit action</a>
+                        </div>
+                    </div>
+                @elseif ($opportunity->missingNextAction())
+                    <div class="mt-5 rounded-xl bg-amber-50 p-5 text-sm text-amber-900 ring-1 ring-inset ring-amber-200">
+                        <p class="font-semibold">Missing next action</p>
+                        <p class="mt-1">This opportunity is open but has no incomplete action. Create a concrete next step, or park/archive the opportunity if you are intentionally not pursuing it.</p>
+                    </div>
+                @else
+                    <div class="mt-5 rounded-xl bg-gray-50 p-5 text-sm text-gray-500 ring-1 ring-inset ring-gray-100">
+                        No next action is required while this opportunity is parked, archived, closed, or rejected.
+                    </div>
+                @endif
+            </section>
+
             <section class="mt-8 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div>

@@ -13,7 +13,9 @@ class OpportunityController extends Controller
 {
     public function index(): View
     {
-        $opportunities = Opportunity::latest()
+        $opportunities = Opportunity::query()
+            ->with(['actions' => fn ($query) => $query->orderByRaw('due_date is null')->orderBy('due_date')->orderBy('id')])
+            ->latest()
             ->get()
             ->sortByDesc(fn (Opportunity $opportunity) => $opportunity->computedScore() ?? PHP_INT_MIN)
             ->values();
@@ -63,7 +65,7 @@ class OpportunityController extends Controller
             'availableContacts' => Contact::orderBy('name')->get(),
             'availableProjects' => Project::orderBy('name')->get(),
             'opportunity' => $opportunity->load([
-                'actions' => fn ($query) => $query->latest('due_date')->latest(),
+                'actions' => fn ($query) => $query->orderByRaw('due_date is null')->orderBy('due_date')->orderBy('id'),
                 'applications' => fn ($query) => $query->latest('applied_at')->latest(),
                 'contacts' => fn ($query) => $query->orderBy('name'),
                 'projects' => fn ($query) => $query->orderBy('name'),
