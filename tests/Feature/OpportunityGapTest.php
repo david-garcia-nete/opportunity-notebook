@@ -199,14 +199,17 @@ class OpportunityGapTest extends TestCase
 
         $response = $this->actingAs($user)->get(route('dashboard'));
 
-        $response
-            ->assertOk()
-            ->assertSeeText('High-Value Opportunities With Critical Gaps')
-            ->assertSeeText('Senior Backend Engineer')
-            ->assertSeeText('Open Gap Count')
-            ->assertSeeText('AWS certification')
-            ->assertSeeText('Critical')
-            ->assertDontSeeText('Completed portfolio update');
+        $response->assertOk();
+        $gapSummarySection = $this->dashboardSection($response->getContent(), 'dashboard-gap-summary');
+        $recentActivitySection = $this->dashboardSection($response->getContent(), 'recent-activity');
+
+        $this->assertStringContainsString('High-Value Opportunities With Critical Gaps', $gapSummarySection);
+        $this->assertStringContainsString('Senior Backend Engineer', $gapSummarySection);
+        $this->assertStringContainsString('Open Gap Count', $gapSummarySection);
+        $this->assertStringContainsString('AWS certification', $gapSummarySection);
+        $this->assertStringContainsString('Critical', $gapSummarySection);
+        $this->assertStringNotContainsString('Completed portfolio update', $gapSummarySection);
+        $this->assertStringContainsString('Completed portfolio update', $recentActivitySection);
     }
 
     public function test_strategic_objective_page_shows_open_gap_counts_for_linked_opportunities(): void
@@ -242,6 +245,15 @@ class OpportunityGapTest extends TestCase
             ->assertOk()
             ->assertSeeText('Open Gaps')
             ->assertSeeTextInOrder(['AI Consultant', (string) $opportunity->computedScore(), 'active', '1']);
+    }
+
+    private function dashboardSection(string $content, string $testId): string
+    {
+        $matched = preg_match('/<section\b(?=[^>]*data-testid="'.preg_quote($testId, '/').'"[^>]*)[^>]*>(.*?)<\/section>/s', $content, $matches);
+
+        $this->assertSame(1, $matched, 'Dashboard section [data-testid="'.$testId.'"] was not found.');
+
+        return html_entity_decode(strip_tags($matches[0]));
     }
 
     private function createScoredOpportunity(array $attributes, int $factorValue): Opportunity
