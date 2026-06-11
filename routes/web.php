@@ -7,8 +7,10 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ContactOpportunityController;
 use App\Http\Controllers\OpportunityController;
 use App\Http\Controllers\OpportunityProjectController;
+use App\Http\Controllers\OpportunityStrategicObjectiveController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\StrategicObjectiveController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -31,6 +33,10 @@ Route::middleware('auth')->group(function () {
         ->name('opportunities.projects.store');
     Route::delete('/opportunities/{opportunity}/projects/{project}', [OpportunityProjectController::class, 'destroyFromOpportunity'])
         ->name('opportunities.projects.destroy');
+    Route::post('/opportunities/{opportunity}/strategic-objectives', [OpportunityStrategicObjectiveController::class, 'storeForOpportunity'])
+        ->name('opportunities.strategic-objectives.store');
+    Route::delete('/opportunities/{opportunity}/strategic-objectives/{strategicObjective}', [OpportunityStrategicObjectiveController::class, 'destroyFromOpportunity'])
+        ->name('opportunities.strategic-objectives.destroy');
 
     Route::resource('contacts', ContactController::class);
     Route::post('/contacts/{contact}/opportunities', [ContactOpportunityController::class, 'storeForContact'])
@@ -40,6 +46,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('actions', ActionController::class);
     Route::resource('applications', ApplicationController::class);
     Route::resource('projects', ProjectController::class);
+    Route::resource('strategic-objectives', StrategicObjectiveController::class);
     Route::post('/projects/{project}/opportunities', [OpportunityProjectController::class, 'storeForProject'])
         ->name('projects.opportunities.store');
     Route::delete('/projects/{project}/opportunities/{opportunity}', [OpportunityProjectController::class, 'destroyFromProject'])

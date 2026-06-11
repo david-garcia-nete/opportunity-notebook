@@ -123,6 +123,73 @@
             <section class="mt-8 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Strategic Objectives</h3>
+                        <p class="mt-1 text-sm text-gray-500">Outcomes this opportunity may help you achieve.</p>
+                    </div>
+                </div>
+
+                <form method="POST" action="{{ route('opportunities.strategic-objectives.store', $opportunity) }}" class="mt-5 grid gap-4 rounded-xl bg-gray-50 p-4 ring-1 ring-inset ring-gray-100 sm:grid-cols-2">
+                    @csrf
+                    <div>
+                        <label for="strategic_objective_id" class="block text-sm font-medium text-gray-700">Objective</label>
+                        <select id="strategic_objective_id" name="strategic_objective_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="">Choose an objective</option>
+                            @foreach ($availableStrategicObjectives as $strategicObjective)
+                                <option value="{{ $strategicObjective->id }}" @selected(old('strategic_objective_id') == $strategicObjective->id)>{{ $strategicObjective->name }} — Priority {{ $strategicObjective->priority }}{{ $strategicObjective->active ? '' : ' (inactive)' }}</option>
+                            @endforeach
+                        </select>
+                        @error('strategic_objective_id')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div class="flex items-end">
+                        <button type="submit" class="inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                            Attach Objective
+                        </button>
+                    </div>
+                </form>
+
+                @if ($opportunity->strategicObjectives->isEmpty())
+                    <div class="mt-5 rounded-xl bg-gray-50 p-4 text-sm text-gray-500 ring-1 ring-inset ring-gray-100">
+                        No strategic objectives linked to this opportunity yet.
+                    </div>
+                @else
+                    <div class="mt-5 overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Name</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Priority</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Status</th>
+                                    <th scope="col" class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 bg-white">
+                                @foreach ($opportunity->strategicObjectives as $strategicObjective)
+                                    <tr>
+                                        <td class="whitespace-nowrap px-4 py-4 text-sm font-semibold text-gray-900">
+                                            <a href="{{ route('strategic-objectives.show', $strategicObjective) }}" class="text-indigo-600 hover:text-indigo-900">{{ $strategicObjective->name }}</a>
+                                        </td>
+                                        <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-600">{{ $strategicObjective->priority }}</td>
+                                        <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-600">{{ $strategicObjective->active ? 'Active' : 'Inactive' }}</td>
+                                        <td class="whitespace-nowrap px-4 py-4 text-right text-sm">
+                                            <form method="POST" action="{{ route('opportunities.strategic-objectives.destroy', [$opportunity, $strategicObjective]) }}">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="font-semibold text-red-600 hover:text-red-900">Remove</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </section>
+
+            <section class="mt-8 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
                         <h3 class="text-lg font-semibold text-gray-900">Contacts</h3>
                         <p class="mt-1 text-sm text-gray-500">People connected to this opportunity.</p>
                     </div>
@@ -202,7 +269,6 @@
                     </div>
                 @endif
             </section>
-
 
             <section class="mt-8 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                 <div>
