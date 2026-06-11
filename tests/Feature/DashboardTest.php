@@ -144,7 +144,7 @@ class DashboardTest extends TestCase
         ]);
 
         $response = $this->actingAs($user)->get(route('dashboard'));
-        $focusSection = $this->dashboardSection($response->getContent(), 'Current Focus Opportunities', 'Dashboard metrics');
+        $focusSection = $this->dashboardSection($response->getContent(), 'current-focus-opportunities');
 
         $response->assertOk();
         $this->assertStringContainsString('Focused Client Advisory', $focusSection);
@@ -171,7 +171,7 @@ class DashboardTest extends TestCase
         ], 9);
 
         $response = $this->actingAs($user)->get(route('dashboard'));
-        $focusSection = $this->dashboardSection($response->getContent(), 'Current Focus Opportunities', 'Dashboard metrics');
+        $focusSection = $this->dashboardSection($response->getContent(), 'current-focus-opportunities');
 
         $response->assertOk();
         $this->assertStringContainsString('Focused Retainer Lead', $focusSection);
@@ -231,9 +231,7 @@ class DashboardTest extends TestCase
             ->assertSeeText('Stalled High Value Opportunity')
             ->assertSeeText('Base score: '.$stalledOpportunity->computedScore().' · Weighted score: —');
 
-        $missingSectionStart = strpos($response->getContent(), 'High-Value Opportunities Missing Next Action');
-        $missingSectionEnd = strpos($response->getContent(), 'Overdue Actions on High-Value Opportunities', $missingSectionStart);
-        $missingSection = substr($response->getContent(), $missingSectionStart, $missingSectionEnd - $missingSectionStart);
+        $missingSection = $this->dashboardSection($response->getContent(), 'high-value-missing-next-action');
 
         $this->assertStringNotContainsString('High Value With Next Action', $missingSection);
         $this->assertStringNotContainsString('Parked High Value Opportunity', $missingSection);
@@ -260,13 +258,14 @@ class DashboardTest extends TestCase
 
         $response = $this->actingAs($user)->get(route('dashboard'));
 
-        $response
-            ->assertOk()
-            ->assertSeeText('Overdue Actions on High-Value Opportunities')
-            ->assertSeeText('Send overdue proposal follow-up')
-            ->assertSeeText('Important Client Pursuit')
-            ->assertSeeText('Opportunity score: '.$opportunity->computedScore())
-            ->assertDontSeeText('Completed overdue action');
+        $response->assertOk();
+        $overdueSection = $this->dashboardSection($response->getContent(), 'overdue-high-value-actions');
+
+        $this->assertStringContainsString('Overdue Actions on High-Value Opportunities', $overdueSection);
+        $this->assertStringContainsString('Send overdue proposal follow-up', $overdueSection);
+        $this->assertStringContainsString('Important Client Pursuit', $overdueSection);
+        $this->assertStringContainsString('Opportunity score: '.$opportunity->computedScore(), $overdueSection);
+        $this->assertStringNotContainsString('Completed overdue action', $overdueSection);
     }
 
     public function test_lower_value_opportunities_are_not_prioritized_above_higher_value_ones(): void
@@ -336,15 +335,16 @@ class DashboardTest extends TestCase
 
         $response = $this->actingAs($user)->get(route('dashboard'));
 
-        $response
-            ->assertOk()
-            ->assertSeeText('Top Objectives')
-            ->assertSeeText('Increase household income')
-            ->assertSeeText('2 linked')
-            ->assertSeeText('Premium advisory package')
-            ->assertSeeText('Average opportunity score')
-            ->assertSeeText('34')
-            ->assertDontSeeText('Inactive outcome');
+        $response->assertOk();
+        $objectivesSection = $this->dashboardSection($response->getContent(), 'top-objectives');
+
+        $this->assertStringContainsString('Top Objectives', $objectivesSection);
+        $this->assertStringContainsString('Increase household income', $objectivesSection);
+        $this->assertStringContainsString('2 linked', $objectivesSection);
+        $this->assertStringContainsString('Premium advisory package', $objectivesSection);
+        $this->assertStringContainsString('Average opportunity score', $objectivesSection);
+        $this->assertStringContainsString('34', $objectivesSection);
+        $this->assertStringNotContainsString('Inactive outcome', $objectivesSection);
     }
 
 
@@ -375,13 +375,14 @@ class DashboardTest extends TestCase
 
         $response = $this->actingAs($user)->get(route('dashboard'));
 
-        $response
-            ->assertOk()
-            ->assertSeeText('Contacts Requiring Follow-Up')
-            ->assertSeeText('Due Follow Up Contact')
-            ->assertSeeText('Asked for referral status.')
-            ->assertSeeText('Referral Opportunity')
-            ->assertDontSeeText('Future Follow Up Contact');
+        $response->assertOk();
+        $followUpSection = $this->dashboardSection($response->getContent(), 'contacts-requiring-follow-up');
+
+        $this->assertStringContainsString('Contacts Requiring Follow-Up', $followUpSection);
+        $this->assertStringContainsString('Due Follow Up Contact', $followUpSection);
+        $this->assertStringContainsString('Asked for referral status.', $followUpSection);
+        $this->assertStringContainsString('Referral Opportunity', $followUpSection);
+        $this->assertStringNotContainsString('Future Follow Up Contact', $followUpSection);
     }
 
     public function test_dashboard_shows_dormant_high_value_relationships(): void
@@ -429,21 +430,23 @@ class DashboardTest extends TestCase
 
         $response = $this->actingAs($user)->get(route('dashboard'));
 
-        $response
-            ->assertOk()
-            ->assertSeeText('Dormant High-Value Relationships')
-            ->assertSeeText('Dormant High Value Contact')
-            ->assertSeeText('Executive Advisory Lead')
-            ->assertDontSeeText('Recently Active Contact')
-            ->assertDontSeeText('Dormant Low Value Contact');
+        $response->assertOk();
+        $dormantSection = $this->dashboardSection($response->getContent(), 'dormant-high-value-relationships');
+
+        $this->assertStringContainsString('Dormant High-Value Relationships', $dormantSection);
+        $this->assertStringContainsString('Dormant High Value Contact', $dormantSection);
+        $this->assertStringContainsString('Executive Advisory Lead', $dormantSection);
+        $this->assertStringNotContainsString('Recently Active Contact', $dormantSection);
+        $this->assertStringNotContainsString('Dormant Low Value Contact', $dormantSection);
     }
 
-    private function dashboardSection(string $content, string $startText, string $endText): string
+    private function dashboardSection(string $content, string $testId): string
     {
-        $sectionStart = strpos($content, $startText);
-        $sectionEnd = strpos($content, $endText, $sectionStart);
+        $matched = preg_match('/<section\b(?=[^>]*data-testid="'.preg_quote($testId, '/').'"[^>]*)[^>]*>(.*?)<\/section>/s', $content, $matches);
 
-        return substr($content, $sectionStart, $sectionEnd - $sectionStart);
+        $this->assertSame(1, $matched, 'Dashboard section [data-testid="'.$testId.'"] was not found.');
+
+        return html_entity_decode(strip_tags($matches[0]));
     }
 
 
@@ -473,16 +476,56 @@ class DashboardTest extends TestCase
             'opportunity_gap_id' => $plannedGap->id,
             'title' => 'Build portfolio project',
         ]);
+        OpportunityGap::create([
+            'opportunity_id' => $opportunity->id,
+            'title' => 'Medium Priority Gap',
+            'category' => 'Skill',
+            'status' => 'Open',
+            'priority' => 'Medium',
+        ]);
+        OpportunityGap::create([
+            'opportunity_id' => $opportunity->id,
+            'title' => 'Completed High Gap',
+            'category' => 'Portfolio',
+            'status' => 'Complete',
+            'priority' => 'High',
+        ]);
+        OpportunityGap::create([
+            'opportunity_id' => $opportunity->id,
+            'title' => 'In Progress Critical Gap',
+            'category' => 'Experience',
+            'status' => 'In Progress',
+            'priority' => 'Critical',
+        ]);
+        $completedActionGap = OpportunityGap::create([
+            'opportunity_id' => $opportunity->id,
+            'title' => 'Completed Action Linked Gap',
+            'category' => 'Networking',
+            'status' => 'Open',
+            'priority' => 'High',
+        ]);
+        Action::create([
+            'opportunity_id' => $opportunity->id,
+            'opportunity_gap_id' => $completedActionGap->id,
+            'title' => 'Completed linked gap action',
+            'completed_at' => now(),
+        ]);
 
         $response = $this->actingAs($user)->get(route('dashboard'));
 
-        $response
-            ->assertOk()
-            ->assertSeeText('Gaps Without Action Plans')
-            ->assertSeeText('AWS Certification')
-            ->assertSeeText('Critical')
-            ->assertSeeText('Cloud Advisory')
-            ->assertDontSeeText('Portfolio Project');
+        $response->assertOk();
+        $gapSection = $this->dashboardSection($response->getContent(), 'gaps-without-action-plans');
+
+        $this->assertStringContainsString('Gaps Without Action Plans', $gapSection);
+        $this->assertStringContainsString('AWS Certification', $gapSection);
+        $this->assertStringContainsString('Critical', $gapSection);
+        $this->assertStringContainsString('Cloud Advisory', $gapSection);
+        $this->assertStringNotContainsString('Portfolio Project', $gapSection);
+        $this->assertStringNotContainsString('Medium Priority Gap', $gapSection);
+        $this->assertStringNotContainsString('Completed High Gap', $gapSection);
+        $this->assertStringNotContainsString('In Progress Critical Gap', $gapSection);
+        $this->assertStringNotContainsString('Completed Action Linked Gap', $gapSection);
+        $this->assertStringNotContainsString('Completed linked gap action', $gapSection);
     }
 
     private function createScoredOpportunity(array $attributes, int $factorValue): Opportunity

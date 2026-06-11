@@ -222,6 +222,28 @@ class TimelineTest extends TestCase
             ->assertSeeText('Application via Referral');
     }
 
+
+    public function test_dashboard_recent_activity_can_show_completed_actions(): void
+    {
+        $user = User::factory()->create();
+        $opportunity = $this->opportunity();
+        Action::create([
+            'opportunity_id' => $opportunity->id,
+            'title' => 'Completed dashboard activity',
+            'completed_at' => now(),
+        ]);
+
+        $response = $this->actingAs($user)->get(route('dashboard'));
+
+        $response->assertOk();
+        $recentActivitySection = $this->dashboardSection($response->getContent(), 'recent-activity');
+
+        $this->assertStringContainsString('Recent Activity', $recentActivitySection);
+        $this->assertStringContainsString('Action Completed', $recentActivitySection);
+        $this->assertStringContainsString('Completed dashboard activity', $recentActivitySection);
+        $this->assertStringContainsString('Completed', $recentActivitySection);
+    }
+
     private function opportunity(array $attributes = []): Opportunity
     {
         return Opportunity::create(array_merge([
@@ -229,4 +251,14 @@ class TimelineTest extends TestCase
             'status' => 'active',
         ], $attributes));
     }
+
+    private function dashboardSection(string $content, string $testId): string
+    {
+        $matched = preg_match('/<section\b(?=[^>]*data-testid="'.preg_quote($testId, '/').'"[^>]*)[^>]*>(.*?)<\/section>/s', $content, $matches);
+
+        $this->assertSame(1, $matched, 'Dashboard section [data-testid="'.$testId.'"] was not found.');
+
+        return html_entity_decode(strip_tags($matches[0]));
+    }
+
 }
