@@ -204,6 +204,10 @@ class ReviewController extends Controller
                         ->values(),
                     'missing_next_action' => $opportunity->missingNextAction(),
                     'recent_activity' => $opportunityTimeline['history']->take(3)->values(),
+                    'recent_contact_interactions' => $opportunity->contactInteractions
+                        ->sortByDesc('interaction_date')
+                        ->take(3)
+                        ->values(),
                     'follow_ups' => $opportunity->contactInteractions
                         ->filter(fn ($interaction) => $interaction->next_follow_up_date !== null && $interaction->next_follow_up_date->greaterThanOrEqualTo(today()))
                         ->sortBy('next_follow_up_date')
