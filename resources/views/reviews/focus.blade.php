@@ -123,12 +123,18 @@
 
                                         <div class="rounded-xl bg-slate-50 p-4 ring-1 ring-inset ring-slate-100">
                                             <h4 class="text-sm font-semibold text-gray-900">Contacts and follow-ups</h4>
-                                            @if ($opportunity->contacts->isEmpty() && $opportunitySignals['follow_ups']->isEmpty())
-                                                <p class="mt-2 text-sm text-gray-600">No linked contacts or upcoming follow-ups.</p>
+                                            @if ($opportunity->contacts->isEmpty() && $opportunitySignals['recent_contact_interactions']->isEmpty() && $opportunitySignals['follow_ups']->isEmpty())
+                                                <p class="mt-2 text-sm text-gray-600">No linked contacts, recent interactions, or upcoming follow-ups.</p>
                                             @else
                                                 <ul class="mt-2 space-y-2 text-sm text-gray-700">
                                                     @foreach ($opportunity->contacts as $contact)
                                                         <li>{{ $contact->name }}@if($contact->organization) · {{ $contact->organization }}@endif</li>
+                                                    @endforeach
+                                                    @foreach ($opportunitySignals['recent_contact_interactions'] as $interaction)
+                                                        <li>
+                                                            Recent interaction: {{ $interaction->contact?->name ?? 'Contact' }} · {{ $interaction->interaction_date->toFormattedDateString() }}
+                                                            <span class="block text-gray-600">{{ $interaction->summary }}</span>
+                                                        </li>
                                                     @endforeach
                                                     @foreach ($opportunitySignals['follow_ups'] as $followUp)
                                                         <li>Follow up: {{ $followUp->contact?->name ?? 'Contact' }} · {{ $followUp->next_follow_up_date->toFormattedDateString() }}</li>

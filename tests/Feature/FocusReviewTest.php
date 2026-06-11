@@ -122,7 +122,7 @@ class FocusReviewTest extends TestCase
         $this->assertDatabaseHas('actions', [
             'opportunity_id' => $opportunity->id,
             'title' => 'Send focused proposal',
-            'due_date' => today()->addDays(2)->toDateString(),
+            'due_date' => today()->addDays(2)->startOfDay()->toDateTimeString(),
             'description' => 'Clarify value and timeline.',
         ]);
     }
