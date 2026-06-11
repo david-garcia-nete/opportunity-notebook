@@ -39,7 +39,7 @@ class WeeklyReviewTest extends TestCase
         $focusedOpportunity = Opportunity::create([
             'title' => 'Focused Advisory Sprint',
             'company' => 'Acme Advisory',
-            'status' => 'active',
+            'status' => 'Active',
             'score' => 88,
             'is_focus' => true,
             'focused_at' => now(),
@@ -48,7 +48,7 @@ class WeeklyReviewTest extends TestCase
         Opportunity::create([
             'title' => 'Unfocused Research Idea',
             'company' => 'Back Burner Labs',
-            'status' => 'idea',
+            'status' => 'Idea',
             'is_focus' => false,
         ]);
         Action::create([

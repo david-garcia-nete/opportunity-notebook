@@ -7,6 +7,7 @@ use App\Models\Application;
 use App\Models\ContactInteraction;
 use App\Models\Opportunity;
 use App\Models\OpportunityGap;
+use App\Support\Statuses;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
@@ -164,7 +165,7 @@ class OpportunityTimelineService
                 ),
             ]);
 
-            if ($gap->status === 'Complete') {
+            if ($gap->status === Statuses::GAP_COMPLETE) {
                 $items->push($this->item(
                     date: $gap->updated_at,
                     typeLabel: 'Gap Completed',

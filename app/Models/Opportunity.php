@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Statuses;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -39,6 +40,12 @@ class Opportunity extends Model
         'family_fit' => 'Family Fit',
         'risk_level' => 'Risk Level',
     ];
+
+
+    public function setStatusAttribute(?string $value): void
+    {
+        $this->attributes['status'] = Statuses::normalizeOpportunity($value) ?? $value;
+    }
 
     public function computedScore(): ?int
     {
@@ -142,7 +149,7 @@ class Opportunity extends Model
 
     public function openOpportunityGaps(): HasMany
     {
-        return $this->opportunityGaps()->where('status', 'Open');
+        return $this->opportunityGaps()->where('status', Statuses::GAP_OPEN);
     }
 
     public function incompleteActions(): HasMany
@@ -181,13 +188,11 @@ class Opportunity extends Model
 
     public function isOpenForNextAction(): bool
     {
-        $status = str($this->status ?? '')->lower()->trim()->toString();
-
-        if ($status === '') {
+        if ($this->status === null || $this->status === '') {
             return true;
         }
 
-        return ! str($status)->contains(['closed', 'rejected', 'archived', 'parked']);
+        return ! in_array($this->status, Statuses::unavailableForNextActionOpportunities(), true);
     }
 
     public function missingNextAction(): bool

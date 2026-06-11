@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('title');
             $table->string('company')->nullable();
             $table->string('type')->nullable();
-            $table->string('status')->default('idea');
+            $table->string('status')->default('Idea');
             $table->unsignedInteger('score')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();

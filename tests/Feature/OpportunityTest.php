@@ -22,7 +22,7 @@ class OpportunityTest extends TestCase
         Opportunity::create([
             'title' => 'Senior Laravel Developer',
             'company' => 'Acme Inc.',
-            'status' => 'idea',
+            'status' => 'Idea',
             'score' => 80,
         ]);
 
@@ -33,7 +33,7 @@ class OpportunityTest extends TestCase
             ->assertSee('Opportunity Pipeline')
             ->assertSee('Senior Laravel Developer')
             ->assertSee('Acme Inc.')
-            ->assertSee('idea')
+            ->assertSee('Idea')
             ->assertSee('80');
     }
 
@@ -55,7 +55,7 @@ class OpportunityTest extends TestCase
         Opportunity::create([
             'title' => 'Fractional CTO Advisory',
             'company' => 'Acme Inc.',
-            'status' => 'active',
+            'status' => 'Active',
             'income_potential' => 8,
             'probability_of_success' => 7,
             'time_to_revenue' => 2,
@@ -68,7 +68,7 @@ class OpportunityTest extends TestCase
         Opportunity::create([
             'title' => 'Closed Staff Role',
             'company' => 'Globex',
-            'status' => 'closed',
+            'status' => 'Closed',
         ]);
 
         $response = $this->actingAs($user)->get(route('opportunities.compare'));
@@ -92,7 +92,7 @@ class OpportunityTest extends TestCase
         $user = User::factory()->create();
         Opportunity::create([
             'title' => 'Lower Comparison Priority',
-            'status' => 'active',
+            'status' => 'Active',
             'income_potential' => 4,
             'probability_of_success' => 4,
             'time_to_revenue' => 8,
@@ -104,7 +104,7 @@ class OpportunityTest extends TestCase
         ]);
         Opportunity::create([
             'title' => 'Higher Comparison Priority',
-            'status' => 'active',
+            'status' => 'Active',
             'income_potential' => 9,
             'probability_of_success' => 9,
             'time_to_revenue' => 2,
@@ -139,7 +139,7 @@ class OpportunityTest extends TestCase
         ]));
         $opportunity = Opportunity::create([
             'title' => 'Income Weighted Opportunity',
-            'status' => 'active',
+            'status' => 'Active',
             'income_potential' => 9,
             'probability_of_success' => 2,
             'time_to_revenue' => 10,
@@ -170,7 +170,7 @@ class OpportunityTest extends TestCase
         ]));
         Opportunity::create([
             'title' => 'Higher Base Income Option',
-            'status' => 'active',
+            'status' => 'Active',
             'income_potential' => 10,
             'probability_of_success' => 10,
             'time_to_revenue' => 1,
@@ -182,7 +182,7 @@ class OpportunityTest extends TestCase
         ]);
         Opportunity::create([
             'title' => 'Better Personal Priority Fit',
-            'status' => 'active',
+            'status' => 'Active',
             'income_potential' => 4,
             'probability_of_success' => 1,
             'time_to_revenue' => 10,
@@ -207,7 +207,7 @@ class OpportunityTest extends TestCase
         $user = User::factory()->create();
         $opportunity = Opportunity::create([
             'title' => 'Counted Opportunity',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
 
         $contacts = collect([
@@ -226,8 +226,8 @@ class OpportunityTest extends TestCase
         Action::create(['opportunity_id' => $opportunity->id, 'title' => 'Open follow up']);
         Action::create(['opportunity_id' => $opportunity->id, 'title' => 'Completed prep', 'completed_at' => now()]);
 
-        Application::create(['opportunity_id' => $opportunity->id, 'applied_at' => now(), 'status' => 'submitted']);
-        Application::create(['opportunity_id' => $opportunity->id, 'applied_at' => now(), 'status' => 'interviewing']);
+        Application::create(['opportunity_id' => $opportunity->id, 'applied_at' => now(), 'status' => 'Applied']);
+        Application::create(['opportunity_id' => $opportunity->id, 'applied_at' => now(), 'status' => 'Interviewing']);
 
         $response = $this->actingAs($user)->get(route('opportunities.compare'));
 
@@ -248,7 +248,7 @@ class OpportunityTest extends TestCase
             'title' => 'Contract Product Build',
             'company' => 'Northwind',
             'type' => 'contract',
-            'status' => 'idea',
+            'status' => 'Idea',
             'score' => 72,
             'notes' => 'Potential six-week Laravel build.',
             'income_potential' => 9,
@@ -268,7 +268,7 @@ class OpportunityTest extends TestCase
             'title' => 'Contract Product Build',
             'company' => 'Northwind',
             'type' => 'contract',
-            'status' => 'idea',
+            'status' => 'Idea',
             'score' => 72,
             'notes' => 'Potential six-week Laravel build.',
             'income_potential' => 9,
@@ -290,7 +290,7 @@ class OpportunityTest extends TestCase
         $response = $this->actingAs($user)->post(route('opportunities.store'), [
             'title' => 'Focused Advisory Lead',
             'company' => 'Acme Strategy',
-            'status' => 'active',
+            'status' => 'Active',
             'is_focus' => '1',
             'focus_reason' => 'Best near-term income path.',
         ]);
@@ -308,7 +308,7 @@ class OpportunityTest extends TestCase
         $user = User::factory()->create();
         $opportunity = Opportunity::create([
             'title' => 'Former Focus Lead',
-            'status' => 'active',
+            'status' => 'Active',
             'is_focus' => true,
             'focused_at' => now(),
             'focus_reason' => 'Previously important.',
@@ -316,7 +316,7 @@ class OpportunityTest extends TestCase
 
         $this->actingAs($user)->patch(route('opportunities.update', $opportunity), [
             'title' => 'Former Focus Lead',
-            'status' => 'parked',
+            'status' => 'Parked',
         ])->assertRedirect(route('opportunities.show', $opportunity));
 
         $opportunity->refresh();
@@ -331,13 +331,13 @@ class OpportunityTest extends TestCase
         $user = User::factory()->create();
         Opportunity::create([
             'title' => 'Focused Opportunity',
-            'status' => 'active',
+            'status' => 'Active',
             'is_focus' => true,
             'focused_at' => now(),
         ]);
         Opportunity::create([
             'title' => 'Regular Opportunity',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
 
         $response = $this->actingAs($user)->get(route('opportunities.index', ['focus' => 1]));
@@ -353,7 +353,7 @@ class OpportunityTest extends TestCase
     {
         $opportunity = Opportunity::create([
             'title' => 'Scored Opportunity',
-            'status' => 'active',
+            'status' => 'Active',
             'income_potential' => 9,
             'probability_of_success' => 8,
             'time_to_revenue' => 3,
@@ -372,7 +372,7 @@ class OpportunityTest extends TestCase
     {
         $opportunity = Opportunity::create([
             'title' => 'Next Action Opportunity',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         Action::create([
             'opportunity_id' => $opportunity->id,
@@ -392,7 +392,7 @@ class OpportunityTest extends TestCase
     {
         $opportunity = Opportunity::create([
             'title' => 'Completed Action Opportunity',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         Action::create([
             'opportunity_id' => $opportunity->id,
@@ -413,7 +413,7 @@ class OpportunityTest extends TestCase
     {
         $opportunity = Opportunity::create([
             'title' => 'Undated Action Opportunity',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         Action::create([
             'opportunity_id' => $opportunity->id,
@@ -432,7 +432,7 @@ class OpportunityTest extends TestCase
     {
         $openOpportunity = Opportunity::create([
             'title' => 'Missing Next Action Opportunity',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         Action::create([
             'opportunity_id' => $openOpportunity->id,
@@ -441,7 +441,7 @@ class OpportunityTest extends TestCase
         ]);
         $parkedOpportunity = Opportunity::create([
             'title' => 'Parked Opportunity',
-            'status' => 'parked',
+            'status' => 'Parked',
         ]);
 
         $this->assertTrue($openOpportunity->missingNextAction());
@@ -453,7 +453,7 @@ class OpportunityTest extends TestCase
         $user = User::factory()->create();
         $opportunity = Opportunity::create([
             'title' => 'Evaluation Visible Role',
-            'status' => 'active',
+            'status' => 'Active',
             'income_potential' => 8,
             'probability_of_success' => 7,
             'time_to_revenue' => 2,
@@ -481,7 +481,7 @@ class OpportunityTest extends TestCase
         $user = User::factory()->create();
         Opportunity::create([
             'title' => 'Lower Priority Opportunity',
-            'status' => 'active',
+            'status' => 'Active',
             'income_potential' => 4,
             'probability_of_success' => 4,
             'time_to_revenue' => 8,
@@ -493,7 +493,7 @@ class OpportunityTest extends TestCase
         ]);
         Opportunity::create([
             'title' => 'Higher Priority Opportunity',
-            'status' => 'active',
+            'status' => 'Active',
             'income_potential' => 9,
             'probability_of_success' => 9,
             'time_to_revenue' => 2,
@@ -518,7 +518,7 @@ class OpportunityTest extends TestCase
         $user = User::factory()->create();
         $opportunityWithAction = Opportunity::create([
             'title' => 'Opportunity With Next Action',
-            'status' => 'active',
+            'status' => 'Active',
             'income_potential' => 8,
         ]);
         Action::create([
@@ -528,7 +528,7 @@ class OpportunityTest extends TestCase
         ]);
         Opportunity::create([
             'title' => 'Opportunity Missing Action',
-            'status' => 'active',
+            'status' => 'Active',
             'income_potential' => 7,
         ]);
 
@@ -547,7 +547,7 @@ class OpportunityTest extends TestCase
         $user = User::factory()->create();
         $opportunityWithAction = Opportunity::create([
             'title' => 'Opportunity With Show Next Action',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         $nextAction = Action::create([
             'opportunity_id' => $opportunityWithAction->id,
@@ -556,7 +556,7 @@ class OpportunityTest extends TestCase
         ]);
         $missingOpportunity = Opportunity::create([
             'title' => 'Missing Show Next Action',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
 
         $this->actingAs($user)
@@ -582,14 +582,14 @@ class OpportunityTest extends TestCase
         $opportunity = Opportunity::create([
             'title' => 'Original Role',
             'company' => 'Acme Inc.',
-            'status' => 'idea',
+            'status' => 'Idea',
         ]);
 
         $response = $this->actingAs($user)->patch(route('opportunities.update', $opportunity), [
             'title' => 'Updated Role',
             'company' => 'Globex',
             'type' => 'full-time',
-            'status' => 'active',
+            'status' => 'Active',
             'score' => 91,
             'notes' => 'High-priority opportunity.',
         ]);
@@ -600,7 +600,7 @@ class OpportunityTest extends TestCase
             'title' => 'Updated Role',
             'company' => 'Globex',
             'type' => 'full-time',
-            'status' => 'active',
+            'status' => 'Active',
             'score' => 91,
             'notes' => 'High-priority opportunity.',
         ]);
@@ -611,7 +611,7 @@ class OpportunityTest extends TestCase
         $user = User::factory()->create();
         $opportunity = Opportunity::create([
             'title' => 'Role to Remove',
-            'status' => 'idea',
+            'status' => 'Idea',
         ]);
 
         $response = $this->actingAs($user)->delete(route('opportunities.destroy', $opportunity));
@@ -625,9 +625,9 @@ class OpportunityTest extends TestCase
     public function test_dashboard_uses_real_opportunity_counts(): void
     {
         $user = User::factory()->create();
-        Opportunity::create(['title' => 'Active Role', 'status' => 'active']);
-        Opportunity::create(['title' => 'Rejected Role', 'status' => 'rejected']);
-        Opportunity::create(['title' => 'Closed Role', 'status' => 'closed']);
+        Opportunity::create(['title' => 'Active Role', 'status' => 'Active']);
+        Opportunity::create(['title' => 'Rejected Role', 'status' => 'Rejected']);
+        Opportunity::create(['title' => 'Closed Role', 'status' => 'Closed']);
 
         $response = $this->actingAs($user)->get(route('dashboard'));
 
@@ -643,7 +643,7 @@ class OpportunityTest extends TestCase
     {
         $opportunity = Opportunity::create([
             'title' => 'Protected Role',
-            'status' => 'idea',
+            'status' => 'Idea',
         ]);
 
         $this->get(route('opportunities.index'))->assertRedirect(route('login'));
@@ -651,13 +651,13 @@ class OpportunityTest extends TestCase
         $this->get(route('opportunities.create'))->assertRedirect(route('login'));
         $this->post(route('opportunities.store'), [
             'title' => 'Guest Role',
-            'status' => 'idea',
+            'status' => 'Idea',
         ])->assertRedirect(route('login'));
         $this->get(route('opportunities.show', $opportunity))->assertRedirect(route('login'));
         $this->get(route('opportunities.edit', $opportunity))->assertRedirect(route('login'));
         $this->patch(route('opportunities.update', $opportunity), [
             'title' => 'Guest Update',
-            'status' => 'active',
+            'status' => 'Active',
         ])->assertRedirect(route('login'));
         $this->delete(route('opportunities.destroy', $opportunity))->assertRedirect(route('login'));
     }

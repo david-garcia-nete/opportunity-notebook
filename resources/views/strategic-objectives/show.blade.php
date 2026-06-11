@@ -64,7 +64,7 @@
                                         <td class="px-4 py-4 text-sm font-semibold"><a href="{{ route('opportunities.show', $opportunity) }}" class="text-indigo-600 hover:text-indigo-900">{{ $opportunity->title }}</a><div class="mt-1 font-normal text-gray-500">{{ $opportunity->company ?? '—' }}</div></td>
                                         <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-600">{{ $opportunity->computedScore() ?? '—' }}</td>
                                         <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-600">{{ $opportunity->status }}</td>
-                                        <td class="whitespace-nowrap px-4 py-4 text-sm font-semibold text-gray-900">{{ $opportunity->opportunityGaps->where('status', 'Open')->count() }}</td>
+                                        <td class="whitespace-nowrap px-4 py-4 text-sm font-semibold text-gray-900">{{ $opportunity->opportunityGaps->where('status', \App\Support\Statuses::GAP_OPEN)->count() }}</td>
                                         <td class="px-4 py-4 text-sm text-gray-600">
                                             @if ($nextAction)
                                                 <a href="{{ route('actions.show', $nextAction) }}" class="font-medium text-indigo-600 hover:text-indigo-900">{{ $nextAction->title }}</a>

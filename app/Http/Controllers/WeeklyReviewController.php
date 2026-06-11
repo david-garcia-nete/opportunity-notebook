@@ -6,6 +6,7 @@ use App\Models\Action;
 use App\Models\ContactInteraction;
 use App\Models\Opportunity;
 use App\Models\OpportunityGap;
+use App\Support\Statuses;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
@@ -37,7 +38,7 @@ class WeeklyReviewController extends Controller
                     ->orderBy('id'),
             ])
             ->withCount([
-                'opportunityGaps as open_gaps_count' => fn ($query) => $query->where('status', '!=', 'Complete'),
+                'opportunityGaps as open_gaps_count' => fn ($query) => $query->where('status', '!=', Statuses::GAP_COMPLETE),
                 'actions as overdue_actions_count' => fn ($query) => $query
                     ->whereNull('completed_at')
                     ->whereDate('due_date', '<', today()),
@@ -71,7 +72,7 @@ class WeeklyReviewController extends Controller
     {
         return OpportunityGap::query()
             ->with('opportunity')
-            ->where('status', '!=', 'Complete')
+            ->where('status', '!=', Statuses::GAP_COMPLETE)
             ->whereIn('priority', ['Critical', 'High'])
             ->orderByRaw("case priority when 'Critical' then 0 when 'High' then 1 else 2 end")
             ->orderBy('title')

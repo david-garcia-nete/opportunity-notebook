@@ -72,7 +72,7 @@ class DailyActionQueueTest extends TestCase
         $focusOpportunity = $this->createFocusOpportunity('Focused Fractional CTO');
         $nonFocusOpportunity = Opportunity::create([
             'title' => 'Non-Focus Job Lead',
-            'status' => 'active',
+            'status' => 'Active',
             'is_focus' => false,
         ]);
         Action::create([
@@ -265,7 +265,7 @@ class DailyActionQueueTest extends TestCase
     {
         return Opportunity::create([
             'title' => $title,
-            'status' => 'active',
+            'status' => 'Active',
             'is_focus' => true,
             'focused_at' => now(),
         ]);

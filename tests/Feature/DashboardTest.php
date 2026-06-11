@@ -54,12 +54,12 @@ class DashboardTest extends TestCase
         $highValueOpportunity = $this->createScoredOpportunity([
             'title' => 'High Value Advisory',
             'company' => 'Acme Inc.',
-            'status' => 'active',
+            'status' => 'Active',
         ], 9);
         $this->createScoredOpportunity([
             'title' => 'Lower Value Contract',
             'company' => 'Globex',
-            'status' => 'active',
+            'status' => 'Active',
         ], 4);
 
         $response = $this->actingAs($user)->get(route('dashboard'));
@@ -69,7 +69,7 @@ class DashboardTest extends TestCase
             ->assertSeeText('Top Ranked Opportunities')
             ->assertSeeText('High Value Advisory')
             ->assertSeeText('Acme Inc.')
-            ->assertSeeText('active')
+            ->assertSeeText('Active')
             ->assertSeeText((string) $highValueOpportunity->computedScore())
             ->assertSee(route('opportunities.show', $highValueOpportunity), false);
     }
@@ -92,7 +92,7 @@ class DashboardTest extends TestCase
         $higherBase = Opportunity::create([
             'title' => 'Higher Base Score Option',
             'company' => 'Base Co',
-            'status' => 'active',
+            'status' => 'Active',
             'income_potential' => 10,
             'probability_of_success' => 10,
             'time_to_revenue' => 1,
@@ -105,7 +105,7 @@ class DashboardTest extends TestCase
         $weightedBest = Opportunity::create([
             'title' => 'Priority Fit Option',
             'company' => 'Fit Co',
-            'status' => 'active',
+            'status' => 'Active',
             'income_potential' => 4,
             'probability_of_success' => 1,
             'time_to_revenue' => 10,
@@ -132,7 +132,7 @@ class DashboardTest extends TestCase
             'title' => 'Focused Client Advisory',
             'company' => 'Acme Inc.',
             'type' => 'consulting',
-            'status' => 'active',
+            'status' => 'Active',
             'is_focus' => true,
             'focused_at' => now(),
             'focus_reason' => 'Highest leverage income path.',
@@ -161,13 +161,13 @@ class DashboardTest extends TestCase
         $user = User::factory()->create();
         $this->createScoredOpportunity([
             'title' => 'Focused Retainer Lead',
-            'status' => 'active',
+            'status' => 'Active',
             'is_focus' => true,
             'focused_at' => now(),
         ], 8);
         $this->createScoredOpportunity([
             'title' => 'Non Focused Strong Lead',
-            'status' => 'active',
+            'status' => 'Active',
         ], 9);
 
         $response = $this->actingAs($user)->get(route('dashboard'));
@@ -185,7 +185,7 @@ class DashboardTest extends TestCase
         foreach (range(1, 6) as $number) {
             $this->createScoredOpportunity([
                 'title' => 'Focus Opportunity '.$number,
-                'status' => 'active',
+                'status' => 'Active',
                 'is_focus' => true,
                 'focused_at' => now(),
             ], 7);
@@ -203,7 +203,7 @@ class DashboardTest extends TestCase
         $user = User::factory()->create();
         $stalledOpportunity = $this->createScoredOpportunity([
             'title' => 'Stalled High Value Opportunity',
-            'status' => 'active',
+            'status' => 'Active',
         ], 9);
         Action::create([
             'opportunity_id' => $stalledOpportunity->id,
@@ -212,7 +212,7 @@ class DashboardTest extends TestCase
         ]);
         $movingOpportunity = $this->createScoredOpportunity([
             'title' => 'High Value With Next Action',
-            'status' => 'active',
+            'status' => 'Active',
         ], 8);
         Action::create([
             'opportunity_id' => $movingOpportunity->id,
@@ -220,7 +220,7 @@ class DashboardTest extends TestCase
         ]);
         $parkedOpportunity = $this->createScoredOpportunity([
             'title' => 'Parked High Value Opportunity',
-            'status' => 'parked',
+            'status' => 'Parked',
         ], 8);
 
         $response = $this->actingAs($user)->get(route('dashboard'));
@@ -242,7 +242,7 @@ class DashboardTest extends TestCase
         $user = User::factory()->create();
         $opportunity = $this->createScoredOpportunity([
             'title' => 'Important Client Pursuit',
-            'status' => 'active',
+            'status' => 'Active',
         ], 9);
         Action::create([
             'opportunity_id' => $opportunity->id,
@@ -273,11 +273,11 @@ class DashboardTest extends TestCase
         $user = User::factory()->create();
         $lowValueOpportunity = $this->createScoredOpportunity([
             'title' => 'Lower Priority Opportunity',
-            'status' => 'active',
+            'status' => 'Active',
         ], 3);
         $highValueOpportunity = $this->createScoredOpportunity([
             'title' => 'Higher Priority Opportunity',
-            'status' => 'active',
+            'status' => 'Active',
         ], 9);
         Action::create([
             'opportunity_id' => $lowValueOpportunity->id,
@@ -292,12 +292,12 @@ class DashboardTest extends TestCase
         Application::create([
             'opportunity_id' => $lowValueOpportunity->id,
             'applied_at' => now(),
-            'status' => 'submitted',
+            'status' => 'Applied',
         ]);
         Application::create([
             'opportunity_id' => $highValueOpportunity->id,
             'applied_at' => now()->subDay(),
-            'status' => 'submitted',
+            'status' => 'Applied',
         ]);
 
         $response = $this->actingAs($user)->get(route('dashboard'));
@@ -324,11 +324,11 @@ class DashboardTest extends TestCase
         ]);
         $lowerScoreOpportunity = $this->createScoredOpportunity([
             'title' => 'Lower value consulting lead',
-            'status' => 'active',
+            'status' => 'Active',
         ], 4);
         $higherScoreOpportunity = $this->createScoredOpportunity([
             'title' => 'Premium advisory package',
-            'status' => 'active',
+            'status' => 'Active',
         ], 8);
         $objective->opportunities()->attach([$lowerScoreOpportunity->id, $higherScoreOpportunity->id]);
         $inactiveObjective->opportunities()->attach($higherScoreOpportunity->id);
@@ -355,7 +355,7 @@ class DashboardTest extends TestCase
         $futureContact = Contact::create(['name' => 'Future Follow Up Contact']);
         $opportunity = $this->createScoredOpportunity([
             'title' => 'Referral Opportunity',
-            'status' => 'active',
+            'status' => 'Active',
         ], 8);
         ContactInteraction::create([
             'contact_id' => $contact->id,
@@ -393,15 +393,15 @@ class DashboardTest extends TestCase
         $lowValueContact = Contact::create(['name' => 'Dormant Low Value Contact']);
         $highValueOpportunity = $this->createScoredOpportunity([
             'title' => 'Executive Advisory Lead',
-            'status' => 'active',
+            'status' => 'Active',
         ], 9);
         $recentHighValueOpportunity = $this->createScoredOpportunity([
             'title' => 'Recent Executive Lead',
-            'status' => 'active',
+            'status' => 'Active',
         ], 8);
         $lowValueOpportunity = $this->createScoredOpportunity([
             'title' => 'Low Value Side Quest',
-            'status' => 'active',
+            'status' => 'Active',
         ], 3);
         $dormantContact->opportunities()->attach($highValueOpportunity->id);
         $recentContact->opportunities()->attach($recentHighValueOpportunity->id);
@@ -455,7 +455,7 @@ class DashboardTest extends TestCase
         $user = User::factory()->create();
         $opportunity = $this->createScoredOpportunity([
             'title' => 'Cloud Advisory',
-            'status' => 'active',
+            'status' => 'Active',
         ], 8);
         OpportunityGap::create([
             'opportunity_id' => $opportunity->id,
@@ -532,7 +532,7 @@ class DashboardTest extends TestCase
     {
         return Opportunity::create(array_merge([
             'title' => 'Scored Opportunity',
-            'status' => 'active',
+            'status' => 'Active',
             'income_potential' => $factorValue,
             'probability_of_success' => $factorValue,
             'time_to_revenue' => 1,

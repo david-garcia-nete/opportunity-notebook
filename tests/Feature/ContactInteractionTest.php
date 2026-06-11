@@ -19,7 +19,7 @@ class ContactInteractionTest extends TestCase
         $contact = Contact::create(['name' => 'Jordan Lee']);
         $opportunity = Opportunity::create([
             'title' => 'Senior Laravel Role',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
 
         $response = $this->actingAs($user)->post(route('contact-interactions.store'), [
@@ -100,11 +100,11 @@ class ContactInteractionTest extends TestCase
         $contact = Contact::create(['name' => 'High Influence Contact']);
         $activeOpportunity = $this->createScoredOpportunity([
             'title' => 'Premium Advisory Lead',
-            'status' => 'active',
+            'status' => 'Active',
         ], 8);
         $closedOpportunity = $this->createScoredOpportunity([
             'title' => 'Closed Consulting Lead',
-            'status' => 'closed',
+            'status' => 'Closed',
         ], 4);
         $contact->opportunities()->attach([$activeOpportunity->id, $closedOpportunity->id]);
         ContactInteraction::create([
@@ -142,7 +142,7 @@ class ContactInteractionTest extends TestCase
         $contact = Contact::create(['name' => 'Avery Recruiter']);
         $opportunity = Opportunity::create([
             'title' => 'Director Role',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         ContactInteraction::create([
             'contact_id' => $contact->id,
@@ -169,7 +169,7 @@ class ContactInteractionTest extends TestCase
         $contact = Contact::create(['name' => 'Relationship Contact']);
         $opportunity = Opportunity::create([
             'title' => 'Relationship Opportunity',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         $interaction = ContactInteraction::create([
             'contact_id' => $contact->id,
@@ -189,7 +189,7 @@ class ContactInteractionTest extends TestCase
     {
         return Opportunity::create(array_merge([
             'title' => 'Scored Opportunity',
-            'status' => 'active',
+            'status' => 'Active',
             'income_potential' => $factorValue,
             'probability_of_success' => $factorValue,
             'time_to_revenue' => 1,

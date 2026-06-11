@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('url')->nullable();
             $table->text('description')->nullable();
-            $table->string('status')->default('active');
+            $table->string('status')->default('Active');
             $table->timestamps();
         });
     }

@@ -17,14 +17,14 @@ class ApplicationTest extends TestCase
         $user = User::factory()->create();
         $opportunity = Opportunity::create([
             'title' => 'Senior Product Role',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         $appliedAt = now()->setSecond(0);
 
         $response = $this->actingAs($user)->post(route('applications.store'), [
             'opportunity_id' => $opportunity->id,
             'applied_at' => $appliedAt->format('Y-m-d H:i:s'),
-            'status' => 'submitted',
+            'status' => 'Applied',
             'source' => 'Company site',
             'notes' => 'Submitted tailored cover letter.',
         ]);
@@ -35,7 +35,7 @@ class ApplicationTest extends TestCase
         $this->assertDatabaseHas('applications', [
             'opportunity_id' => $opportunity->id,
             'applied_at' => $appliedAt->format('Y-m-d H:i:s'),
-            'status' => 'submitted',
+            'status' => 'Applied',
             'source' => 'Company site',
             'notes' => 'Submitted tailored cover letter.',
         ]);
@@ -46,23 +46,23 @@ class ApplicationTest extends TestCase
         $user = User::factory()->create();
         $opportunity = Opportunity::create([
             'title' => 'Original Opportunity',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         $newOpportunity = Opportunity::create([
             'title' => 'New Opportunity',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         $application = Application::create([
             'opportunity_id' => $opportunity->id,
             'applied_at' => now()->subDay(),
-            'status' => 'submitted',
+            'status' => 'Applied',
         ]);
         $appliedAt = now()->setSecond(0);
 
         $response = $this->actingAs($user)->patch(route('applications.update', $application), [
             'opportunity_id' => $newOpportunity->id,
             'applied_at' => $appliedAt->format('Y-m-d H:i:s'),
-            'status' => 'interviewing',
+            'status' => 'Interviewing',
             'source' => 'Referral',
             'notes' => 'Moved to recruiter screen.',
         ]);
@@ -72,7 +72,7 @@ class ApplicationTest extends TestCase
             'id' => $application->id,
             'opportunity_id' => $newOpportunity->id,
             'applied_at' => $appliedAt->format('Y-m-d H:i:s'),
-            'status' => 'interviewing',
+            'status' => 'Interviewing',
             'source' => 'Referral',
             'notes' => 'Moved to recruiter screen.',
         ]);
@@ -83,12 +83,12 @@ class ApplicationTest extends TestCase
         $user = User::factory()->create();
         $opportunity = Opportunity::create([
             'title' => 'Application Opportunity',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         $application = Application::create([
             'opportunity_id' => $opportunity->id,
             'applied_at' => now(),
-            'status' => 'submitted',
+            'status' => 'Applied',
         ]);
 
         $response = $this->actingAs($user)->delete(route('applications.destroy', $application));
@@ -104,12 +104,12 @@ class ApplicationTest extends TestCase
         $user = User::factory()->create();
         $opportunity = Opportunity::create([
             'title' => 'Festival Submission',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         Application::create([
             'opportunity_id' => $opportunity->id,
             'applied_at' => now(),
-            'status' => 'submitted',
+            'status' => 'Applied',
             'source' => 'Festival portal',
         ]);
 
@@ -118,7 +118,7 @@ class ApplicationTest extends TestCase
         $response
             ->assertOk()
             ->assertSee('Applications')
-            ->assertSee('submitted')
+            ->assertSee('Applied')
             ->assertSee('Festival portal')
             ->assertSee(route('applications.create', ['opportunity_id' => $opportunity->id]), false);
     }
@@ -127,12 +127,12 @@ class ApplicationTest extends TestCase
     {
         $opportunity = Opportunity::create([
             'title' => 'Grant Application',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         $application = Application::create([
             'opportunity_id' => $opportunity->id,
             'applied_at' => now(),
-            'status' => 'submitted',
+            'status' => 'Applied',
         ]);
 
         $this->assertTrue($opportunity->applications->contains($application));
@@ -144,22 +144,22 @@ class ApplicationTest extends TestCase
         $user = User::factory()->create();
         $opportunity = Opportunity::create([
             'title' => 'Contract Proposal',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         Application::create([
             'opportunity_id' => $opportunity->id,
             'applied_at' => now()->subDay(),
-            'status' => 'submitted',
+            'status' => 'Applied',
         ]);
         Application::create([
             'opportunity_id' => $opportunity->id,
             'applied_at' => now()->subDays(6),
-            'status' => 'interviewing',
+            'status' => 'Interviewing',
         ]);
         Application::create([
             'opportunity_id' => $opportunity->id,
             'applied_at' => now()->subDays(8),
-            'status' => 'rejected',
+            'status' => 'Rejected',
         ]);
 
         $response = $this->actingAs($user)->get(route('dashboard'));
@@ -175,12 +175,12 @@ class ApplicationTest extends TestCase
     {
         $opportunity = Opportunity::create([
             'title' => 'Protected Opportunity',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         $application = Application::create([
             'opportunity_id' => $opportunity->id,
             'applied_at' => now(),
-            'status' => 'submitted',
+            'status' => 'Applied',
         ]);
 
         $this->get(route('applications.index'))->assertRedirect(route('login'));
@@ -188,14 +188,14 @@ class ApplicationTest extends TestCase
         $this->post(route('applications.store'), [
             'opportunity_id' => $opportunity->id,
             'applied_at' => now()->format('Y-m-d H:i:s'),
-            'status' => 'submitted',
+            'status' => 'Applied',
         ])->assertRedirect(route('login'));
         $this->get(route('applications.show', $application))->assertRedirect(route('login'));
         $this->get(route('applications.edit', $application))->assertRedirect(route('login'));
         $this->patch(route('applications.update', $application), [
             'opportunity_id' => $opportunity->id,
             'applied_at' => now()->format('Y-m-d H:i:s'),
-            'status' => 'interviewing',
+            'status' => 'Interviewing',
         ])->assertRedirect(route('login'));
         $this->delete(route('applications.destroy', $application))->assertRedirect(route('login'));
     }

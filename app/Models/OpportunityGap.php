@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Statuses;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -20,9 +21,9 @@ class OpportunityGap extends Model
     ];
 
     public const STATUSES = [
-        'Open',
-        'In Progress',
-        'Complete',
+        Statuses::GAP_OPEN,
+        Statuses::GAP_IN_PROGRESS,
+        Statuses::GAP_COMPLETE,
     ];
 
     public const PRIORITIES = [
@@ -31,6 +32,12 @@ class OpportunityGap extends Model
         'Medium',
         'Low',
     ];
+
+
+    public function setStatusAttribute(?string $value): void
+    {
+        $this->attributes['status'] = Statuses::normalizeGap($value) ?? $value;
+    }
 
     protected $fillable = [
         'opportunity_id',

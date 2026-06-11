@@ -18,7 +18,7 @@ class StrategicObjectiveOpportunityTest extends TestCase
         $user = User::factory()->create();
         $opportunity = Opportunity::create([
             'title' => 'Fractional consulting offer',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         $strategicObjective = StrategicObjective::create([
             'name' => 'Increase household income',
@@ -42,7 +42,7 @@ class StrategicObjectiveOpportunityTest extends TestCase
         $user = User::factory()->create();
         $opportunity = Opportunity::create([
             'title' => 'Portfolio contract',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         $strategicObjective = StrategicObjective::create([
             'name' => 'Build software portfolio',
@@ -65,7 +65,7 @@ class StrategicObjectiveOpportunityTest extends TestCase
         $user = User::factory()->create();
         $opportunity = Opportunity::create([
             'title' => 'Music licensing lead',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         $strategicObjective = StrategicObjective::create([
             'name' => 'Develop music career',
@@ -95,11 +95,11 @@ class StrategicObjectiveOpportunityTest extends TestCase
         ]);
         $lowerScoreOpportunity = $this->createScoredOpportunity([
             'title' => 'Small retainer',
-            'status' => 'idea',
+            'status' => 'Idea',
         ], 4);
         $higherScoreOpportunity = $this->createScoredOpportunity([
             'title' => 'Premium consulting package',
-            'status' => 'active',
+            'status' => 'Active',
         ], 9);
         Action::create([
             'opportunity_id' => $higherScoreOpportunity->id,
@@ -116,7 +116,7 @@ class StrategicObjectiveOpportunityTest extends TestCase
             ->assertSeeText('Linked Opportunities')
             ->assertSeeTextInOrder(['Premium consulting package', 'Small retainer'])
             ->assertSeeText((string) $higherScoreOpportunity->computedScore())
-            ->assertSeeText('active')
+            ->assertSeeText('Active')
             ->assertSeeText('Send package proposal');
     }
 
@@ -124,7 +124,7 @@ class StrategicObjectiveOpportunityTest extends TestCase
     {
         $opportunity = Opportunity::create([
             'title' => 'Protected opportunity',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         $strategicObjective = StrategicObjective::create([
             'name' => 'Protected objective',
@@ -143,7 +143,7 @@ class StrategicObjectiveOpportunityTest extends TestCase
     {
         return Opportunity::create(array_merge([
             'title' => 'Scored Opportunity',
-            'status' => 'active',
+            'status' => 'Active',
             'income_potential' => $factorValue,
             'probability_of_success' => $factorValue,
             'time_to_revenue' => 1,

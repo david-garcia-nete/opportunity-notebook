@@ -13,6 +13,7 @@ use App\Models\StrategicObjective;
 use App\Models\UserPreference;
 use App\Services\DailyActionQueueService;
 use App\Services\OpportunityTimelineService;
+use App\Support\Statuses;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
@@ -25,7 +26,7 @@ class DashboardController extends Controller
         $dailyQueueItems = $dailyActionQueue->build();
 
         $opportunityCount = Opportunity::count();
-        $activeOpportunityCount = Opportunity::whereNotIn('status', ['rejected', 'closed'])->count();
+        $activeOpportunityCount = Opportunity::whereNotIn('status', Statuses::terminalOpportunities())->count();
         $actionCount = Action::count();
         $contactCount = Contact::count();
         $applicationCount = Application::count();
@@ -164,7 +165,7 @@ class DashboardController extends Controller
     private function rankedOpportunities(?UserPreference $preference = null): Collection
     {
         return Opportunity::query()
-            ->whereNotIn('status', ['rejected', 'closed'])
+            ->whereNotIn('status', Statuses::terminalOpportunities())
             ->with([
                 'actions' => fn ($query) => $query->orderByRaw('due_date is null')->orderBy('due_date')->orderBy('id'),
                 'opportunityGaps' => fn ($query) => $query->orderByRaw("case priority when 'Critical' then 1 when 'High' then 2 when 'Medium' then 3 else 4 end")->orderBy('title'),
@@ -187,7 +188,7 @@ class DashboardController extends Controller
     {
         return $rankedOpportunities
             ->map(function (Opportunity $opportunity) {
-                $openGaps = $opportunity->opportunityGaps->where('status', 'Open');
+                $openGaps = $opportunity->opportunityGaps->where('status', Statuses::GAP_OPEN);
 
                 return [
                     'opportunity' => $opportunity,
@@ -206,7 +207,7 @@ class DashboardController extends Controller
     {
         return OpportunityGap::query()
             ->with('opportunity')
-            ->where('status', 'Open')
+            ->where('status', Statuses::GAP_OPEN)
             ->whereIn('priority', ['Critical', 'High'])
             ->whereDoesntHave('actions')
             ->orderByRaw("case priority when 'Critical' then 1 else 2 end")

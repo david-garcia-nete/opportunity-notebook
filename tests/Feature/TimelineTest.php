@@ -21,7 +21,7 @@ class TimelineTest extends TestCase
         $user = User::factory()->create();
         $opportunity = Opportunity::create([
             'title' => 'Fractional CTO Role',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
 
         $response = $this->actingAs($user)->get(route('opportunities.show', $opportunity));
@@ -77,7 +77,7 @@ class TimelineTest extends TestCase
         Application::create([
             'opportunity_id' => $opportunity->id,
             'applied_at' => now()->subDays(2),
-            'status' => 'submitted',
+            'status' => 'Applied',
             'source' => 'Company portal',
         ]);
 
@@ -87,7 +87,7 @@ class TimelineTest extends TestCase
             ->assertOk()
             ->assertSeeText('Application Submitted')
             ->assertSeeText('Application via Company portal')
-            ->assertSeeText('submitted');
+            ->assertSeeText('Applied');
     }
 
     public function test_contact_interactions_appear_in_timeline(): void
@@ -186,12 +186,12 @@ class TimelineTest extends TestCase
         Application::create([
             'opportunity_id' => $focused->id,
             'applied_at' => now()->subDay(),
-            'status' => 'submitted',
+            'status' => 'Applied',
         ]);
         Application::create([
             'opportunity_id' => $notFocused->id,
             'applied_at' => now()->subDay(),
-            'status' => 'submitted',
+            'status' => 'Applied',
         ]);
 
         $response = $this->actingAs($user)->get(route('timeline.index', ['focus' => 1]));
@@ -209,7 +209,7 @@ class TimelineTest extends TestCase
         Application::create([
             'opportunity_id' => $opportunity->id,
             'applied_at' => now()->subDay(),
-            'status' => 'submitted',
+            'status' => 'Applied',
             'source' => 'Referral',
         ]);
 
@@ -248,7 +248,7 @@ class TimelineTest extends TestCase
     {
         return Opportunity::create(array_merge([
             'title' => 'Senior Product Advisor',
-            'status' => 'active',
+            'status' => 'Active',
         ], $attributes));
     }
 

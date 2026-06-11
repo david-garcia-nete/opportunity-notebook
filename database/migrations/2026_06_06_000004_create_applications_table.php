@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('opportunity_id')->constrained()->cascadeOnDelete();
             $table->dateTime('applied_at');
-            $table->string('status')->default('submitted');
+            $table->string('status')->default('Applied');
             $table->string('source')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();

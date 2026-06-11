@@ -17,7 +17,7 @@ class ActionTest extends TestCase
         $user = User::factory()->create();
         $opportunity = Opportunity::create([
             'title' => 'Senior Laravel Developer',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         Action::create([
             'opportunity_id' => $opportunity->id,
@@ -51,7 +51,7 @@ class ActionTest extends TestCase
         $user = User::factory()->create();
         $opportunity = Opportunity::create([
             'title' => 'Contract Product Build',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
 
         $response = $this->actingAs($user)->post(route('actions.store'), [
@@ -79,11 +79,11 @@ class ActionTest extends TestCase
         $user = User::factory()->create();
         $opportunity = Opportunity::create([
             'title' => 'Original Opportunity',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         $newOpportunity = Opportunity::create([
             'title' => 'New Opportunity',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         $action = Action::create([
             'opportunity_id' => $opportunity->id,
@@ -129,7 +129,7 @@ class ActionTest extends TestCase
         $user = User::factory()->create();
         $opportunity = Opportunity::create([
             'title' => 'Recruiter Lead',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         Action::create([
             'opportunity_id' => $opportunity->id,

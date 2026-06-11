@@ -6,6 +6,7 @@ use App\Models\Action;
 use App\Models\ContactInteraction;
 use App\Models\Opportunity;
 use App\Models\OpportunityGap;
+use App\Support\Statuses;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
@@ -48,7 +49,7 @@ class DailyActionQueueService
                 ->whereDate('next_follow_up_date', '<=', today())
                 ->count(),
             'critical_gap_count' => OpportunityGap::query()
-                ->where('status', 'Open')
+                ->where('status', Statuses::GAP_OPEN)
                 ->where('priority', 'Critical')
                 ->whereHas('opportunity', fn ($query) => $query->where('is_focus', true))
                 ->count(),
@@ -134,7 +135,7 @@ class DailyActionQueueService
     {
         return OpportunityGap::query()
             ->with('opportunity')
-            ->where('status', 'Open')
+            ->where('status', Statuses::GAP_OPEN)
             ->whereIn('priority', ['Critical', 'High'])
             ->whereDoesntHave('actions')
             ->whereHas('opportunity', fn ($query) => $query->where('is_focus', true))
@@ -159,7 +160,7 @@ class DailyActionQueueService
     {
         return OpportunityGap::query()
             ->with('opportunity')
-            ->where('status', 'Open')
+            ->where('status', Statuses::GAP_OPEN)
             ->where('priority', $gapPriority)
             ->whereHas('actions')
             ->whereHas('opportunity', fn ($query) => $query->where('is_focus', true))

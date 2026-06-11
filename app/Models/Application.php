@@ -2,11 +2,18 @@
 
 namespace App\Models;
 
+use App\Support\Statuses;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Application extends Model
 {
+
+    public function setStatusAttribute(?string $value): void
+    {
+        $this->attributes['status'] = Statuses::normalizeApplication($value) ?? $value;
+    }
+
     protected $fillable = [
         'opportunity_id',
         'applied_at',
