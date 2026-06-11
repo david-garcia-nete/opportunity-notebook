@@ -244,7 +244,7 @@ class OpportunityGapTest extends TestCase
         $response
             ->assertOk()
             ->assertSeeText('Open Gaps')
-            ->assertSeeTextInOrder(['AI Consultant', (string) $opportunity->computedScore(), 'active', '1']);
+            ->assertSeeTextInOrder(['AI Consultant', (string) $opportunity->computedScore(), 'Active', '1']);
     }
 
     private function dashboardSection(string $content, string $testId): string

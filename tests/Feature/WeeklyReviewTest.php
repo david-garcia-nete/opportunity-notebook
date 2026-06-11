@@ -74,7 +74,7 @@ class WeeklyReviewTest extends TestCase
         $response->assertOk();
         $this->assertStringContainsString('Focused Advisory Sprint', $focusSection);
         $this->assertStringContainsString('Acme Advisory', $focusSection);
-        $this->assertStringContainsString('active', $focusSection);
+        $this->assertStringContainsString('Active', $focusSection);
         $this->assertStringContainsString('Score 88', $focusSection);
         $this->assertStringContainsString('Highest confidence path to income.', $focusSection);
         $this->assertStringContainsString('Draft advisory proposal', $focusSection);
