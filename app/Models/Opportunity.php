@@ -27,7 +27,27 @@ class Opportunity extends Model
         'is_focus',
         'focused_at',
         'focus_reason',
+        'outcome',
+        'outcome_date',
+        'outcome_notes',
         'notes',
+    ];
+
+    public const OUTCOMES = [
+        'Won',
+        'Lost',
+        'Parked',
+        'Abandoned',
+        'No Response',
+        'Not Pursued',
+    ];
+
+    public const FINAL_OUTCOMES = [
+        'Won',
+        'Lost',
+        'Abandoned',
+        'No Response',
+        'Not Pursued',
     ];
 
     public const EVALUATION_FIELDS = [
@@ -261,6 +281,7 @@ class Opportunity extends Model
             'risk_level' => 'integer',
             'is_focus' => 'boolean',
             'focused_at' => 'datetime',
+            'outcome_date' => 'date',
         ];
     }
 }

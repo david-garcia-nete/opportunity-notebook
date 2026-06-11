@@ -71,6 +71,38 @@
 
                 @include('opportunities.partials.evaluation-fields', ['opportunity' => $opportunity])
 
+                <section class="rounded-xl bg-slate-50 p-4 ring-1 ring-inset ring-slate-100">
+                    <div>
+                        <p class="text-sm font-semibold uppercase tracking-wide text-slate-600">Outcome</p>
+                        <p class="mt-1 text-sm text-slate-500">Record what happened so the notebook can learn which efforts produce results.</p>
+                    </div>
+
+                    <div class="mt-4 grid gap-6 sm:grid-cols-2">
+                        <div>
+                            <x-input-label for="outcome" :value="__('Outcome')" />
+                            <select id="outcome" name="outcome" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <option value="">No outcome yet</option>
+                                @foreach ($outcomes as $outcome)
+                                    <option value="{{ $outcome }}" @selected(old('outcome', $opportunity->outcome) === $outcome)>{{ $outcome }}</option>
+                                @endforeach
+                            </select>
+                            <x-input-error class="mt-2" :messages="$errors->get('outcome')" />
+                        </div>
+
+                        <div>
+                            <x-input-label for="outcome_date" :value="__('Outcome date')" />
+                            <x-text-input id="outcome_date" name="outcome_date" type="date" class="mt-1 block w-full" :value="old('outcome_date', optional($opportunity->outcome_date)->format('Y-m-d'))" />
+                            <x-input-error class="mt-2" :messages="$errors->get('outcome_date')" />
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <x-input-label for="outcome_notes" :value="__('Outcome notes')" />
+                        <textarea id="outcome_notes" name="outcome_notes" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('outcome_notes', $opportunity->outcome_notes) }}</textarea>
+                        <x-input-error class="mt-2" :messages="$errors->get('outcome_notes')" />
+                    </div>
+                </section>
+
                 <div>
                     <x-input-label for="notes" :value="__('Notes')" />
                     <textarea id="notes" name="notes" rows="5" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('notes', $opportunity->notes) }}</textarea>

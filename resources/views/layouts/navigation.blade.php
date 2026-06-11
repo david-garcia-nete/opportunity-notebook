@@ -24,6 +24,9 @@
                     <x-nav-link :href="route('opportunities.index')" :active="request()->routeIs('opportunities.*')">
                         {{ __('Opportunities') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('outcome-analytics')" :active="request()->routeIs('outcome-analytics')">
+                        {{ __('Outcomes') }}
+                    </x-nav-link>
                     <x-nav-link :href="route('contacts.index')" :active="request()->routeIs('contacts.*')">
                         {{ __('Contacts') }}
                     </x-nav-link>
@@ -106,6 +109,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('opportunities.index')" :active="request()->routeIs('opportunities.*')">
                 {{ __('Opportunities') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('outcome-analytics')" :active="request()->routeIs('outcome-analytics')">
+                {{ __('Outcomes') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('contacts.index')" :active="request()->routeIs('contacts.*')">
                 {{ __('Contacts') }}

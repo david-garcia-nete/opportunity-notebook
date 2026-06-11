@@ -13,6 +13,7 @@ use App\Models\StrategicObjective;
 use App\Models\UserPreference;
 use App\Services\DailyActionQueueService;
 use App\Services\OpportunityReadinessService;
+use App\Services\OutcomeAnalyticsService;
 use App\Services\OpportunityTimelineService;
 use App\Support\Statuses;
 use Illuminate\Support\Collection;
@@ -20,7 +21,7 @@ use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function __invoke(DailyActionQueueService $dailyActionQueue, OpportunityTimelineService $timeline, OpportunityReadinessService $readiness): View
+    public function __invoke(DailyActionQueueService $dailyActionQueue, OpportunityTimelineService $timeline, OpportunityReadinessService $readiness, OutcomeAnalyticsService $outcomeAnalytics): View
     {
         $preference = request()->user()?->preference;
         $rankedOpportunities = $this->rankedOpportunities($preference);
@@ -71,6 +72,7 @@ class DashboardController extends Controller
             'dormantHighValueRelationships' => $this->dormantHighValueRelationships(),
             'topObjectives' => $this->topObjectives(),
             'recentActivityItems' => $timeline->recentHistory(),
+            'outcomeSnapshot' => $outcomeAnalytics->summary(),
         ]);
     }
 
