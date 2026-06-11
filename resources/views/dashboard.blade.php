@@ -110,6 +110,18 @@
                 @endforeach
             </section>
 
+            @if ($overdueActionCount > 0 || $actionsDueTodayCount > 0)
+                <section class="rounded-2xl border border-amber-100 bg-amber-50 p-5 text-sm font-semibold text-amber-900 shadow-sm" aria-label="Action alerts">
+                    @if ($overdueActionCount > 0)
+                        <p>You have overdue actions that need attention.</p>
+                    @endif
+
+                    @if ($actionsDueTodayCount > 0)
+                        <p @class(['mt-2' => $overdueActionCount > 0])>You have actions due today.</p>
+                    @endif
+                </section>
+            @endif
+
             <div class="grid gap-8 lg:grid-cols-3">
                 <section class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm lg:col-span-2">
                     <div class="flex items-center justify-between">
