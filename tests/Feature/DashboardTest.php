@@ -150,7 +150,7 @@ class DashboardTest extends TestCase
         $this->assertStringContainsString('Focused Client Advisory', $focusSection);
         $this->assertStringContainsString('Acme Inc.', $focusSection);
         $this->assertStringContainsString('consulting', $focusSection);
-        $this->assertStringContainsString('active', $focusSection);
+        $this->assertStringContainsString('Active', $focusSection);
         $this->assertStringContainsString('Score '.$focusedOpportunity->computedScore(), $focusSection);
         $this->assertStringContainsString('Next action: Schedule scope call', $focusSection);
         $this->assertStringContainsString('Highest leverage income path.', $focusSection);
