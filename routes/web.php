@@ -82,6 +82,12 @@ Route::middleware('auth')->group(function () {
     Route::resource('actions', ActionController::class);
     Route::resource('applications', ApplicationController::class);
     Route::resource('projects', ProjectController::class);
+    Route::post('/reviews/focus', [ReviewController::class, 'startFocus'])
+        ->name('reviews.focus.start');
+    Route::get('/reviews/{review}/focus', [ReviewController::class, 'focus'])
+        ->name('reviews.focus.show');
+    Route::post('/reviews/{review}/focus', [ReviewController::class, 'completeFocus'])
+        ->name('reviews.focus.complete');
     Route::resource('reviews', ReviewController::class)
         ->only(['index', 'create', 'store', 'show']);
     Route::resource('strategic-objectives', StrategicObjectiveController::class);

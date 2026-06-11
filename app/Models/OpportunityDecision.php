@@ -17,6 +17,13 @@ class OpportunityDecision extends Model
         'reopen',
     ];
 
+    public const FOCUS_REVIEW_DECISION_TYPES = [
+        'continue',
+        'intensify',
+        'park',
+        'abandon',
+    ];
+
     public const REASON_CATEGORIES = [
         'capacity',
         'financial_return',
@@ -69,6 +76,13 @@ class OpportunityDecision extends Model
     public static function decisionTypeOptions(): array
     {
         return collect(self::DECISION_TYPES)
+            ->mapWithKeys(fn (string $type) => [$type => Str::headline($type)])
+            ->all();
+    }
+
+    public static function focusReviewDecisionTypeOptions(): array
+    {
+        return collect(self::FOCUS_REVIEW_DECISION_TYPES)
             ->mapWithKeys(fn (string $type) => [$type => Str::headline($type)])
             ->all();
     }
