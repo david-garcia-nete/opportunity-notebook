@@ -6,6 +6,7 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ContactOpportunityController;
 use App\Http\Controllers\ContactInteractionController;
+use App\Http\Controllers\DailyActionQueueController;
 use App\Http\Controllers\OpportunityController;
 use App\Http\Controllers\OpportunityGapController;
 use App\Http\Controllers\OpportunityProjectController;
@@ -26,6 +27,7 @@ Route::get('/dashboard', DashboardController::class)
     ->name('dashboard');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/daily-queue', DailyActionQueueController::class)->name('daily-queue');
     Route::get('/weekly-review', WeeklyReviewController::class)->name('weekly-review');
 
     Route::get('/opportunities/compare', [OpportunityController::class, 'compare'])
