@@ -42,6 +42,34 @@
             </section>
 
 
+            <section data-testid="outcome-snapshot" class="rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                        <p class="text-sm font-semibold uppercase tracking-wide text-indigo-600">Outcome Snapshot</p>
+                        <h3 class="mt-1 text-lg font-semibold text-gray-900">Which efforts are producing results?</h3>
+                        <p class="mt-1 text-sm text-gray-500">A quick read on won opportunities, negative final outcomes, and current win rate.</p>
+                    </div>
+                    <a href="{{ route('outcome-analytics') }}" class="inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                        View Outcome Analytics
+                    </a>
+                </div>
+
+                <div class="mt-5 grid gap-4 sm:grid-cols-3">
+                    <div class="rounded-xl bg-indigo-50 p-4 ring-1 ring-inset ring-indigo-100">
+                        <p class="text-sm font-medium text-indigo-700">Won</p>
+                        <p class="mt-2 text-3xl font-bold text-indigo-900">{{ $outcomeSnapshot['counts']['Won'] }}</p>
+                    </div>
+                    <div class="rounded-xl bg-slate-50 p-4 ring-1 ring-inset ring-slate-100">
+                        <p class="text-sm font-medium text-slate-700">Lost / Abandoned / No Response</p>
+                        <p class="mt-2 text-3xl font-bold text-slate-900">{{ $outcomeSnapshot['lost_combined_count'] }}</p>
+                    </div>
+                    <div class="rounded-xl bg-emerald-50 p-4 ring-1 ring-inset ring-emerald-100">
+                        <p class="text-sm font-medium text-emerald-700">Win rate</p>
+                        <p class="mt-2 text-3xl font-bold text-emerald-900">{{ number_format($outcomeSnapshot['win_rate'], 1) }}%</p>
+                    </div>
+                </div>
+            </section>
+
             <section data-testid="current-focus-opportunities" class="rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm">
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>

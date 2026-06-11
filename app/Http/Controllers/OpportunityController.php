@@ -114,6 +114,7 @@ class OpportunityController extends Controller
     {
         return view('opportunities.edit', [
             'opportunity' => $opportunity,
+            'outcomes' => Opportunity::OUTCOMES,
             'statuses' => Statuses::opportunities(),
         ]);
     }
@@ -165,6 +166,9 @@ class OpportunityController extends Controller
             'risk_level' => ['nullable', 'integer', 'min:1', 'max:10'],
             'is_focus' => ['nullable', 'boolean'],
             'focus_reason' => ['nullable', 'string'],
+            'outcome' => ['nullable', 'string', Rule::in(Opportunity::OUTCOMES)],
+            'outcome_date' => ['nullable', 'date', 'required_with:outcome'],
+            'outcome_notes' => ['nullable', 'string'],
             'notes' => ['nullable', 'string'],
         ]);
 
