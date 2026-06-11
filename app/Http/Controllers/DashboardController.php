@@ -12,6 +12,7 @@ use App\Models\Project;
 use App\Models\StrategicObjective;
 use App\Models\UserPreference;
 use App\Services\DailyActionQueueService;
+use App\Services\OpportunityReadinessService;
 use App\Services\OpportunityTimelineService;
 use App\Support\Statuses;
 use Illuminate\Support\Collection;
@@ -19,7 +20,7 @@ use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function __invoke(DailyActionQueueService $dailyActionQueue, OpportunityTimelineService $timeline): View
+    public function __invoke(DailyActionQueueService $dailyActionQueue, OpportunityTimelineService $timeline, OpportunityReadinessService $readiness): View
     {
         $preference = request()->user()?->preference;
         $rankedOpportunities = $this->rankedOpportunities($preference);
@@ -55,6 +56,7 @@ class DashboardController extends Controller
             'dailyQueueItems' => $dailyQueueItems,
             'dailyQueueSummary' => $dailyActionQueue->summary($dailyQueueItems),
             'currentFocusOpportunities' => $currentFocusOpportunities,
+            'currentFocusReadiness' => $readiness->dashboardSummaries($currentFocusOpportunities),
             'hasTooManyFocusOpportunities' => $currentFocusOpportunities->count() > 5,
             'topRankedOpportunities' => $rankedOpportunities->take(5),
             'highValueOpportunitiesMissingNextAction' => $rankedOpportunities
@@ -77,7 +79,13 @@ class DashboardController extends Controller
     {
         return Opportunity::query()
             ->where('is_focus', true)
-            ->with(['actions' => fn ($query) => $query->orderByRaw('due_date is null')->orderBy('due_date')->orderBy('id')])
+            ->with([
+                'actions' => fn ($query) => $query->orderByRaw('due_date is null')->orderBy('due_date')->orderBy('id'),
+                'applications',
+                'opportunityGaps',
+                'projects',
+                'strategicObjectives',
+            ])
             ->latest('focused_at')
             ->latest()
             ->get()

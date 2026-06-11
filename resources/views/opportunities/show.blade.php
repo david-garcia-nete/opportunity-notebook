@@ -52,6 +52,84 @@
             </div>
 
 
+            <section class="mt-8 rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                        <p class="text-sm font-semibold uppercase tracking-wide text-indigo-600">Portfolio Readiness</p>
+                        <h3 class="mt-1 text-lg font-semibold text-gray-900">Am I prepared to win this opportunity?</h3>
+                        <p class="mt-1 text-sm text-gray-500">Readiness is calculated from evidence and gaps, not from whether the opportunity is worth pursuing.</p>
+                    </div>
+                    <div class="rounded-xl bg-indigo-50 px-5 py-4 text-right ring-1 ring-inset ring-indigo-100">
+                        <p class="text-sm font-medium text-indigo-700">Readiness Score</p>
+                        <p class="mt-1 text-3xl font-bold text-indigo-950">{{ $readinessIndicators['score'] }}</p>
+                        <span class="mt-2 inline-flex rounded-full bg-white px-3 py-1 text-xs font-semibold text-indigo-700 ring-1 ring-inset ring-indigo-200">{{ $readinessIndicators['status'] }}</span>
+                    </div>
+                </div>
+
+                <dl class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                    <div class="rounded-xl bg-gray-50 p-4 ring-1 ring-inset ring-gray-100">
+                        <dt class="text-sm font-medium text-gray-500">Linked Projects</dt>
+                        <dd class="mt-1 text-2xl font-bold text-gray-900">{{ $readinessIndicators['projects_count'] }}</dd>
+                    </div>
+                    <div class="rounded-xl bg-gray-50 p-4 ring-1 ring-inset ring-gray-100">
+                        <dt class="text-sm font-medium text-gray-500">Open Gaps</dt>
+                        <dd class="mt-1 text-2xl font-bold text-gray-900">{{ $readinessIndicators['open_gaps_count'] }}</dd>
+                    </div>
+                    <div class="rounded-xl bg-gray-50 p-4 ring-1 ring-inset ring-gray-100">
+                        <dt class="text-sm font-medium text-gray-500">Completed Gaps</dt>
+                        <dd class="mt-1 text-2xl font-bold text-gray-900">{{ $readinessIndicators['completed_gaps_count'] }}</dd>
+                    </div>
+                    <div class="rounded-xl bg-gray-50 p-4 ring-1 ring-inset ring-gray-100">
+                        <dt class="text-sm font-medium text-gray-500">Related Applications</dt>
+                        <dd class="mt-1 text-2xl font-bold text-gray-900">{{ $readinessIndicators['applications_count'] }}</dd>
+                    </div>
+                    <div class="rounded-xl bg-gray-50 p-4 ring-1 ring-inset ring-gray-100">
+                        <dt class="text-sm font-medium text-gray-500">Strategic Objectives</dt>
+                        <dd class="mt-1 text-2xl font-bold text-gray-900">{{ $readinessIndicators['strategic_objectives_count'] }}</dd>
+                    </div>
+                </dl>
+
+                <div class="mt-6 grid gap-6 lg:grid-cols-2">
+                    <div class="rounded-xl bg-slate-50 p-5 ring-1 ring-inset ring-slate-100">
+                        <h4 class="text-base font-semibold text-gray-900">Readiness Breakdown</h4>
+                        <dl class="mt-4 space-y-3">
+                            @foreach ($readinessBreakdown as $item)
+                                <div class="flex items-center justify-between text-sm">
+                                    <dt class="text-gray-600">{{ $item['label'] }}{{ $item['count'] !== null ? ' ('.$item['count'].')' : '' }}</dt>
+                                    <dd class="font-semibold {{ $item['points'] < 0 ? 'text-red-700' : 'text-green-700' }}">{{ $item['points'] > 0 ? '+' : '' }}{{ $item['points'] }}</dd>
+                                </div>
+                            @endforeach
+                        </dl>
+                    </div>
+
+                    <div class="rounded-xl bg-slate-50 p-5 ring-1 ring-inset ring-slate-100">
+                        <h4 class="text-base font-semibold text-gray-900">Evidence Summary</h4>
+                        <div class="mt-4 space-y-4 text-sm text-gray-600">
+                            <div>
+                                <p class="font-semibold text-gray-900">Linked Projects</p>
+                                <p>{{ $opportunity->projects->pluck('name')->join(', ') ?: 'No projects linked yet.' }}</p>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-900">Open Gaps</p>
+                                <p>{{ $opportunity->opportunityGaps->where('status', \App\Support\Statuses::GAP_OPEN)->pluck('title')->join(', ') ?: 'No open gaps.' }}</p>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-900">Completed Gaps</p>
+                                <p>{{ $opportunity->opportunityGaps->where('status', \App\Support\Statuses::GAP_COMPLETE)->pluck('title')->join(', ') ?: 'No completed gaps yet.' }}</p>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-900">Related Applications</p>
+                                <p>{{ $opportunity->applications->pluck('status')->join(', ') ?: 'No applications yet.' }}</p>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-900">Strategic Objectives</p>
+                                <p>{{ $opportunity->strategicObjectives->pluck('name')->join(', ') ?: 'No strategic objectives linked yet.' }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
 
             @php($nextAction = $opportunity->nextAction())
 

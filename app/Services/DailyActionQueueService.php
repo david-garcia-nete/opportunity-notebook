@@ -12,6 +12,10 @@ use Illuminate\Support\Collection;
 
 class DailyActionQueueService
 {
+    public function __construct(private OpportunityReadinessService $readiness)
+    {
+    }
+
     public function build(): Collection
     {
         return collect()
@@ -19,6 +23,7 @@ class DailyActionQueueService
             ->merge($this->dueTodayFocusActions())
             ->merge($this->focusOpportunitiesMissingNextAction())
             ->merge($this->dueContactFollowUps())
+            ->merge($this->lowReadinessFocusOpportunities())
             ->merge($this->focusOpportunityGapsWithoutActionPlans())
             ->merge($this->focusOpportunityGaps('Critical', 6, 'Close this critical gap before investing in lower-priority work.'))
             ->merge($this->focusOpportunityGaps('High', 7, 'Make progress on this high-priority gap.'))
@@ -128,6 +133,29 @@ class DailyActionQueueService
                 'priority_label' => 'Priority 4 · Contact follow-up due',
                 'recommended_next_step' => 'Reach out to '.$interaction->contact->name.' and log the outcome.',
                 'url' => route('contacts.show', $interaction->contact),
+            ]);
+    }
+
+    private function lowReadinessFocusOpportunities(): Collection
+    {
+        return Opportunity::query()
+            ->where('is_focus', true)
+            ->with(['opportunityGaps', 'projects', 'applications', 'strategicObjectives'])
+            ->orderBy('title')
+            ->get()
+            ->filter(fn (Opportunity $opportunity) => $this->readiness->score($opportunity) < 50)
+            ->values()
+            ->map(fn (Opportunity $opportunity) => [
+                'type' => 'readiness',
+                'type_label' => 'Readiness',
+                'opportunity' => $opportunity,
+                'title' => $opportunity->title.' opportunity is not yet ready for pursuit.',
+                'due_date' => null,
+                'due_date_sort' => today()->addYears(10),
+                'priority' => 4.5,
+                'priority_label' => 'Priority 5 · Low readiness focus opportunity',
+                'recommended_next_step' => 'Review portfolio readiness and close the most important evidence gaps.',
+                'url' => route('opportunities.show', $opportunity),
             ]);
     }
 
