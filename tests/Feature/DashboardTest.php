@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\Action;
 use App\Models\Application;
+use App\Models\Contact;
+use App\Models\ContactInteraction;
 use App\Models\Opportunity;
 use App\Models\StrategicObjective;
 use App\Models\User;
@@ -36,6 +38,8 @@ class DashboardTest extends TestCase
         $response->assertSeeText('High-Value Opportunities With Critical Gaps');
         $response->assertSeeText('Overdue Actions on High-Value Opportunities');
         $response->assertSeeText('Recent Applications for High-Value Opportunities');
+        $response->assertSeeText('Contacts Requiring Follow-Up');
+        $response->assertSeeText('Dormant High-Value Relationships');
         $response->assertSeeText('Opportunity Pipeline Summary');
         $response->assertSeeText('Opportunities');
         $response->assertSeeText('Active Opportunities');
@@ -214,6 +218,97 @@ class DashboardTest extends TestCase
             ->assertSeeText('Average opportunity score')
             ->assertSeeText('34')
             ->assertDontSeeText('Inactive outcome');
+    }
+
+
+    public function test_dashboard_shows_contacts_requiring_follow_up(): void
+    {
+        $user = User::factory()->create();
+        $contact = Contact::create(['name' => 'Due Follow Up Contact']);
+        $futureContact = Contact::create(['name' => 'Future Follow Up Contact']);
+        $opportunity = $this->createScoredOpportunity([
+            'title' => 'Referral Opportunity',
+            'status' => 'active',
+        ], 8);
+        ContactInteraction::create([
+            'contact_id' => $contact->id,
+            'opportunity_id' => $opportunity->id,
+            'interaction_date' => today()->subDays(3),
+            'interaction_type' => 'Referral',
+            'summary' => 'Asked for referral status.',
+            'next_follow_up_date' => today(),
+        ]);
+        ContactInteraction::create([
+            'contact_id' => $futureContact->id,
+            'interaction_date' => today(),
+            'interaction_type' => 'Email',
+            'summary' => 'Future check-in.',
+            'next_follow_up_date' => today()->addDays(5),
+        ]);
+
+        $response = $this->actingAs($user)->get(route('dashboard'));
+
+        $response
+            ->assertOk()
+            ->assertSeeText('Contacts Requiring Follow-Up')
+            ->assertSeeText('Due Follow Up Contact')
+            ->assertSeeText('Asked for referral status.')
+            ->assertSeeText('Referral Opportunity')
+            ->assertDontSeeText('Future Follow Up Contact');
+    }
+
+    public function test_dashboard_shows_dormant_high_value_relationships(): void
+    {
+        $user = User::factory()->create();
+        $dormantContact = Contact::create(['name' => 'Dormant High Value Contact']);
+        $recentContact = Contact::create(['name' => 'Recently Active Contact']);
+        $lowValueContact = Contact::create(['name' => 'Dormant Low Value Contact']);
+        $highValueOpportunity = $this->createScoredOpportunity([
+            'title' => 'Executive Advisory Lead',
+            'status' => 'active',
+        ], 9);
+        $recentHighValueOpportunity = $this->createScoredOpportunity([
+            'title' => 'Recent Executive Lead',
+            'status' => 'active',
+        ], 8);
+        $lowValueOpportunity = $this->createScoredOpportunity([
+            'title' => 'Low Value Side Quest',
+            'status' => 'active',
+        ], 3);
+        $dormantContact->opportunities()->attach($highValueOpportunity->id);
+        $recentContact->opportunities()->attach($recentHighValueOpportunity->id);
+        $lowValueContact->opportunities()->attach($lowValueOpportunity->id);
+        ContactInteraction::create([
+            'contact_id' => $dormantContact->id,
+            'opportunity_id' => $highValueOpportunity->id,
+            'interaction_date' => today()->subDays(31),
+            'interaction_type' => 'Meeting',
+            'summary' => 'Older strategic meeting.',
+        ]);
+        ContactInteraction::create([
+            'contact_id' => $recentContact->id,
+            'opportunity_id' => $recentHighValueOpportunity->id,
+            'interaction_date' => today()->subDays(5),
+            'interaction_type' => 'Coffee Chat',
+            'summary' => 'Recent strategic meeting.',
+        ]);
+        ContactInteraction::create([
+            'contact_id' => $lowValueContact->id,
+            'opportunity_id' => $lowValueOpportunity->id,
+            'interaction_date' => today()->subDays(45),
+            'interaction_type' => 'Email',
+            'summary' => 'Older low-value exchange.',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('dashboard'));
+
+        $response
+            ->assertOk()
+            ->assertSeeText('Dormant High-Value Relationships')
+            ->assertSeeText('Dormant High Value Contact')
+            ->assertSeeText('Executive Advisory Lead')
+            ->assertDontSeeText('Recently Active Contact')
+            ->assertDontSeeText('Dormant Low Value Contact');
     }
 
     private function createScoredOpportunity(array $attributes, int $factorValue): Opportunity

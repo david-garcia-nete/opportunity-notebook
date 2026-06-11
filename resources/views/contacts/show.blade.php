@@ -47,6 +47,106 @@
                 </dl>
             </div>
 
+
+            @php
+                $lastInteraction = $contact->contactInteractions->first();
+                $upcomingFollowUps = $contact->contactInteractions
+                    ->filter(fn ($interaction) => $interaction->next_follow_up_date && ($interaction->next_follow_up_date->isToday() || $interaction->next_follow_up_date->isFuture()));
+            @endphp
+
+            <section class="mt-8 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Relationship Activity</h3>
+                        <p class="mt-1 text-sm text-gray-500">A lightweight history of conversations, outcomes, and follow-ups.</p>
+                    </div>
+                    <a href="{{ route('contact-interactions.create', ['contact_id' => $contact->id, 'redirect_to' => 'contact']) }}" class="inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                        Add Interaction
+                    </a>
+                </div>
+
+                <dl class="mt-5 grid gap-4 sm:grid-cols-3">
+                    <div class="rounded-xl bg-gray-50 p-4 ring-1 ring-inset ring-gray-100">
+                        <dt class="text-sm font-medium text-gray-500">Total interactions</dt>
+                        <dd class="mt-2 text-2xl font-bold text-gray-900">{{ $contact->contactInteractions->count() }}</dd>
+                    </div>
+                    <div class="rounded-xl bg-gray-50 p-4 ring-1 ring-inset ring-gray-100">
+                        <dt class="text-sm font-medium text-gray-500">Last interaction</dt>
+                        <dd class="mt-2 text-2xl font-bold text-gray-900">{{ $lastInteraction?->interaction_date->toFormattedDateString() ?? '—' }}</dd>
+                    </div>
+                    <div class="rounded-xl bg-gray-50 p-4 ring-1 ring-inset ring-gray-100">
+                        <dt class="text-sm font-medium text-gray-500">Upcoming follow-ups</dt>
+                        <dd class="mt-2 text-2xl font-bold text-gray-900">{{ $upcomingFollowUps->count() }}</dd>
+                    </div>
+                </dl>
+
+                <dl class="mt-5 grid gap-4 sm:grid-cols-3">
+                    <div class="rounded-xl bg-indigo-50 p-4 ring-1 ring-inset ring-indigo-100">
+                        <dt class="text-sm font-medium text-indigo-700">Linked opportunities</dt>
+                        <dd class="mt-2 text-2xl font-bold text-indigo-950">{{ $contact->linkedOpportunitiesCount() }}</dd>
+                    </div>
+                    <div class="rounded-xl bg-indigo-50 p-4 ring-1 ring-inset ring-indigo-100">
+                        <dt class="text-sm font-medium text-indigo-700">Active opportunities</dt>
+                        <dd class="mt-2 text-2xl font-bold text-indigo-950">{{ $contact->activeOpportunitiesCount() }}</dd>
+                    </div>
+                    <div class="rounded-xl bg-indigo-50 p-4 ring-1 ring-inset ring-indigo-100">
+                        <dt class="text-sm font-medium text-indigo-700">Average opportunity score</dt>
+                        <dd class="mt-2 text-2xl font-bold text-indigo-950">{{ $contact->averageOpportunityScore() ?? '—' }}</dd>
+                    </div>
+                </dl>
+
+                @if ($contact->contactInteractions->isEmpty())
+                    <div class="mt-5 rounded-xl bg-gray-50 p-4 text-sm text-gray-500 ring-1 ring-inset ring-gray-100">
+                        No relationship activity recorded yet.
+                    </div>
+                @else
+                    <div class="mt-5 overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Date</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Type</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Opportunity</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Summary</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Outcome</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Follow-up</th>
+                                    <th scope="col" class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 bg-white">
+                                @foreach ($contact->contactInteractions as $interaction)
+                                    <tr>
+                                        <td class="whitespace-nowrap px-4 py-4 text-sm font-semibold text-gray-900">{{ $interaction->interaction_date->toFormattedDateString() }}</td>
+                                        <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-600">{{ $interaction->interaction_type }}</td>
+                                        <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-600">
+                                            @if ($interaction->opportunity)
+                                                <a href="{{ route('opportunities.show', $interaction->opportunity) }}" class="font-semibold text-indigo-600 hover:text-indigo-900">{{ $interaction->opportunity->title }}</a>
+                                            @else
+                                                —
+                                            @endif
+                                        </td>
+                                        <td class="px-4 py-4 text-sm text-gray-600">{{ $interaction->summary }}</td>
+                                        <td class="px-4 py-4 text-sm text-gray-600">{{ $interaction->outcome ?? '—' }}</td>
+                                        <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-600">{{ $interaction->next_follow_up_date?->toFormattedDateString() ?? '—' }}</td>
+                                        <td class="whitespace-nowrap px-4 py-4 text-right text-sm">
+                                            <div class="flex justify-end gap-3">
+                                                <a href="{{ route('contact-interactions.edit', ['contact_interaction' => $interaction, 'redirect_to' => 'contact']) }}" class="font-semibold text-indigo-600 hover:text-indigo-900">Edit</a>
+                                                <form method="POST" action="{{ route('contact-interactions.destroy', $interaction) }}">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <input type="hidden" name="redirect_to" value="contact">
+                                                    <button type="submit" class="font-semibold text-red-600 hover:text-red-900">Delete</button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </section>
+
             <section class="mt-8 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                 <div>
                     <h3 class="text-lg font-semibold text-gray-900">Opportunities</h3>

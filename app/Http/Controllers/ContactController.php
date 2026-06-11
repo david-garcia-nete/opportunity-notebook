@@ -35,7 +35,10 @@ class ContactController extends Controller
     {
         return view('contacts.show', [
             'availableOpportunities' => Opportunity::orderBy('title')->get(),
-            'contact' => $contact->load(['opportunities' => fn ($query) => $query->orderBy('title')]),
+            'contact' => $contact->load([
+                'contactInteractions' => fn ($query) => $query->with('opportunity')->latest('interaction_date')->latest(),
+                'opportunities' => fn ($query) => $query->orderBy('title'),
+            ]),
         ]);
     }
 

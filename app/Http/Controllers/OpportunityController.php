@@ -66,6 +66,7 @@ class OpportunityController extends Controller
         $opportunity->load([
             'actions' => fn ($query) => $query->orderByRaw('due_date is null')->orderBy('due_date')->orderBy('id'),
             'applications' => fn ($query) => $query->latest('applied_at')->latest(),
+            'contactInteractions' => fn ($query) => $query->with('contact')->latest('interaction_date')->latest(),
             'contacts' => fn ($query) => $query->orderBy('name'),
             'opportunityGaps' => fn ($query) => $query->orderByRaw("case priority when 'Critical' then 1 when 'High' then 2 when 'Medium' then 3 else 4 end")->orderBy('title'),
             'projects' => fn ($query) => $query->orderBy('name'),
