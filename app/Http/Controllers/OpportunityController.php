@@ -9,6 +9,7 @@ use App\Models\Project;
 use App\Models\StrategicObjective;
 use App\Models\UserPreference;
 use App\Services\OpportunityReadinessService;
+use App\Services\OpportunityForecastService;
 use App\Services\OpportunityTimelineService;
 use App\Support\Statuses;
 use Illuminate\Http\RedirectResponse;
@@ -76,7 +77,7 @@ class OpportunityController extends Controller
             ->with('status', 'Opportunity created.');
     }
 
-    public function show(Opportunity $opportunity, OpportunityTimelineService $timeline, OpportunityReadinessService $readiness): View
+    public function show(Opportunity $opportunity, OpportunityTimelineService $timeline, OpportunityReadinessService $readiness, OpportunityForecastService $forecast): View
     {
         $opportunity->load([
             'actions' => fn ($query) => $query->orderByRaw('due_date is null')->orderBy('due_date')->orderBy('id'),
@@ -104,6 +105,9 @@ class OpportunityController extends Controller
             'gapPriorityCounts' => $gapPriorityCounts,
             'gapStatuses' => Statuses::gaps(),
             'opportunity' => $opportunity,
+            'forecastBreakdown' => $forecast->breakdown($opportunity, request()->user()?->preference),
+            'forecastScore' => $forecast->score($opportunity, request()->user()?->preference),
+            'forecastStatus' => $forecast->status($opportunity, request()->user()?->preference),
             'readinessBreakdown' => $readiness->breakdown($opportunity),
             'readinessIndicators' => $readiness->indicators($opportunity),
             'timeline' => $timeline->forOpportunity($opportunity),

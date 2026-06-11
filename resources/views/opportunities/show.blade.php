@@ -131,6 +131,34 @@
             </section>
 
 
+            <section data-testid="opportunity-forecast" class="mt-8 rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                        <p class="text-sm font-semibold uppercase tracking-wide text-indigo-600">Forecast</p>
+                        <h3 class="mt-1 text-lg font-semibold text-gray-900">How likely is this opportunity to succeed?</h3>
+                        <p class="mt-1 text-sm text-gray-500">Forecasting is rules-based: 40% weighted score, 40% readiness, 20% execution health.</p>
+                    </div>
+                    <div class="rounded-xl bg-indigo-50 px-5 py-4 text-right ring-1 ring-inset ring-indigo-100">
+                        <p class="text-sm font-medium text-indigo-700">Forecast Score</p>
+                        <p class="mt-1 text-3xl font-bold text-indigo-950">{{ $forecastScore }}</p>
+                        <p class="mt-3 text-xs font-semibold uppercase tracking-wide text-indigo-700">Forecast Status</p>
+                        <span class="mt-1 inline-flex rounded-full bg-white px-3 py-1 text-xs font-semibold text-indigo-700 ring-1 ring-inset ring-indigo-200">{{ $forecastStatus }}</span>
+                    </div>
+                </div>
+
+                <div class="mt-6 rounded-xl bg-slate-50 p-5 ring-1 ring-inset ring-slate-100">
+                    <h4 class="text-base font-semibold text-gray-900">Forecast Breakdown</h4>
+                    <dl class="mt-4 space-y-3">
+                        @foreach ($forecastBreakdown as $item)
+                            <div class="flex items-center justify-between text-sm">
+                                <dt class="text-gray-600">{{ $item['label'] }}:</dt>
+                                <dd class="font-semibold {{ $item['label'] === 'Forecast' ? 'text-indigo-700' : 'text-green-700' }}">{{ $item['label'] === 'Forecast' ? '' : '+' }}{{ $item['points'] }}</dd>
+                            </div>
+                        @endforeach
+                    </dl>
+                </div>
+            </section>
+
             @php($nextAction = $opportunity->nextAction())
 
             <section class="mt-8 rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm">

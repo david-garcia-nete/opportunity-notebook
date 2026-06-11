@@ -13,6 +13,7 @@ use App\Models\StrategicObjective;
 use App\Models\UserPreference;
 use App\Services\DailyActionQueueService;
 use App\Services\OpportunityReadinessService;
+use App\Services\OpportunityForecastService;
 use App\Services\OutcomeAnalyticsService;
 use App\Services\OpportunityTimelineService;
 use App\Support\Statuses;
@@ -21,14 +22,14 @@ use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function __invoke(DailyActionQueueService $dailyActionQueue, OpportunityTimelineService $timeline, OpportunityReadinessService $readiness, OutcomeAnalyticsService $outcomeAnalytics): View
+    public function __invoke(DailyActionQueueService $dailyActionQueue, OpportunityTimelineService $timeline, OpportunityReadinessService $readiness, OpportunityForecastService $forecast, OutcomeAnalyticsService $outcomeAnalytics): View
     {
         $preference = request()->user()?->preference;
         $rankedOpportunities = $this->rankedOpportunities($preference);
         $dailyQueueItems = $dailyActionQueue->build();
 
         $opportunityCount = Opportunity::count();
-        $activeOpportunityCount = Opportunity::whereNotIn('status', Statuses::terminalOpportunities())->count();
+        $activeOpportunityCount = Opportunity::whereIn('status', Statuses::currentOpportunities())->count();
         $actionCount = Action::count();
         $contactCount = Contact::count();
         $applicationCount = Application::count();
@@ -42,6 +43,8 @@ class DashboardController extends Controller
             ->count();
 
         $currentFocusOpportunities = $this->currentFocusOpportunities($preference);
+        $forecastOpportunities = $this->forecastOpportunities();
+        $forecastSummaries = $forecast->ranked($forecastOpportunities, $preference);
 
         return view('dashboard', [
             'opportunityCount' => $opportunityCount,
@@ -58,6 +61,8 @@ class DashboardController extends Controller
             'dailyQueueSummary' => $dailyActionQueue->summary($dailyQueueItems),
             'currentFocusOpportunities' => $currentFocusOpportunities,
             'currentFocusReadiness' => $readiness->dashboardSummaries($currentFocusOpportunities),
+            'forecastedBestOpportunities' => $forecastSummaries->take(5),
+            'focusOpportunitiesAtRisk' => $forecast->focusAtRisk($forecastOpportunities, $preference)->take(5),
             'hasTooManyFocusOpportunities' => $currentFocusOpportunities->count() > 5,
             'topRankedOpportunities' => $rankedOpportunities->take(5),
             'highValueOpportunitiesMissingNextAction' => $rankedOpportunities
@@ -81,10 +86,11 @@ class DashboardController extends Controller
     {
         return Opportunity::query()
             ->where('is_focus', true)
+            ->whereIn('status', Statuses::currentOpportunities())
             ->with([
                 'actions' => fn ($query) => $query->orderByRaw('due_date is null')->orderBy('due_date')->orderBy('id'),
                 'applications',
-                'opportunityGaps',
+                'opportunityGaps.actions',
                 'projects',
                 'strategicObjectives',
             ])
@@ -95,12 +101,29 @@ class DashboardController extends Controller
             ->values();
     }
 
+
+    private function forecastOpportunities(): Collection
+    {
+        return Opportunity::query()
+            ->whereIn('status', Statuses::currentOpportunities())
+            ->with([
+                'actions' => fn ($query) => $query->orderByRaw('due_date is null')->orderBy('due_date')->orderBy('id'),
+                'opportunityGaps.actions',
+                'projects',
+            ])
+            ->get();
+    }
+
     private function contactsRequiringFollowUp(): Collection
     {
         return ContactInteraction::query()
             ->with(['contact', 'opportunity'])
             ->whereNotNull('next_follow_up_date')
             ->whereDate('next_follow_up_date', '<=', today())
+            ->where(function ($query) {
+                $query->whereNull('opportunity_id')
+                    ->orWhereHas('opportunity', fn ($opportunityQuery) => $opportunityQuery->whereIn('status', Statuses::currentOpportunities()));
+            })
             ->orderBy('next_follow_up_date')
             ->get()
             ->take(5)
@@ -118,6 +141,7 @@ class DashboardController extends Controller
             ->get()
             ->map(function (Contact $contact) {
                 $highValueOpportunities = $contact->opportunities
+                    ->filter(fn (Opportunity $opportunity) => in_array($opportunity->status, Statuses::currentOpportunities(), true))
                     ->filter(fn (Opportunity $opportunity) => ($opportunity->computedScore() ?? PHP_INT_MIN) >= 30)
                     ->sortByDesc(fn (Opportunity $opportunity) => $opportunity->computedScore())
                     ->values();
@@ -154,12 +178,14 @@ class DashboardController extends Controller
             ->orderBy('name')
             ->get()
             ->map(function (StrategicObjective $objective) {
-                $scoredOpportunities = $objective->opportunities
+                $currentOpportunities = $objective->opportunities
+                    ->filter(fn (Opportunity $opportunity) => in_array($opportunity->status, Statuses::currentOpportunities(), true));
+                $scoredOpportunities = $currentOpportunities
                     ->filter(fn (Opportunity $opportunity) => $opportunity->computedScore() !== null);
 
                 return [
                     'objective' => $objective,
-                    'linked_opportunity_count' => $objective->opportunities->count(),
+                    'linked_opportunity_count' => $currentOpportunities->count(),
                     'highest_ranked_opportunity' => $scoredOpportunities
                         ->sortByDesc(fn (Opportunity $opportunity) => $opportunity->computedScore())
                         ->first(),
@@ -175,7 +201,7 @@ class DashboardController extends Controller
     private function rankedOpportunities(?UserPreference $preference = null): Collection
     {
         return Opportunity::query()
-            ->whereNotIn('status', Statuses::terminalOpportunities())
+            ->whereIn('status', Statuses::currentOpportunities())
             ->with([
                 'actions' => fn ($query) => $query->orderByRaw('due_date is null')->orderBy('due_date')->orderBy('id'),
                 'opportunityGaps' => fn ($query) => $query->orderByRaw("case priority when 'Critical' then 1 when 'High' then 2 when 'Medium' then 3 else 4 end")->orderBy('title'),
@@ -220,6 +246,7 @@ class DashboardController extends Controller
             ->where('status', Statuses::GAP_OPEN)
             ->whereIn('priority', ['Critical', 'High'])
             ->whereDoesntHave('actions')
+            ->whereHas('opportunity', fn ($query) => $query->whereIn('status', Statuses::currentOpportunities()))
             ->orderByRaw("case priority when 'Critical' then 1 else 2 end")
             ->orderBy('title')
             ->take(5)
@@ -233,7 +260,9 @@ class DashboardController extends Controller
             ->whereNull('completed_at')
             ->whereDate('due_date', '<', today())
             ->get()
-            ->filter(fn (Action $action) => $action->opportunity?->computedScore() !== null)
+            ->filter(fn (Action $action) => $action->opportunity !== null
+                && in_array($action->opportunity->status, Statuses::currentOpportunities(), true)
+                && $action->opportunity->computedScore() !== null)
             ->sort(function (Action $first, Action $second) {
                 $scoreComparison = $second->opportunity->computedScore() <=> $first->opportunity->computedScore();
 
@@ -253,7 +282,9 @@ class DashboardController extends Controller
             ->with('opportunity')
             ->latest('applied_at')
             ->get()
-            ->filter(fn (Application $application) => $application->opportunity?->computedScore() !== null)
+            ->filter(fn (Application $application) => $application->opportunity !== null
+                && in_array($application->opportunity->status, Statuses::currentOpportunities(), true)
+                && $application->opportunity->computedScore() !== null)
             ->sort(function (Application $first, Application $second) {
                 $scoreComparison = $second->opportunity->computedScore() <=> $first->opportunity->computedScore();
 

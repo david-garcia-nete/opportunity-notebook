@@ -202,6 +202,89 @@
                 @endif
             </section>
 
+
+            <section data-testid="forecasted-best-opportunities" class="rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                        <p class="text-sm font-semibold uppercase tracking-wide text-indigo-600">Forecasted Best Opportunities</p>
+                        <h3 class="mt-1 text-lg font-semibold text-gray-900">Which opportunities are most likely to succeed?</h3>
+                        <p class="mt-1 text-sm text-gray-500">Ranked by transparent rules: 40% weighted score, 40% readiness, 20% execution health.</p>
+                    </div>
+                    <a href="{{ route('forecasts') }}" class="inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                        View Forecasts
+                    </a>
+                </div>
+
+                @if ($forecastedBestOpportunities->isEmpty())
+                    <div class="mt-5 rounded-xl bg-gray-50 p-4 text-sm text-gray-500 ring-1 ring-inset ring-gray-100">
+                        Add active opportunities with evaluation fields to see forecast rankings.
+                    </div>
+                @else
+                    <div class="mt-6 overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Opportunity</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Forecast Score</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Forecast Status</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Focus Status</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Readiness Score</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 bg-white">
+                                @foreach ($forecastedBestOpportunities as $summary)
+                                    <tr>
+                                        <td class="whitespace-nowrap px-4 py-4 text-sm font-semibold">
+                                            <a href="{{ route('opportunities.show', $summary['opportunity']) }}" class="text-indigo-600 hover:text-indigo-900">{{ $summary['opportunity']->title }}</a>
+                                            <p class="mt-1 text-xs font-normal text-gray-500">{{ $summary['opportunity']->company ?? 'No company listed' }}</p>
+                                        </td>
+                                        <td class="whitespace-nowrap px-4 py-4 text-sm font-semibold text-gray-900">{{ $summary['forecast_score'] }}</td>
+                                        <td class="whitespace-nowrap px-4 py-4 text-sm"><span class="rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700 ring-1 ring-inset ring-indigo-100">{{ $summary['forecast_status'] }}</span></td>
+                                        <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-700">{{ $summary['focus_status'] }}</td>
+                                        <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-700">{{ $summary['readiness_score'] }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </section>
+
+            <section data-testid="focus-opportunities-at-risk" class="rounded-2xl border border-red-100 bg-white p-6 shadow-sm">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                        <p class="text-sm font-semibold uppercase tracking-wide text-red-600">Focus Opportunities At Risk</p>
+                        <h3 class="mt-1 text-lg font-semibold text-gray-900">Which focus opportunities need intervention?</h3>
+                        <p class="mt-1 text-sm text-gray-500">Focus opportunities with forecast scores below 60 appear here with explainable reasons.</p>
+                    </div>
+                </div>
+
+                @if ($focusOpportunitiesAtRisk->isEmpty())
+                    <div class="mt-5 rounded-xl bg-gray-50 p-4 text-sm text-gray-500 ring-1 ring-inset ring-gray-100">
+                        No focus opportunities are currently forecast below 60.
+                    </div>
+                @else
+                    <div class="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                        @foreach ($focusOpportunitiesAtRisk as $summary)
+                            <article class="rounded-xl border border-red-100 bg-red-50 p-4">
+                                <div class="flex items-start justify-between gap-4">
+                                    <div>
+                                        <a href="{{ route('opportunities.show', $summary['opportunity']) }}" class="font-semibold text-red-900 hover:text-red-700">{{ $summary['opportunity']->title }}</a>
+                                        <p class="mt-1 text-sm text-red-800">{{ $summary['opportunity']->company ?? 'No company listed' }}</p>
+                                    </div>
+                                    <span class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-red-700 ring-1 ring-inset ring-red-100">Forecast {{ $summary['forecast_score'] }}</span>
+                                </div>
+                                <ul class="mt-4 list-disc space-y-1 pl-5 text-sm text-red-900">
+                                    @foreach ($summary['reasons'] as $reason)
+                                        <li>{{ $reason }}</li>
+                                    @endforeach
+                                </ul>
+                            </article>
+                        @endforeach
+                    </div>
+                @endif
+            </section>
+
             <div class="grid gap-8 lg:grid-cols-3">
                 <section class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm lg:col-span-2">
                     <div class="flex items-center justify-between">
