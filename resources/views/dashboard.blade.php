@@ -42,6 +42,38 @@
             </section>
 
 
+            <section data-testid="portfolio-health" class="rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                        <p class="text-sm font-semibold uppercase tracking-wide text-indigo-600">Portfolio Health</p>
+                        <h3 class="mt-1 text-lg font-semibold text-gray-900">How healthy is my opportunity portfolio?</h3>
+                        <p class="mt-1 text-sm text-gray-500">A portfolio-level read on forecast, readiness, focus, and risk.</p>
+                    </div>
+                    <a href="{{ route('portfolio') }}" class="inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                        View Portfolio
+                    </a>
+                </div>
+
+                <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <div class="rounded-xl bg-indigo-50 p-4 ring-1 ring-inset ring-indigo-100">
+                        <p class="text-sm font-medium text-indigo-700">Average Forecast</p>
+                        <p class="mt-2 text-3xl font-bold text-indigo-900">{{ number_format($portfolioHealth['average_forecast_score'], 1) }}</p>
+                    </div>
+                    <div class="rounded-xl bg-emerald-50 p-4 ring-1 ring-inset ring-emerald-100">
+                        <p class="text-sm font-medium text-emerald-700">Average Readiness</p>
+                        <p class="mt-2 text-3xl font-bold text-emerald-900">{{ number_format($portfolioHealth['average_readiness_score'], 1) }}</p>
+                    </div>
+                    <div class="rounded-xl bg-slate-50 p-4 ring-1 ring-inset ring-slate-100">
+                        <p class="text-sm font-medium text-slate-700">Focused Opportunities</p>
+                        <p class="mt-2 text-3xl font-bold text-slate-900">{{ $portfolioHealth['focused_opportunity_count'] }}</p>
+                    </div>
+                    <div class="rounded-xl bg-red-50 p-4 ring-1 ring-inset ring-red-100">
+                        <p class="text-sm font-medium text-red-700">Portfolio Risks</p>
+                        <p class="mt-2 text-3xl font-bold text-red-900">{{ $portfolioHealth['portfolio_risk_count'] }}</p>
+                    </div>
+                </div>
+            </section>
+
             <section data-testid="outcome-snapshot" class="rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm">
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div>

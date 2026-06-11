@@ -12,6 +12,7 @@ use App\Http\Controllers\OpportunityController;
 use App\Http\Controllers\OpportunityGapController;
 use App\Http\Controllers\OutcomeAnalyticsController;
 use App\Http\Controllers\OpportunityProjectController;
+use App\Http\Controllers\PortfolioController;
 use App\Http\Controllers\PortfolioReadinessController;
 use App\Http\Controllers\OpportunityStrategicObjectiveController;
 use App\Http\Controllers\ProfileController;
@@ -37,6 +38,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/portfolio-readiness', PortfolioReadinessController::class)->name('portfolio-readiness');
     Route::get('/outcome-analytics', OutcomeAnalyticsController::class)->name('outcome-analytics');
     Route::get('/forecasts', ForecastController::class)->name('forecasts');
+    Route::get('/portfolio', PortfolioController::class)->name('portfolio');
 
     Route::get('/opportunities/compare', [OpportunityController::class, 'compare'])
         ->name('opportunities.compare');
