@@ -36,7 +36,7 @@
                     <p class="text-sm font-semibold uppercase tracking-wide text-indigo-100">Today's command center</p>
                     <h1 class="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">What deserves attention today?</h1>
                     <p class="mt-4 text-base leading-7 text-indigo-100">
-                        Invest attention where the computed score, stalled next steps, and overdue follow-ups suggest the strongest income momentum.
+                        Invest attention where your weighted priorities, stalled next steps, and overdue follow-ups suggest the strongest income momentum.
                     </p>
                 </div>
             </section>
@@ -56,7 +56,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <h3 class="text-lg font-semibold text-gray-900">Top Ranked Opportunities</h3>
-                            <p class="mt-1 text-sm text-gray-500">Active opportunities sorted by computed opportunity score.</p>
+                            <p class="mt-1 text-sm text-gray-500">Active opportunities sorted by weighted score when your preferences exist; otherwise by base score.</p>
                         </div>
                     </div>
 
@@ -72,7 +72,8 @@
                                         <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Title</th>
                                         <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Company</th>
                                         <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Status</th>
-                                        <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Computed Score</th>
+                                        <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Base Score</th>
+                                        <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Weighted Score</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100 bg-white">
@@ -86,6 +87,7 @@
                                             <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-600">{{ $opportunity->company ?? '—' }}</td>
                                             <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-600">{{ $opportunity->status }}</td>
                                             <td class="whitespace-nowrap px-4 py-4 text-sm font-semibold text-gray-900">{{ $opportunity->computedScore() }}</td>
+                                            <td class="whitespace-nowrap px-4 py-4 text-sm font-semibold text-indigo-700">{{ $opportunity->weightedScore($preference) ?? '—' }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -170,7 +172,7 @@
                                     {{ $opportunity->title }}
                                 </a>
                                 <p class="mt-1 text-sm text-amber-800">{{ $opportunity->company ?? 'No company listed' }}</p>
-                                <p class="mt-3 text-sm font-medium text-amber-900">Computed score: {{ $opportunity->computedScore() }}</p>
+                                <p class="mt-3 text-sm font-medium text-amber-900">Base score: {{ $opportunity->computedScore() }} · Weighted score: {{ $opportunity->weightedScore($preference) ?? '—' }}</p>
                             </article>
                         @endforeach
                     </div>

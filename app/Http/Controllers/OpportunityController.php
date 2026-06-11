@@ -7,6 +7,7 @@ use App\Models\Opportunity;
 use App\Models\OpportunityGap;
 use App\Models\Project;
 use App\Models\StrategicObjective;
+use App\Models\UserPreference;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -29,6 +30,8 @@ class OpportunityController extends Controller
 
     public function compare(): View
     {
+        $preference = request()->user()?->preference;
+
         $opportunities = Opportunity::query()
             ->whereNotIn('status', ['rejected', 'closed'])
             ->withCount([
@@ -39,11 +42,12 @@ class OpportunityController extends Controller
             ])
             ->latest()
             ->get()
-            ->sortByDesc(fn (Opportunity $opportunity) => $opportunity->computedScore() ?? PHP_INT_MIN)
+            ->sortByDesc(fn (Opportunity $opportunity) => $this->rankedScore($opportunity, $preference))
             ->values();
 
         return view('opportunities.compare', [
             'opportunities' => $opportunities,
+            'preference' => $preference,
         ]);
     }
 
@@ -109,6 +113,13 @@ class OpportunityController extends Controller
         return redirect()
             ->route('opportunities.index')
             ->with('status', 'Opportunity deleted.');
+    }
+
+    private function rankedScore(Opportunity $opportunity, ?UserPreference $preference = null): int
+    {
+        return $preference
+            ? $opportunity->weightedScore($preference) ?? PHP_INT_MIN
+            : $opportunity->computedScore() ?? PHP_INT_MIN;
     }
 
     private function validatedOpportunity(Request $request): array

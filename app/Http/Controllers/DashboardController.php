@@ -9,6 +9,7 @@ use App\Models\ContactInteraction;
 use App\Models\Opportunity;
 use App\Models\Project;
 use App\Models\StrategicObjective;
+use App\Models\UserPreference;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
@@ -16,7 +17,8 @@ class DashboardController extends Controller
 {
     public function __invoke(): View
     {
-        $rankedOpportunities = $this->rankedOpportunities();
+        $preference = request()->user()?->preference;
+        $rankedOpportunities = $this->rankedOpportunities($preference);
 
         $opportunityCount = Opportunity::count();
         $activeOpportunityCount = Opportunity::whereNotIn('status', ['rejected', 'closed'])->count();
@@ -42,6 +44,7 @@ class DashboardController extends Controller
             'applicationsThisWeekCount' => $applicationsThisWeekCount,
             'actionsDueTodayCount' => $actionsDueTodayCount,
             'overdueActionCount' => $overdueActionCount,
+            'preference' => $preference,
             'topRankedOpportunities' => $rankedOpportunities->take(5),
             'highValueOpportunitiesMissingNextAction' => $rankedOpportunities
                 ->filter(fn (Opportunity $opportunity) => $opportunity->missingNextAction())
@@ -134,7 +137,7 @@ class DashboardController extends Controller
             ->values();
     }
 
-    private function rankedOpportunities(): Collection
+    private function rankedOpportunities(?UserPreference $preference = null): Collection
     {
         return Opportunity::query()
             ->whereNotIn('status', ['rejected', 'closed'])
@@ -144,9 +147,16 @@ class DashboardController extends Controller
             ])
             ->latest()
             ->get()
-            ->filter(fn (Opportunity $opportunity) => $opportunity->computedScore() !== null)
-            ->sortByDesc(fn (Opportunity $opportunity) => $opportunity->computedScore())
+            ->filter(fn (Opportunity $opportunity) => $this->rankedScore($opportunity, $preference) !== null)
+            ->sortByDesc(fn (Opportunity $opportunity) => $this->rankedScore($opportunity, $preference))
             ->values();
+    }
+
+    private function rankedScore(Opportunity $opportunity, ?UserPreference $preference = null): ?int
+    {
+        return $preference
+            ? $opportunity->weightedScore($preference)
+            : $opportunity->computedScore();
     }
 
     private function highValueOpportunitiesWithCriticalGaps(Collection $rankedOpportunities): Collection

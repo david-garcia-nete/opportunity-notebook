@@ -6,7 +6,7 @@
                 <h2 class="text-2xl font-semibold leading-tight text-gray-900">
                     {{ __('Compare Opportunities') }}
                 </h2>
-                <p class="mt-1 text-sm text-gray-500">Active opportunities are sorted by computed score so focused effort starts with the strongest options.</p>
+                <p class="mt-1 text-sm text-gray-500">Active opportunities are sorted by weighted score when preferences exist, with the original base score preserved for comparison.</p>
             </div>
             <div class="flex flex-col gap-2 sm:flex-row">
                 <a href="{{ route('opportunities.index') }}" class="inline-flex items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
@@ -32,7 +32,7 @@
                     </div>
                 @else
                     <div class="border-b border-gray-100 bg-white px-6 py-4">
-                        <p class="text-sm text-gray-600">Showing active/open opportunities. Closed and rejected opportunities are not included in this comparison.</p>
+                        <p class="text-sm text-gray-600">Showing active/open opportunities. Closed and rejected opportunities are not included. Add weighting preferences to personalize ranking.</p>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
@@ -41,7 +41,9 @@
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Title</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Company</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Status</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Computed Score</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Base Score</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Weighted Score</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Why Ranked Highly</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Income Potential</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Probability of Success</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Time to Revenue</th>
@@ -67,6 +69,14 @@
                                         <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-600">{{ $opportunity->company ?? '—' }}</td>
                                         <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-600">{{ $opportunity->status }}</td>
                                         <td class="whitespace-nowrap px-6 py-4 text-sm font-semibold text-gray-900">{{ $opportunity->computedScore() ?? '—' }}</td>
+                                        <td class="whitespace-nowrap px-6 py-4 text-sm font-semibold text-indigo-700">{{ $opportunity->weightedScore($preference) ?? '—' }}</td>
+                                        <td class="px-6 py-4 text-sm text-gray-600">
+                                            @if ($opportunity->weightedScoreContributors($preference)->isNotEmpty())
+                                                Major contributors: {{ $opportunity->weightedScoreContributors($preference)->implode(', ') }}
+                                            @else
+                                                Add preferences to see weighted contributors.
+                                            @endif
+                                        </td>
                                         <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-600">{{ $opportunity->income_potential ?? '—' }}</td>
                                         <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-600">{{ $opportunity->probability_of_success ?? '—' }}</td>
                                         <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-600">{{ $opportunity->time_to_revenue ?? '—' }}</td>
