@@ -19,7 +19,7 @@ class OpportunityGapTest extends TestCase
         $user = User::factory()->create();
         $opportunity = Opportunity::create([
             'title' => 'Senior Backend Engineer',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
 
         $response = $this->actingAs($user)->post(route('opportunities.gaps.store', $opportunity), [
@@ -46,7 +46,7 @@ class OpportunityGapTest extends TestCase
         $user = User::factory()->create();
         $opportunity = Opportunity::create([
             'title' => 'AI Consultant',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         $gap = OpportunityGap::create([
             'opportunity_id' => $opportunity->id,
@@ -79,7 +79,7 @@ class OpportunityGapTest extends TestCase
         $user = User::factory()->create();
         $opportunity = Opportunity::create([
             'title' => 'Professional Musician',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         $gap = OpportunityGap::create([
             'opportunity_id' => $opportunity->id,
@@ -101,7 +101,7 @@ class OpportunityGapTest extends TestCase
     {
         $opportunity = Opportunity::create([
             'title' => 'Senior Backend Engineer',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         $gap = OpportunityGap::create([
             'opportunity_id' => $opportunity->id,
@@ -119,7 +119,7 @@ class OpportunityGapTest extends TestCase
     {
         $opportunity = Opportunity::create([
             'title' => 'AI Consultant',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         OpportunityGap::create([
             'opportunity_id' => $opportunity->id,
@@ -139,7 +139,7 @@ class OpportunityGapTest extends TestCase
         $user = User::factory()->create();
         $opportunity = Opportunity::create([
             'title' => 'Professional Musician',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         OpportunityGap::create([
             'opportunity_id' => $opportunity->id,
@@ -244,7 +244,7 @@ class OpportunityGapTest extends TestCase
         $response
             ->assertOk()
             ->assertSeeText('Open Gaps')
-            ->assertSeeTextInOrder(['AI Consultant', (string) $opportunity->computedScore(), 'active', '1']);
+            ->assertSeeTextInOrder(['AI Consultant', (string) $opportunity->computedScore(), 'Active', '1']);
     }
 
     private function dashboardSection(string $content, string $testId): string
@@ -260,7 +260,7 @@ class OpportunityGapTest extends TestCase
     {
         return Opportunity::create(array_merge([
             'title' => 'Scored Opportunity',
-            'status' => 'active',
+            'status' => 'Active',
             'income_potential' => $factorValue,
             'probability_of_success' => $factorValue,
             'time_to_revenue' => 1,
@@ -277,7 +277,7 @@ class OpportunityGapTest extends TestCase
         $user = User::factory()->create();
         $opportunity = Opportunity::create([
             'title' => 'Cloud Architect Role',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         $gap = OpportunityGap::create([
             'opportunity_id' => $opportunity->id,
@@ -307,11 +307,11 @@ class OpportunityGapTest extends TestCase
         $user = User::factory()->create();
         $opportunity = Opportunity::create([
             'title' => 'Portfolio Consulting',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         $otherOpportunity = Opportunity::create([
             'title' => 'Wrong Opportunity',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         $gap = OpportunityGap::create([
             'opportunity_id' => $opportunity->id,
@@ -345,7 +345,7 @@ class OpportunityGapTest extends TestCase
     {
         $opportunity = Opportunity::create([
             'title' => 'Data Engineering Contract',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         $gap = OpportunityGap::create([
             'opportunity_id' => $opportunity->id,
@@ -377,7 +377,7 @@ class OpportunityGapTest extends TestCase
         $user = User::factory()->create();
         $opportunity = Opportunity::create([
             'title' => 'Security Role',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         $gap = OpportunityGap::create([
             'opportunity_id' => $opportunity->id,
@@ -416,7 +416,7 @@ class OpportunityGapTest extends TestCase
         $user = User::factory()->create();
         $opportunity = Opportunity::create([
             'title' => 'Cloud Consultant',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         $criticalOne = OpportunityGap::create([
             'opportunity_id' => $opportunity->id,

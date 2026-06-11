@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Application;
 use App\Models\Opportunity;
+use App\Support\Statuses;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -22,7 +23,9 @@ class ApplicationController extends Controller
     {
         return view('applications.create', [
             'opportunities' => Opportunity::orderBy('title')->get(),
+            'defaultStatus' => Statuses::APPLICATION_APPLIED,
             'selectedOpportunityId' => $request->integer('opportunity_id') ?: null,
+            'statuses' => Statuses::applications(),
         ]);
     }
 
@@ -47,6 +50,7 @@ class ApplicationController extends Controller
         return view('applications.edit', [
             'application' => $application,
             'opportunities' => Opportunity::orderBy('title')->get(),
+            'statuses' => Statuses::applications(),
         ]);
     }
 
@@ -70,10 +74,14 @@ class ApplicationController extends Controller
 
     private function validatedApplication(Request $request): array
     {
+        if ($normalizedStatus = Statuses::normalizeApplication($request->input('status'))) {
+            $request->merge(['status' => $normalizedStatus]);
+        }
+
         return $request->validate([
             'opportunity_id' => ['required', 'integer', Rule::exists('opportunities', 'id')],
             'applied_at' => ['required', 'date'],
-            'status' => ['required', 'string', 'max:255'],
+            'status' => ['required', 'string', Rule::in(Statuses::applications())],
             'source' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string'],
         ]);

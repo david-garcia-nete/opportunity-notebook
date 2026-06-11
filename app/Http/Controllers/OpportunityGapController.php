@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Opportunity;
 use App\Models\OpportunityGap;
+use App\Support\Statuses;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -17,7 +18,7 @@ class OpportunityGapController extends Controller
             'categories' => OpportunityGap::CATEGORIES,
             'opportunity' => $opportunity,
             'priorities' => OpportunityGap::PRIORITIES,
-            'statuses' => OpportunityGap::STATUSES,
+            'statuses' => Statuses::gaps(),
         ]);
     }
 
@@ -52,7 +53,7 @@ class OpportunityGapController extends Controller
             'gap' => $gap,
             'opportunity' => $opportunity,
             'priorities' => OpportunityGap::PRIORITIES,
-            'statuses' => OpportunityGap::STATUSES,
+            'statuses' => Statuses::gaps(),
         ]);
     }
 
@@ -80,11 +81,15 @@ class OpportunityGapController extends Controller
 
     private function validatedOpportunityGap(Request $request): array
     {
+        if ($normalizedStatus = Statuses::normalizeGap($request->input('status'))) {
+            $request->merge(['status' => $normalizedStatus]);
+        }
+
         return $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'category' => ['required', 'string', Rule::in(OpportunityGap::CATEGORIES)],
-            'status' => ['required', 'string', Rule::in(OpportunityGap::STATUSES)],
+            'status' => ['required', 'string', Rule::in(Statuses::gaps())],
             'priority' => ['required', 'string', Rule::in(OpportunityGap::PRIORITIES)],
         ]);
     }

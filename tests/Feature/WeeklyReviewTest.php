@@ -39,7 +39,7 @@ class WeeklyReviewTest extends TestCase
         $focusedOpportunity = Opportunity::create([
             'title' => 'Focused Advisory Sprint',
             'company' => 'Acme Advisory',
-            'status' => 'active',
+            'status' => 'Active',
             'score' => 88,
             'is_focus' => true,
             'focused_at' => now(),
@@ -48,7 +48,7 @@ class WeeklyReviewTest extends TestCase
         Opportunity::create([
             'title' => 'Unfocused Research Idea',
             'company' => 'Back Burner Labs',
-            'status' => 'idea',
+            'status' => 'Idea',
             'is_focus' => false,
         ]);
         Action::create([
@@ -74,7 +74,7 @@ class WeeklyReviewTest extends TestCase
         $response->assertOk();
         $this->assertStringContainsString('Focused Advisory Sprint', $focusSection);
         $this->assertStringContainsString('Acme Advisory', $focusSection);
-        $this->assertStringContainsString('active', $focusSection);
+        $this->assertStringContainsString('Active', $focusSection);
         $this->assertStringContainsString('Score 88', $focusSection);
         $this->assertStringContainsString('Highest confidence path to income.', $focusSection);
         $this->assertStringContainsString('Draft advisory proposal', $focusSection);

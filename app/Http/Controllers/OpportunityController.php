@@ -9,7 +9,9 @@ use App\Models\Project;
 use App\Models\StrategicObjective;
 use App\Models\UserPreference;
 use App\Services\OpportunityTimelineService;
+use App\Support\Statuses;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -38,7 +40,7 @@ class OpportunityController extends Controller
         $preference = request()->user()?->preference;
 
         $opportunities = Opportunity::query()
-            ->whereNotIn('status', ['rejected', 'closed'])
+            ->whereNotIn('status', Statuses::terminalOpportunities())
             ->withCount([
                 'contacts',
                 'projects',
@@ -58,7 +60,10 @@ class OpportunityController extends Controller
 
     public function create(): View
     {
-        return view('opportunities.create');
+        return view('opportunities.create', [
+            'defaultStatus' => Statuses::OPPORTUNITY_IDEA,
+            'statuses' => Statuses::opportunities(),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -82,10 +87,10 @@ class OpportunityController extends Controller
             'strategicObjectives' => fn ($query) => $query->orderByDesc('priority')->orderBy('name'),
         ]);
 
-        $gapCounts = collect(OpportunityGap::STATUSES)
+        $gapCounts = collect(Statuses::gaps())
             ->mapWithKeys(fn (string $status) => [$status => $opportunity->opportunityGaps->where('status', $status)->count()]);
         $gapPriorityCounts = collect(['Critical', 'High'])
-            ->mapWithKeys(fn (string $priority) => [$priority => $opportunity->opportunityGaps->where('status', 'Open')->where('priority', $priority)->count()]);
+            ->mapWithKeys(fn (string $priority) => [$priority => $opportunity->opportunityGaps->where('status', Statuses::GAP_OPEN)->where('priority', $priority)->count()]);
         $gapActions = $opportunity->opportunityGaps->flatMap->actions;
 
         return view('opportunities.show', [
@@ -96,7 +101,7 @@ class OpportunityController extends Controller
             'gapActionOpenCount' => $gapActions->whereNull('completed_at')->count(),
             'gapCounts' => $gapCounts,
             'gapPriorityCounts' => $gapPriorityCounts,
-            'gapStatuses' => OpportunityGap::STATUSES,
+            'gapStatuses' => Statuses::gaps(),
             'opportunity' => $opportunity,
             'timeline' => $timeline->forOpportunity($opportunity),
         ]);
@@ -106,6 +111,7 @@ class OpportunityController extends Controller
     {
         return view('opportunities.edit', [
             'opportunity' => $opportunity,
+            'statuses' => Statuses::opportunities(),
         ]);
     }
 
@@ -136,11 +142,15 @@ class OpportunityController extends Controller
 
     private function validatedOpportunity(Request $request, ?Opportunity $opportunity = null): array
     {
+        if ($normalizedStatus = Statuses::normalizeOpportunity($request->input('status'))) {
+            $request->merge(['status' => $normalizedStatus]);
+        }
+
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'company' => ['nullable', 'string', 'max:255'],
             'type' => ['nullable', 'string', 'max:255'],
-            'status' => ['required', 'string', 'max:255'],
+            'status' => ['required', 'string', Rule::in(Statuses::opportunities())],
             'score' => ['nullable', 'integer', 'min:0'],
             'income_potential' => ['nullable', 'integer', 'min:1', 'max:10'],
             'probability_of_success' => ['nullable', 'integer', 'min:1', 'max:10'],

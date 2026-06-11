@@ -36,7 +36,11 @@
                 <div class="grid gap-6 sm:grid-cols-2">
                     <div>
                         <x-input-label for="status" :value="__('Status')" />
-                        <x-text-input id="status" name="status" type="text" class="mt-1 block w-full" :value="old('status', 'idea')" required />
+                        <select id="status" name="status" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            @foreach ($statuses as $status)
+                                <option value="{{ $status }}" @selected(old('status', $defaultStatus) === $status)>{{ $status }}</option>
+                            @endforeach
+                        </select>
                         <x-input-error class="mt-2" :messages="$errors->get('status')" />
                     </div>
 

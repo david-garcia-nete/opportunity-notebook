@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Opportunity;
 use App\Models\Project;
+use App\Support\Statuses;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class ProjectController extends Controller
@@ -19,7 +21,10 @@ class ProjectController extends Controller
 
     public function create(): View
     {
-        return view('projects.create');
+        return view('projects.create', [
+            'defaultStatus' => Statuses::PROJECT_ACTIVE,
+            'statuses' => Statuses::projects(),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -43,6 +48,7 @@ class ProjectController extends Controller
     {
         return view('projects.edit', [
             'project' => $project,
+            'statuses' => Statuses::projects(),
         ]);
     }
 
@@ -66,11 +72,15 @@ class ProjectController extends Controller
 
     private function validatedProject(Request $request): array
     {
+        if ($normalizedStatus = Statuses::normalizeProject($request->input('status'))) {
+            $request->merge(['status' => $normalizedStatus]);
+        }
+
         return $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'url' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'status' => ['required', 'string', 'max:255'],
+            'status' => ['required', 'string', Rule::in(Statuses::projects())],
         ]);
     }
 }

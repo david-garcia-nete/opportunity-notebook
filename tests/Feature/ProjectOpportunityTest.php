@@ -17,11 +17,11 @@ class ProjectOpportunityTest extends TestCase
         $user = User::factory()->create();
         $opportunity = Opportunity::create([
             'title' => 'Laravel Developer',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         $project = Project::create([
             'name' => 'Opportunity Notebook',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
 
         $response = $this->actingAs($user)->post(route('opportunities.projects.store', $opportunity), [
@@ -42,11 +42,11 @@ class ProjectOpportunityTest extends TestCase
         $user = User::factory()->create();
         $opportunity = Opportunity::create([
             'title' => 'AI Developer',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         $project = Project::create([
             'name' => 'AI Playlist Builder',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         $opportunity->projects()->attach($project->id, [
             'notes' => 'Useful proof-of-work for AI workflows.',
@@ -66,12 +66,12 @@ class ProjectOpportunityTest extends TestCase
         $user = User::factory()->create();
         $opportunity = Opportunity::create([
             'title' => 'Laravel Developer',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         $project = Project::create([
             'name' => 'Jam Notebook',
             'url' => 'https://example.com/jam-notebook',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         $opportunity->projects()->attach($project->id, [
             'notes' => 'Demonstrates a focused Laravel portfolio project.',
@@ -83,7 +83,7 @@ class ProjectOpportunityTest extends TestCase
             ->assertOk()
             ->assertSeeText('Projects')
             ->assertSeeText('Jam Notebook')
-            ->assertSeeText('active')
+            ->assertSeeText('Active')
             ->assertSeeText('https://example.com/jam-notebook')
             ->assertSeeText('Demonstrates a focused Laravel portfolio project.');
     }
@@ -93,12 +93,12 @@ class ProjectOpportunityTest extends TestCase
         $user = User::factory()->create();
         $project = Project::create([
             'name' => 'Opportunity Notebook',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         $opportunity = Opportunity::create([
             'title' => 'AI Developer',
             'company' => 'Globex',
-            'status' => 'idea',
+            'status' => 'Idea',
         ]);
         $project->opportunities()->attach($opportunity->id, [
             'notes' => 'Connects project work to AI product roles.',
@@ -111,7 +111,7 @@ class ProjectOpportunityTest extends TestCase
             ->assertSeeText('Opportunities')
             ->assertSeeText('AI Developer')
             ->assertSeeText('Globex')
-            ->assertSeeText('idea')
+            ->assertSeeText('Idea')
             ->assertSeeText('Connects project work to AI product roles.');
     }
 
@@ -120,11 +120,11 @@ class ProjectOpportunityTest extends TestCase
         $user = User::factory()->create();
         $project = Project::create([
             'name' => 'Opportunity Notebook',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         $opportunity = Opportunity::create([
             'title' => 'Product Engineer',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
 
         $response = $this->actingAs($user)->post(route('projects.opportunities.store', $project), [
@@ -144,11 +144,11 @@ class ProjectOpportunityTest extends TestCase
     {
         $opportunity = Opportunity::create([
             'title' => 'Protected Role',
-            'status' => 'idea',
+            'status' => 'Idea',
         ]);
         $project = Project::create([
             'name' => 'Protected Project',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
 
         $this->post(route('opportunities.projects.store', $opportunity), [
@@ -164,11 +164,11 @@ class ProjectOpportunityTest extends TestCase
     {
         $opportunity = Opportunity::create([
             'title' => 'Protected Role',
-            'status' => 'idea',
+            'status' => 'Idea',
         ]);
         $project = Project::create([
             'name' => 'Protected Project',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         $opportunity->projects()->attach($project->id);
 

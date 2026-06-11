@@ -18,7 +18,7 @@ class ProjectTest extends TestCase
             'name' => 'Opportunity Notebook',
             'url' => 'https://example.com/opportunity-notebook',
             'description' => 'A portfolio app for career decisions.',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
 
         $response = $this->actingAs($user)->get(route('projects.index'));
@@ -29,7 +29,7 @@ class ProjectTest extends TestCase
             ->assertSeeText('New Project')
             ->assertSeeText('Opportunity Notebook')
             ->assertSeeText('https://example.com/opportunity-notebook')
-            ->assertSeeText('active')
+            ->assertSeeText('Active')
             ->assertSeeText('View')
             ->assertSeeText('Edit')
             ->assertSeeText('Delete');
@@ -43,7 +43,7 @@ class ProjectTest extends TestCase
             'name' => 'AI Playlist Builder',
             'url' => 'https://example.com/playlist-builder',
             'description' => 'A demo that supports music technology consulting.',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
 
         $project = Project::first();
@@ -53,7 +53,7 @@ class ProjectTest extends TestCase
             'name' => 'AI Playlist Builder',
             'url' => 'https://example.com/playlist-builder',
             'description' => 'A demo that supports music technology consulting.',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
     }
 
@@ -64,14 +64,14 @@ class ProjectTest extends TestCase
             'name' => 'Jam Notebook',
             'url' => 'https://example.com/jam-notebook',
             'description' => 'Original description.',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
 
         $response = $this->actingAs($user)->patch(route('projects.update', $project), [
             'name' => 'Jam Notebook Pro',
             'url' => 'https://example.com/jam-notebook-pro',
             'description' => 'Updated portfolio description.',
-            'status' => 'paused',
+            'status' => 'Archived',
         ]);
 
         $response->assertRedirect(route('projects.show', $project));
@@ -80,7 +80,7 @@ class ProjectTest extends TestCase
             'name' => 'Jam Notebook Pro',
             'url' => 'https://example.com/jam-notebook-pro',
             'description' => 'Updated portfolio description.',
-            'status' => 'paused',
+            'status' => 'Archived',
         ]);
     }
 
@@ -89,7 +89,7 @@ class ProjectTest extends TestCase
         $user = User::factory()->create();
         $project = Project::create([
             'name' => 'Open source contribution',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
 
         $response = $this->actingAs($user)->delete(route('projects.destroy', $project));
@@ -104,20 +104,20 @@ class ProjectTest extends TestCase
     {
         $project = Project::create([
             'name' => 'Protected Project',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
 
         $this->get(route('projects.index'))->assertRedirect(route('login'));
         $this->get(route('projects.create'))->assertRedirect(route('login'));
         $this->post(route('projects.store'), [
             'name' => 'Guest Project',
-            'status' => 'active',
+            'status' => 'Active',
         ])->assertRedirect(route('login'));
         $this->get(route('projects.show', $project))->assertRedirect(route('login'));
         $this->get(route('projects.edit', $project))->assertRedirect(route('login'));
         $this->patch(route('projects.update', $project), [
             'name' => 'Updated Protected Project',
-            'status' => 'paused',
+            'status' => 'Archived',
         ])->assertRedirect(route('login'));
         $this->delete(route('projects.destroy', $project))->assertRedirect(route('login'));
     }
@@ -127,11 +127,11 @@ class ProjectTest extends TestCase
         $user = User::factory()->create();
         Project::create([
             'name' => 'Laravel portfolio app',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         Project::create([
             'name' => 'Music technology demo',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
 
         $response = $this->actingAs($user)->get(route('dashboard'));

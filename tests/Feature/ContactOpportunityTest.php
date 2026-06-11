@@ -17,7 +17,7 @@ class ContactOpportunityTest extends TestCase
         $user = User::factory()->create();
         $opportunity = Opportunity::create([
             'title' => 'Senior Laravel Role',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         $contact = Contact::create([
             'name' => 'Jordan Lee',
@@ -43,7 +43,7 @@ class ContactOpportunityTest extends TestCase
         $user = User::factory()->create();
         $opportunity = Opportunity::create([
             'title' => 'Contract Product Build',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         $contact = Contact::create([
             'name' => 'Maria Santos',
@@ -66,7 +66,7 @@ class ContactOpportunityTest extends TestCase
         $user = User::factory()->create();
         $opportunity = Opportunity::create([
             'title' => 'Fractional CTO Advisory',
-            'status' => 'active',
+            'status' => 'Active',
         ]);
         $contact = Contact::create([
             'name' => 'Taylor Morgan',
@@ -97,7 +97,7 @@ class ContactOpportunityTest extends TestCase
         $opportunity = Opportunity::create([
             'title' => 'AI Operations Consultant',
             'company' => 'Globex',
-            'status' => 'idea',
+            'status' => 'Idea',
         ]);
         $contact->opportunities()->attach($opportunity->id, [
             'relationship_type' => 'Hiring Manager',
@@ -110,7 +110,7 @@ class ContactOpportunityTest extends TestCase
             ->assertSeeText('Opportunities')
             ->assertSeeText('AI Operations Consultant')
             ->assertSeeText('Globex')
-            ->assertSeeText('idea')
+            ->assertSeeText('Idea')
             ->assertSeeText('Hiring Manager');
     }
 
@@ -118,7 +118,7 @@ class ContactOpportunityTest extends TestCase
     {
         $opportunity = Opportunity::create([
             'title' => 'Protected Role',
-            'status' => 'idea',
+            'status' => 'Idea',
         ]);
         $contact = Contact::create([
             'name' => 'Protected Contact',
