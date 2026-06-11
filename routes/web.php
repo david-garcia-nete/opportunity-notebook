@@ -14,6 +14,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\StrategicObjectiveController;
 use App\Http\Controllers\UserPreferenceController;
+use App\Http\Controllers\WeeklyReviewController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -25,6 +26,8 @@ Route::get('/dashboard', DashboardController::class)
     ->name('dashboard');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/weekly-review', WeeklyReviewController::class)->name('weekly-review');
+
     Route::get('/opportunities/compare', [OpportunityController::class, 'compare'])
         ->name('opportunities.compare');
     Route::resource('opportunities', OpportunityController::class);
