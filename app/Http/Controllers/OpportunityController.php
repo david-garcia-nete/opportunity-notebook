@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Contact;
 use App\Models\Opportunity;
+use App\Models\OpportunityGap;
 use App\Models\Project;
 use App\Models\StrategicObjective;
 use Illuminate\Http\RedirectResponse;
@@ -62,17 +63,25 @@ class OpportunityController extends Controller
 
     public function show(Opportunity $opportunity): View
     {
+        $opportunity->load([
+            'actions' => fn ($query) => $query->orderByRaw('due_date is null')->orderBy('due_date')->orderBy('id'),
+            'applications' => fn ($query) => $query->latest('applied_at')->latest(),
+            'contacts' => fn ($query) => $query->orderBy('name'),
+            'opportunityGaps' => fn ($query) => $query->orderByRaw("case priority when 'Critical' then 1 when 'High' then 2 when 'Medium' then 3 else 4 end")->orderBy('title'),
+            'projects' => fn ($query) => $query->orderBy('name'),
+            'strategicObjectives' => fn ($query) => $query->orderByDesc('priority')->orderBy('name'),
+        ]);
+
+        $gapCounts = collect(OpportunityGap::STATUSES)
+            ->mapWithKeys(fn (string $status) => [$status => $opportunity->opportunityGaps->where('status', $status)->count()]);
+
         return view('opportunities.show', [
             'availableContacts' => Contact::orderBy('name')->get(),
             'availableProjects' => Project::orderBy('name')->get(),
             'availableStrategicObjectives' => StrategicObjective::orderByDesc('active')->orderByDesc('priority')->orderBy('name')->get(),
-            'opportunity' => $opportunity->load([
-                'actions' => fn ($query) => $query->orderByRaw('due_date is null')->orderBy('due_date')->orderBy('id'),
-                'applications' => fn ($query) => $query->latest('applied_at')->latest(),
-                'contacts' => fn ($query) => $query->orderBy('name'),
-                'projects' => fn ($query) => $query->orderBy('name'),
-                'strategicObjectives' => fn ($query) => $query->orderByDesc('priority')->orderBy('name'),
-            ]),
+            'gapCounts' => $gapCounts,
+            'gapStatuses' => OpportunityGap::STATUSES,
+            'opportunity' => $opportunity,
         ]);
     }
 

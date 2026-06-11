@@ -46,6 +46,7 @@ class DashboardController extends Controller
                 ->filter(fn (Opportunity $opportunity) => $opportunity->missingNextAction())
                 ->take(5)
                 ->values(),
+            'highValueOpportunitiesWithCriticalGaps' => $this->highValueOpportunitiesWithCriticalGaps($rankedOpportunities),
             'overdueActionsOnHighValueOpportunities' => $this->overdueActionsOnHighValueOpportunities(),
             'recentApplicationsForHighValueOpportunities' => $this->recentApplicationsForHighValueOpportunities(),
             'topObjectives' => $this->topObjectives(),
@@ -83,11 +84,33 @@ class DashboardController extends Controller
     {
         return Opportunity::query()
             ->whereNotIn('status', ['rejected', 'closed'])
-            ->with(['actions' => fn ($query) => $query->orderByRaw('due_date is null')->orderBy('due_date')->orderBy('id')])
+            ->with([
+                'actions' => fn ($query) => $query->orderByRaw('due_date is null')->orderBy('due_date')->orderBy('id'),
+                'opportunityGaps' => fn ($query) => $query->orderByRaw("case priority when 'Critical' then 1 when 'High' then 2 when 'Medium' then 3 else 4 end")->orderBy('title'),
+            ])
             ->latest()
             ->get()
             ->filter(fn (Opportunity $opportunity) => $opportunity->computedScore() !== null)
             ->sortByDesc(fn (Opportunity $opportunity) => $opportunity->computedScore())
+            ->values();
+    }
+
+    private function highValueOpportunitiesWithCriticalGaps(Collection $rankedOpportunities): Collection
+    {
+        return $rankedOpportunities
+            ->map(function (Opportunity $opportunity) {
+                $openGaps = $opportunity->opportunityGaps->where('status', 'Open');
+
+                return [
+                    'opportunity' => $opportunity,
+                    'open_gap_count' => $openGaps->count(),
+                    'highest_priority_gap' => $openGaps
+                        ->sortBy(fn ($gap) => $gap->priorityRank())
+                        ->first(),
+                ];
+            })
+            ->filter(fn (array $summary) => $summary['open_gap_count'] > 0)
+            ->take(5)
             ->values();
     }
 

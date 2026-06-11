@@ -72,6 +72,16 @@ class Opportunity extends Model
         return $this->hasMany(Action::class);
     }
 
+    public function opportunityGaps(): HasMany
+    {
+        return $this->hasMany(OpportunityGap::class);
+    }
+
+    public function openOpportunityGaps(): HasMany
+    {
+        return $this->opportunityGaps()->where('status', 'Open');
+    }
+
     public function incompleteActions(): HasMany
     {
         return $this->actions()->whereNull('completed_at');
