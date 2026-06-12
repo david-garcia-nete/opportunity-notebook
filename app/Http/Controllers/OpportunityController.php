@@ -8,6 +8,7 @@ use App\Models\OpportunityDecision;
 use App\Models\OpportunityGap;
 use App\Models\Project;
 use App\Models\StrategicObjective;
+use App\Models\Theme;
 use App\Models\UserPreference;
 use App\Services\OpportunityReadinessService;
 use App\Services\OpportunityForecastService;
@@ -65,7 +66,9 @@ class OpportunityController extends Controller
     public function create(): View
     {
         return view('opportunities.create', [
+            'availableThemes' => $this->availableThemes(),
             'defaultStatus' => Statuses::OPPORTUNITY_IDEA,
+            'selectedThemes' => collect(),
             'statuses' => Statuses::opportunities(),
         ]);
     }
@@ -73,6 +76,7 @@ class OpportunityController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $opportunity = Opportunity::create($this->validatedOpportunity($request));
+        $opportunity->themes()->sync($request->input('theme_ids', []));
 
         return redirect()
             ->route('opportunities.show', $opportunity)
@@ -90,6 +94,7 @@ class OpportunityController extends Controller
             'opportunityGaps' => fn ($query) => $query->with(['actions' => fn ($actionQuery) => $actionQuery->orderByRaw('completed_at is not null')->orderByRaw('due_date is null')->orderBy('due_date')->orderBy('id')])->orderByRaw("case priority when 'Critical' then 1 when 'High' then 2 when 'Medium' then 3 else 4 end")->orderBy('title'),
             'projects' => fn ($query) => $query->orderBy('name'),
             'strategicObjectives' => fn ($query) => $query->orderByDesc('priority')->orderBy('name'),
+            'themes' => fn ($query) => $query->orderByRaw('priority is null')->orderBy('priority')->orderBy('name'),
         ]);
 
         $gapCounts = collect(Statuses::gaps())
@@ -122,9 +127,11 @@ class OpportunityController extends Controller
     public function edit(Opportunity $opportunity): View
     {
         return view('opportunities.edit', [
+            'availableThemes' => $this->availableThemes($opportunity),
             'opportunity' => $opportunity,
             'outcomeReasons' => Opportunity::outcomeReasonOptions(),
             'outcomes' => Opportunity::OUTCOMES,
+            'selectedThemes' => $opportunity->themes,
             'statuses' => Statuses::opportunities(),
         ]);
     }
@@ -132,6 +139,7 @@ class OpportunityController extends Controller
     public function update(Request $request, Opportunity $opportunity): RedirectResponse
     {
         $opportunity->update($this->validatedOpportunity($request, $opportunity));
+        $opportunity->themes()->sync($request->input('theme_ids', []));
 
         return redirect()
             ->route('opportunities.show', $opportunity)
@@ -182,6 +190,8 @@ class OpportunityController extends Controller
             'outcome_notes' => ['nullable', 'string'],
             'lesson_learned' => ['nullable', 'string'],
             'notes' => ['nullable', 'string'],
+            'theme_ids' => ['nullable', 'array'],
+            'theme_ids.*' => ['integer', Rule::exists('themes', 'id')],
         ]);
 
         if (($validated['outcome_reason'] ?? null) && ! array_key_exists($validated['outcome_reason'], Opportunity::outcomeReasonOptionsFor($validated['outcome'] ?? null))) {
@@ -204,6 +214,20 @@ class OpportunityController extends Controller
             $validated['focus_reason'] = null;
         }
 
+        unset($validated['theme_ids']);
+
         return $validated;
+    }
+
+    private function availableThemes(?Opportunity $opportunity = null)
+    {
+        return Theme::query()
+            ->where('active', true)
+            ->when($opportunity, fn ($query) => $query->orWhereIn('id', $opportunity->themes()->pluck('themes.id')))
+            ->orderByDesc('active')
+            ->orderByRaw('priority is null')
+            ->orderBy('priority')
+            ->orderBy('name')
+            ->get();
     }
 }

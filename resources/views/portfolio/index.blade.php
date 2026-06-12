@@ -98,6 +98,46 @@
                 </div>
             </section>
 
+            <section data-testid="theme-portfolio" class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                        <p class="text-sm font-semibold uppercase tracking-wide text-indigo-600">Theme Portfolio</p>
+                        <h3 class="mt-1 text-lg font-semibold text-gray-900">Which strategic arenas are producing outcomes?</h3>
+                    </div>
+                    <a href="{{ route('themes.index') }}" class="text-sm font-semibold text-indigo-600 hover:text-indigo-900">Manage themes</a>
+                </div>
+                <div class="mt-6 overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Theme</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Opportunities</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Focus</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Won</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Lost</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Abandoned</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Avg Score</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 bg-white">
+                            @forelse ($themeAnalysis as $row)
+                                <tr>
+                                    <td class="whitespace-nowrap px-4 py-4 text-sm font-semibold"><a href="{{ route('themes.show', $row['theme']) }}" class="text-indigo-600 hover:text-indigo-900">{{ $row['theme']->name }}</a></td>
+                                    <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-700">{{ $row['opportunity_count'] }}</td>
+                                    <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-700">{{ $row['focus_opportunity_count'] }}</td>
+                                    <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-700">{{ $row['won_count'] }}</td>
+                                    <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-700">{{ $row['lost_count'] }}</td>
+                                    <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-700">{{ $row['abandoned_count'] }}</td>
+                                    <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-700">{{ number_format($row['average_score'], 1) }}</td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="7" class="px-4 py-6 text-sm text-gray-500">Create themes to analyze strategic arenas.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
             <section data-testid="focus-portfolio" class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                 <div>
                     <p class="text-sm font-semibold uppercase tracking-wide text-indigo-600">Focus Portfolio</p>

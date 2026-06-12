@@ -35,6 +35,16 @@
                         <dd class="mt-1 text-base font-semibold text-gray-900">{{ $project->status }}</dd>
                     </div>
                     <div class="sm:col-span-2">
+                        <dt class="text-sm font-medium text-gray-500">Themes</dt>
+                        <dd class="mt-2 flex flex-wrap gap-2">
+                            @forelse ($project->themes as $theme)
+                                <a href="{{ route('themes.show', $theme) }}" class="inline-flex rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700 ring-1 ring-inset ring-indigo-100">{{ $theme->name }}</a>
+                            @empty
+                                <span class="text-sm text-gray-500">No themes linked yet.</span>
+                            @endforelse
+                        </dd>
+                    </div>
+                    <div class="sm:col-span-2">
                         <dt class="text-sm font-medium text-gray-500">URL</dt>
                         <dd class="mt-1 text-base font-semibold text-gray-900">
                             @if ($project->url)

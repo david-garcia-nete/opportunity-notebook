@@ -30,4 +30,8 @@
             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
         @enderror
     </div>
+
+    <div class="sm:col-span-2">
+        @include('themes.partials.selection')
+    </div>
 </div>

@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class StrategicObjective extends Model
+class Theme extends Model
 {
     protected $fillable = [
         'name',
@@ -14,15 +14,21 @@ class StrategicObjective extends Model
         'active',
     ];
 
-    public function themes(): BelongsToMany
-    {
-        return $this->belongsToMany(Theme::class)
-            ->withTimestamps();
-    }
-
     public function opportunities(): BelongsToMany
     {
         return $this->belongsToMany(Opportunity::class)
+            ->withTimestamps();
+    }
+
+    public function projects(): BelongsToMany
+    {
+        return $this->belongsToMany(Project::class)
+            ->withTimestamps();
+    }
+
+    public function strategicObjectives(): BelongsToMany
+    {
+        return $this->belongsToMany(StrategicObjective::class)
             ->withTimestamps();
     }
 

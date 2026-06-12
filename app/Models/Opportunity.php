@@ -215,6 +215,12 @@ class Opportunity extends Model
             ->values();
     }
 
+    public function themes(): BelongsToMany
+    {
+        return $this->belongsToMany(Theme::class)
+            ->withTimestamps();
+    }
+
     public function actions(): HasMany
     {
         return $this->hasMany(Action::class);

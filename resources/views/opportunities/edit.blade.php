@@ -69,6 +69,8 @@
                     </div>
                 </div>
 
+                @include('themes.partials.selection')
+
                 @include('opportunities.partials.evaluation-fields', ['opportunity' => $opportunity])
 
                 <section class="rounded-xl bg-slate-50 p-4 ring-1 ring-inset ring-slate-100">
