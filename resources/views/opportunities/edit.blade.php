@@ -94,12 +94,30 @@
                             <x-text-input id="outcome_date" name="outcome_date" type="date" class="mt-1 block w-full" :value="old('outcome_date', optional($opportunity->outcome_date)->format('Y-m-d'))" />
                             <x-input-error class="mt-2" :messages="$errors->get('outcome_date')" />
                         </div>
+
+                        <div class="sm:col-span-2">
+                            <x-input-label for="outcome_reason" :value="__('Outcome reason')" />
+                            <select id="outcome_reason" name="outcome_reason" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <option value="">Select why it happened</option>
+                                @foreach ($outcomeReasons as $value => $label)
+                                    <option value="{{ $value }}" @selected(old('outcome_reason', $opportunity->outcome_reason) === $value)>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                            <p class="mt-1 text-xs text-slate-500">Use this for Won, Lost, Abandoned, No Response, and Not Pursued outcomes.</p>
+                            <x-input-error class="mt-2" :messages="$errors->get('outcome_reason')" />
+                        </div>
                     </div>
 
                     <div class="mt-4">
                         <x-input-label for="outcome_notes" :value="__('Outcome notes')" />
                         <textarea id="outcome_notes" name="outcome_notes" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('outcome_notes', $opportunity->outcome_notes) }}</textarea>
                         <x-input-error class="mt-2" :messages="$errors->get('outcome_notes')" />
+                    </div>
+
+                    <div class="mt-4">
+                        <x-input-label for="lesson_learned" :value="__('Lesson learned')" />
+                        <textarea id="lesson_learned" name="lesson_learned" rows="4" placeholder="What should this teach future decisions?" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('lesson_learned', $opportunity->lesson_learned) }}</textarea>
+                        <x-input-error class="mt-2" :messages="$errors->get('lesson_learned')" />
                     </div>
                 </section>
 

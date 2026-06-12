@@ -42,6 +42,41 @@
                 </dl>
             </div>
 
+            <section data-testid="review-outcome-learning" class="mt-8 rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm">
+                <div>
+                    <p class="text-sm font-semibold uppercase tracking-wide text-indigo-600">Outcome Learning</p>
+                    <h3 class="mt-1 text-lg font-semibold text-gray-900">Outcome-related opportunities from this review</h3>
+                </div>
+
+                @if ($outcomeRelatedOpportunities->isEmpty())
+                    <div class="mt-6 rounded-xl bg-slate-50 p-5 text-sm text-gray-600 ring-1 ring-inset ring-slate-100">
+                        No linked opportunities from this review have recorded outcomes yet.
+                    </div>
+                @else
+                    <div class="mt-6 space-y-4">
+                        @foreach ($outcomeRelatedOpportunities as $opportunity)
+                            <article class="rounded-xl bg-indigo-50 p-5 ring-1 ring-inset ring-indigo-100">
+                                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                    <div>
+                                        <p class="text-base font-semibold text-gray-900">
+                                            <a href="{{ route('opportunities.show', $opportunity) }}" class="text-indigo-700 hover:text-indigo-900">
+                                                {{ $opportunity->title }}
+                                            </a>
+                                        </p>
+                                        <p class="mt-1 text-sm text-indigo-900">{{ $opportunity->outcome }}{{ $opportunity->outcomeReasonLabel() ? ' / '.$opportunity->outcomeReasonLabel() : '' }}</p>
+                                    </div>
+                                    <p class="text-sm text-indigo-700">{{ $opportunity->outcome_date?->format('M j, Y') ?? 'No outcome date' }}</p>
+                                </div>
+                                @if ($opportunity->lesson_learned)
+                                    <p class="mt-3 whitespace-pre-line text-sm leading-6 text-indigo-950">{{ $opportunity->lesson_learned }}</p>
+                                @endif
+                            </article>
+                        @endforeach
+                    </div>
+                @endif
+            </section>
+
+
             <section class="mt-8 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                 <div>
                     <p class="text-sm font-semibold uppercase tracking-wide text-indigo-600">Linked Decisions</p>

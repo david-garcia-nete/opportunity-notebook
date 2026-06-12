@@ -29,6 +29,58 @@
                 </article>
             </section>
 
+            <section data-testid="outcome-learning" class="rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm">
+                <div>
+                    <p class="text-sm font-semibold uppercase tracking-wide text-indigo-600">Outcome Learning</p>
+                    <h3 class="mt-1 text-lg font-semibold text-gray-900">Why did outcomes happen?</h3>
+                    <p class="mt-1 text-sm text-gray-500">Structured reasons and lessons turn closed opportunities into strategic memory.</p>
+                </div>
+
+                <div class="mt-6 grid gap-4 lg:grid-cols-4">
+                    @foreach ([
+                        'Top win reasons' => $outcomeReasonBreakdowns['wins'],
+                        'Top loss reasons' => $outcomeReasonBreakdowns['losses'],
+                        'Top abandonment reasons' => $outcomeReasonBreakdowns['abandonments'],
+                        'Top no response reasons' => $outcomeReasonBreakdowns['no_responses'],
+                    ] as $title => $reasons)
+                        <article class="rounded-xl bg-slate-50 p-4 ring-1 ring-inset ring-slate-100">
+                            <h4 class="text-sm font-semibold text-gray-900">{{ $title }}</h4>
+                            @if ($reasons->isEmpty())
+                                <p class="mt-3 text-sm text-gray-500">No reasons recorded yet.</p>
+                            @else
+                                <dl class="mt-3 space-y-2">
+                                    @foreach ($reasons as $reason)
+                                        <div class="flex items-center justify-between gap-3 text-sm">
+                                            <dt class="text-gray-600">{{ $reason['label'] }}</dt>
+                                            <dd class="font-semibold text-gray-900">{{ $reason['count'] }}</dd>
+                                        </div>
+                                    @endforeach
+                                </dl>
+                            @endif
+                        </article>
+                    @endforeach
+                </div>
+
+                <div class="mt-6 rounded-xl bg-indigo-50 p-5 ring-1 ring-inset ring-indigo-100">
+                    <h4 class="text-sm font-semibold text-indigo-950">Recent lessons learned</h4>
+                    @if ($recentLessons->isEmpty())
+                        <p class="mt-3 text-sm text-indigo-700">Record lessons on opportunities to make future reviews smarter.</p>
+                    @else
+                        <div class="mt-4 space-y-4">
+                            @foreach ($recentLessons as $opportunity)
+                                <article>
+                                    <p class="text-sm font-semibold text-indigo-950">
+                                        <a href="{{ route('opportunities.show', $opportunity) }}" class="hover:text-indigo-700">{{ $opportunity->title }}</a>
+                                        <span class="font-medium text-indigo-700">— {{ $opportunity->outcome }}{{ $opportunity->outcomeReasonLabel() ? ' / '.$opportunity->outcomeReasonLabel() : '' }}</span>
+                                    </p>
+                                    <p class="mt-1 text-sm leading-6 text-indigo-900">{{ $opportunity->lesson_learned }}</p>
+                                </article>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+            </section>
+
             <section data-testid="outcome-breakdowns" class="space-y-6">
                 @foreach ($breakdowns as $title => $rows)
                     <article class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
@@ -80,6 +132,7 @@
                                     <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Company</th>
                                     <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Outcome</th>
                                     <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Outcome Date</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Reason</th>
                                     <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Weighted Score</th>
                                     <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Readiness Score</th>
                                     <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Notes</th>
@@ -94,9 +147,18 @@
                                         <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-600">{{ $opportunity->company ?? '—' }}</td>
                                         <td class="whitespace-nowrap px-4 py-4 text-sm font-semibold text-gray-900">{{ $opportunity->outcome }}</td>
                                         <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-600">{{ $opportunity->outcome_date?->format('M j, Y') ?? '—' }}</td>
+                                        <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-600">{{ $opportunity->outcomeReasonLabel() ?? '—' }}</td>
                                         <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-600">{{ $opportunity->weightedScore($preference) ?? '—' }}</td>
                                         <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-600">{{ $readiness->score($opportunity) }}</td>
-                                        <td class="min-w-64 px-4 py-4 text-sm text-gray-600">{{ $opportunity->outcome_notes ? \Illuminate\Support\Str::limit($opportunity->outcome_notes, 100) : '—' }}</td>
+                                        <td class="min-w-64 px-4 py-4 text-sm text-gray-600">
+                                            @if ($opportunity->lesson_learned)
+                                                <span class="font-medium text-gray-900">Lesson:</span> {{ \Illuminate\Support\Str::limit($opportunity->lesson_learned, 100) }}
+                                            @elseif ($opportunity->outcome_notes)
+                                                {{ \Illuminate\Support\Str::limit($opportunity->outcome_notes, 100) }}
+                                            @else
+                                                —
+                                            @endif
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>

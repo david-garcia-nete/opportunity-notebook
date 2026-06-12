@@ -155,10 +155,17 @@ class ReviewController extends Controller
 
     public function show(Review $review): View
     {
+        $review->load([
+            'opportunityDecisions' => fn ($query) => $query->with('opportunity')->latest('decided_at')->latest(),
+        ]);
+
         return view('reviews.show', [
-            'review' => $review->load([
-                'opportunityDecisions' => fn ($query) => $query->with('opportunity')->latest('decided_at')->latest(),
-            ]),
+            'outcomeRelatedOpportunities' => $review->opportunityDecisions
+                ->pluck('opportunity')
+                ->filter(fn (Opportunity $opportunity) => $opportunity->outcome !== null)
+                ->unique('id')
+                ->values(),
+            'review' => $review,
         ]);
     }
 
