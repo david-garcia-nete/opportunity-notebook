@@ -135,7 +135,7 @@
                                     <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Reason</th>
                                     <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Weighted Score</th>
                                     <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Readiness Score</th>
-                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Notes</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Notes/Learning</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100 bg-white">
@@ -151,10 +151,21 @@
                                         <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-600">{{ $opportunity->weightedScore($preference) ?? '—' }}</td>
                                         <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-600">{{ $readiness->score($opportunity) }}</td>
                                         <td class="min-w-64 px-4 py-4 text-sm text-gray-600">
-                                            @if ($opportunity->lesson_learned)
-                                                <span class="font-medium text-gray-900">Lesson:</span> {{ \Illuminate\Support\Str::limit($opportunity->lesson_learned, 100) }}
-                                            @elseif ($opportunity->outcome_notes)
-                                                {{ \Illuminate\Support\Str::limit($opportunity->outcome_notes, 100) }}
+                                            @if ($opportunity->outcome_notes || $opportunity->lesson_learned)
+                                                <div class="space-y-1">
+                                                    @if ($opportunity->outcome_notes)
+                                                        <p>
+                                                            @if ($opportunity->lesson_learned)
+                                                                <span class="font-medium text-gray-900">Notes:</span>
+                                                            @endif
+                                                            {{ \Illuminate\Support\Str::limit($opportunity->outcome_notes, 100) }}
+                                                        </p>
+                                                    @endif
+
+                                                    @if ($opportunity->lesson_learned)
+                                                        <p><span class="font-medium text-gray-900">Lesson:</span> {{ \Illuminate\Support\Str::limit($opportunity->lesson_learned, 100) }}</p>
+                                                    @endif
+                                                </div>
                                             @else
                                                 —
                                             @endif
