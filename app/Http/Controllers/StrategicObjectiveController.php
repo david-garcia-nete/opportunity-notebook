@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Opportunity;
 use App\Models\StrategicObjective;
+use App\Models\Theme;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -24,12 +25,16 @@ class StrategicObjectiveController extends Controller
 
     public function create(): View
     {
-        return view('strategic-objectives.create');
+        return view('strategic-objectives.create', [
+            'availableThemes' => $this->availableThemes(),
+            'selectedThemes' => collect(),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
         $strategicObjective = StrategicObjective::create($this->validatedStrategicObjective($request));
+        $strategicObjective->themes()->sync($request->input('theme_ids', []));
 
         return redirect()
             ->route('strategic-objectives.show', $strategicObjective)
@@ -41,6 +46,7 @@ class StrategicObjectiveController extends Controller
         $strategicObjective->load([
             'opportunities.actions' => fn ($query) => $query->orderByRaw('due_date is null')->orderBy('due_date')->orderBy('id'),
             'opportunities.opportunityGaps',
+            'themes' => fn ($query) => $query->orderByRaw('priority is null')->orderBy('priority')->orderBy('name'),
         ]);
 
         $linkedOpportunities = $strategicObjective->opportunities
@@ -56,6 +62,8 @@ class StrategicObjectiveController extends Controller
     public function edit(StrategicObjective $strategicObjective): View
     {
         return view('strategic-objectives.edit', [
+            'availableThemes' => $this->availableThemes($strategicObjective),
+            'selectedThemes' => $strategicObjective->themes,
             'strategicObjective' => $strategicObjective,
         ]);
     }
@@ -63,6 +71,7 @@ class StrategicObjectiveController extends Controller
     public function update(Request $request, StrategicObjective $strategicObjective): RedirectResponse
     {
         $strategicObjective->update($this->validatedStrategicObjective($request));
+        $strategicObjective->themes()->sync($request->input('theme_ids', []));
 
         return redirect()
             ->route('strategic-objectives.show', $strategicObjective)
@@ -80,11 +89,29 @@ class StrategicObjectiveController extends Controller
 
     private function validatedStrategicObjective(Request $request): array
     {
-        return $request->validate([
+        $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'priority' => ['required', 'integer', 'min:1', 'max:10'],
             'active' => ['nullable', 'boolean'],
+            'theme_ids' => ['nullable', 'array'],
+            'theme_ids.*' => ['integer', 'exists:themes,id'],
         ]) + ['active' => false];
+
+        unset($validated['theme_ids']);
+
+        return $validated;
+    }
+
+    private function availableThemes(?StrategicObjective $strategicObjective = null)
+    {
+        return Theme::query()
+            ->where('active', true)
+            ->when($strategicObjective, fn ($query) => $query->orWhereIn('id', $strategicObjective->themes()->pluck('themes.id')))
+            ->orderByDesc('active')
+            ->orderByRaw('priority is null')
+            ->orderBy('priority')
+            ->orderBy('name')
+            ->get();
     }
 }

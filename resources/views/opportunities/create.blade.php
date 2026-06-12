@@ -68,6 +68,8 @@
                     </div>
                 </div>
 
+                @include('themes.partials.selection')
+
                 @include('opportunities.partials.evaluation-fields')
 
                 <div>

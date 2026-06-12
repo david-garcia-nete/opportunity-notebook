@@ -6,6 +6,7 @@ use App\Models\Action;
 use App\Models\Opportunity;
 use App\Models\OpportunityGap;
 use App\Models\StrategicObjective;
+use App\Models\Theme;
 use App\Models\UserPreference;
 use App\Support\Statuses;
 use Illuminate\Support\Collection;
@@ -33,6 +34,7 @@ class PortfolioAnalysisService
             'focusOpportunities' => $focusSummaries->sortByDesc('forecast_score')->values(),
             'portfolioRisks' => $risks,
             'portfolioStrengths' => $this->portfolioStrengths($focusSummaries),
+            'themeAnalysis' => $this->themeAnalysis(),
         ];
     }
 
@@ -104,6 +106,34 @@ class PortfolioAnalysisService
         ];
     }
 
+    public function themeAnalysis(): Collection
+    {
+        return Theme::query()
+            ->with(['opportunities' => fn ($query) => $query->orderBy('title')])
+            ->orderByDesc('active')
+            ->orderByRaw('priority is null')
+            ->orderBy('priority')
+            ->orderBy('name')
+            ->get()
+            ->map(function (Theme $theme) {
+                $opportunities = $theme->opportunities;
+                $scores = $opportunities
+                    ->map(fn (Opportunity $opportunity) => $opportunity->computedScore())
+                    ->filter(fn ($score) => $score !== null);
+
+                return [
+                    'theme' => $theme,
+                    'opportunity_count' => $opportunities->count(),
+                    'focus_opportunity_count' => $opportunities->where('is_focus', true)->count(),
+                    'won_count' => $opportunities->where('outcome', 'Won')->count(),
+                    'lost_count' => $opportunities->where('outcome', 'Lost')->count(),
+                    'abandoned_count' => $opportunities->where('outcome', 'Abandoned')->count(),
+                    'average_score' => $this->average($scores),
+                ];
+            })
+            ->values();
+    }
+
     public function portfolioRisks(Collection $focusSummaries): Collection
     {
         return $focusSummaries
@@ -136,6 +166,7 @@ class PortfolioAnalysisService
                 'opportunityGaps.actions',
                 'projects',
                 'strategicObjectives',
+                'themes',
             ])
             ->latest()
             ->get();

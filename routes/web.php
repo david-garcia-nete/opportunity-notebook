@@ -20,6 +20,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\StrategicObjectiveController;
+use App\Http\Controllers\ThemeController;
 use App\Http\Controllers\TimelineController;
 use App\Http\Controllers\UserPreferenceController;
 use App\Http\Controllers\WeeklyReviewController;
@@ -82,6 +83,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('actions', ActionController::class);
     Route::resource('applications', ApplicationController::class);
     Route::resource('projects', ProjectController::class);
+    Route::resource('themes', ThemeController::class);
     Route::post('/reviews/focus', [ReviewController::class, 'startFocus'])
         ->name('reviews.focus.start');
     Route::get('/reviews/{review}/focus', [ReviewController::class, 'focus'])

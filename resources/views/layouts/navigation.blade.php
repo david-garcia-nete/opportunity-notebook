@@ -36,6 +36,9 @@
                     <x-nav-link :href="route('portfolio')" :active="request()->routeIs('portfolio')">
                         {{ __('Portfolio') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('themes.index')" :active="request()->routeIs('themes.*')">
+                        {{ __('Themes') }}
+                    </x-nav-link>
                     <x-nav-link :href="route('contacts.index')" :active="request()->routeIs('contacts.*')">
                         {{ __('Contacts') }}
                     </x-nav-link>
@@ -130,6 +133,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('portfolio')" :active="request()->routeIs('portfolio')">
                 {{ __('Portfolio') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('themes.index')" :active="request()->routeIs('themes.*')">
+                {{ __('Themes') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('contacts.index')" :active="request()->routeIs('contacts.*')">
                 {{ __('Contacts') }}

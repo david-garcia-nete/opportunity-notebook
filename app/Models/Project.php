@@ -21,6 +21,12 @@ class Project extends Model
         'status',
     ];
 
+    public function themes(): BelongsToMany
+    {
+        return $this->belongsToMany(Theme::class)
+            ->withTimestamps();
+    }
+
     public function opportunities(): BelongsToMany
     {
         return $this->belongsToMany(Opportunity::class)
