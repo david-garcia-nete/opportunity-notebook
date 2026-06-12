@@ -29,7 +29,9 @@ class Opportunity extends Model
         'focus_reason',
         'outcome',
         'outcome_date',
+        'outcome_reason',
         'outcome_notes',
+        'lesson_learned',
         'notes',
     ];
 
@@ -50,6 +52,38 @@ class Opportunity extends Model
         'Not Pursued',
     ];
 
+    public const SUCCESS_OUTCOME_REASONS = [
+        'strong_relationship' => 'Strong Relationship',
+        'high_readiness' => 'High Readiness',
+        'strong_fit' => 'Strong Fit',
+        'timing' => 'Timing',
+        'persistence' => 'Persistence',
+        'referral' => 'Referral',
+        'differentiated_offer' => 'Differentiated Offer',
+        'other' => 'Other',
+    ];
+
+    public const FAILURE_OUTCOME_REASONS = [
+        'insufficient_readiness' => 'Insufficient Readiness',
+        'skill_gap' => 'Skill Gap',
+        'relationship_gap' => 'Relationship Gap',
+        'timing' => 'Timing',
+        'competition' => 'Competition',
+        'low_priority' => 'Low Priority',
+        'capacity_constraint' => 'Capacity Constraint',
+        'abandoned' => 'Abandoned',
+        'no_response' => 'No Response',
+        'other' => 'Other',
+    ];
+
+    public const OUTCOMES_WITH_LEARNING = [
+        'Won',
+        'Lost',
+        'Abandoned',
+        'No Response',
+        'Not Pursued',
+    ];
+
     public const EVALUATION_FIELDS = [
         'income_potential' => 'Income Potential',
         'probability_of_success' => 'Probability of Success',
@@ -61,6 +95,30 @@ class Opportunity extends Model
         'risk_level' => 'Risk Level',
     ];
 
+    public static function outcomeReasonOptions(): array
+    {
+        return collect(self::SUCCESS_OUTCOME_REASONS)
+            ->merge(self::FAILURE_OUTCOME_REASONS)
+            ->all();
+    }
+
+    public static function outcomeReasonOptionsFor(?string $outcome): array
+    {
+        return $outcome === 'Won'
+            ? self::SUCCESS_OUTCOME_REASONS
+            : (in_array($outcome, self::OUTCOMES_WITH_LEARNING, true) ? self::FAILURE_OUTCOME_REASONS : []);
+    }
+
+    public function outcomeReasonLabel(): ?string
+    {
+        if (! $this->outcome_reason) {
+            return null;
+        }
+
+        return self::outcomeReasonOptionsFor($this->outcome)[$this->outcome_reason]
+            ?? self::outcomeReasonOptions()[$this->outcome_reason]
+            ?? $this->outcome_reason;
+    }
 
     public function setStatusAttribute(?string $value): void
     {

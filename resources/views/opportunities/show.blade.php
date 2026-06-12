@@ -52,6 +52,29 @@
             </div>
 
 
+            <section data-testid="opportunity-learning" class="mt-8 rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm">
+                <div>
+                    <p class="text-sm font-semibold uppercase tracking-wide text-indigo-600">Learning</p>
+                    <h3 class="mt-1 text-lg font-semibold text-gray-900">What should this opportunity teach future decisions?</h3>
+                </div>
+
+                <dl class="mt-5 grid gap-4 sm:grid-cols-2">
+                    <div class="rounded-xl bg-slate-50 p-4 ring-1 ring-inset ring-slate-100">
+                        <dt class="text-sm font-medium text-gray-500">Outcome</dt>
+                        <dd class="mt-1 text-base font-semibold text-gray-900">{{ $opportunity->outcome ?? 'No outcome yet' }}</dd>
+                    </div>
+                    <div class="rounded-xl bg-slate-50 p-4 ring-1 ring-inset ring-slate-100">
+                        <dt class="text-sm font-medium text-gray-500">Outcome Reason</dt>
+                        <dd class="mt-1 text-base font-semibold text-gray-900">{{ $opportunity->outcomeReasonLabel() ?? 'No reason recorded' }}</dd>
+                    </div>
+                    <div class="sm:col-span-2 rounded-xl bg-slate-50 p-4 ring-1 ring-inset ring-slate-100">
+                        <dt class="text-sm font-medium text-gray-500">Lesson Learned</dt>
+                        <dd class="mt-2 whitespace-pre-line text-sm leading-6 text-gray-700">{{ $opportunity->lesson_learned ?: 'No lesson recorded yet.' }}</dd>
+                    </div>
+                </dl>
+            </section>
+
+
             <section class="mt-8 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div>

@@ -14,8 +14,9 @@ use App\Services\OpportunityForecastService;
 use App\Services\OpportunityTimelineService;
 use App\Support\Statuses;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class OpportunityController extends Controller
@@ -122,6 +123,7 @@ class OpportunityController extends Controller
     {
         return view('opportunities.edit', [
             'opportunity' => $opportunity,
+            'outcomeReasons' => Opportunity::outcomeReasonOptions(),
             'outcomes' => Opportunity::OUTCOMES,
             'statuses' => Statuses::opportunities(),
         ]);
@@ -176,9 +178,22 @@ class OpportunityController extends Controller
             'focus_reason' => ['nullable', 'string'],
             'outcome' => ['nullable', 'string', Rule::in(Opportunity::OUTCOMES)],
             'outcome_date' => ['nullable', 'date', 'required_with:outcome'],
+            'outcome_reason' => ['nullable', 'string', Rule::in(array_keys(Opportunity::outcomeReasonOptions()))],
             'outcome_notes' => ['nullable', 'string'],
+            'lesson_learned' => ['nullable', 'string'],
             'notes' => ['nullable', 'string'],
         ]);
+
+        if (($validated['outcome_reason'] ?? null) && ! array_key_exists($validated['outcome_reason'], Opportunity::outcomeReasonOptionsFor($validated['outcome'] ?? null))) {
+            throw ValidationException::withMessages([
+                'outcome_reason' => 'The selected outcome reason is not valid for this outcome.',
+            ]);
+        }
+
+        if (! in_array($validated['outcome'] ?? null, Opportunity::OUTCOMES_WITH_LEARNING, true)) {
+            $validated['outcome_reason'] = null;
+            $validated['lesson_learned'] = null;
+        }
 
         $validated['is_focus'] = $request->boolean('is_focus');
 

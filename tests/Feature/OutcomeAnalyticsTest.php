@@ -30,7 +30,9 @@ class OutcomeAnalyticsTest extends TestCase
             'status' => 'Active',
             'outcome' => 'Won',
             'outcome_date' => '2026-06-10',
+            'outcome_reason' => 'strong_relationship',
             'outcome_notes' => 'Converted after a warm referral and focused portfolio review.',
+            'lesson_learned' => 'Warm introductions consistently outperform direct applications.',
         ]);
 
         $response->assertRedirect(route('opportunities.show', $opportunity));
@@ -38,7 +40,9 @@ class OutcomeAnalyticsTest extends TestCase
             'id' => $opportunity->id,
             'outcome' => 'Won',
             'outcome_date' => '2026-06-10 00:00:00',
+            'outcome_reason' => 'strong_relationship',
             'outcome_notes' => 'Converted after a warm referral and focused portfolio review.',
+            'lesson_learned' => 'Warm introductions consistently outperform direct applications.',
         ]);
     }
 
@@ -60,6 +64,28 @@ class OutcomeAnalyticsTest extends TestCase
         $response
             ->assertRedirect(route('opportunities.edit', $opportunity))
             ->assertSessionHasErrors('outcome');
+    }
+
+
+    public function test_invalid_outcome_reason_is_rejected(): void
+    {
+        $user = User::factory()->create();
+        $opportunity = Opportunity::create([
+            'title' => 'Invalid Outcome Reason Lead',
+            'status' => 'Active',
+        ]);
+
+        $response = $this->actingAs($user)->from(route('opportunities.edit', $opportunity))->patch(route('opportunities.update', $opportunity), [
+            'title' => 'Invalid Outcome Reason Lead',
+            'status' => 'Active',
+            'outcome' => 'Won',
+            'outcome_date' => '2026-06-10',
+            'outcome_reason' => 'competition',
+        ]);
+
+        $response
+            ->assertRedirect(route('opportunities.edit', $opportunity))
+            ->assertSessionHasErrors('outcome_reason');
     }
 
     public function test_outcome_date_is_required_when_outcome_is_present(): void
@@ -92,6 +118,7 @@ class OutcomeAnalyticsTest extends TestCase
             ->assertSeeText('Which efforts are producing results?')
             ->assertSeeText('Total with outcomes')
             ->assertSeeText('Breakdown by Opportunity Type')
+            ->assertSeeText('Outcome Learning')
             ->assertSeeText('Outcome Lessons');
     }
 
@@ -137,6 +164,43 @@ class OutcomeAnalyticsTest extends TestCase
         $this->assertSame(40.0, app(OutcomeAnalyticsService::class)->winRate());
     }
 
+
+    public function test_analytics_include_outcome_reasons(): void
+    {
+        $this->createOutcome('Won', ['outcome_reason' => 'strong_relationship']);
+        $this->createOutcome('Won', ['outcome_reason' => 'strong_relationship']);
+        $this->createOutcome('Lost', ['outcome_reason' => 'competition']);
+        $this->createOutcome('Abandoned', ['outcome_reason' => 'capacity_constraint']);
+        $this->createOutcome('No Response', ['outcome_reason' => 'no_response']);
+
+        $breakdowns = app(OutcomeAnalyticsService::class)->outcomeReasonBreakdowns();
+
+        $this->assertSame('Strong Relationship', $breakdowns['wins']->first()['label']);
+        $this->assertSame(2, $breakdowns['wins']->first()['count']);
+        $this->assertSame('Competition', $breakdowns['losses']->first()['label']);
+        $this->assertSame('Capacity Constraint', $breakdowns['abandonments']->first()['label']);
+        $this->assertSame('No Response', $breakdowns['no_responses']->first()['label']);
+    }
+
+    public function test_opportunity_page_displays_lessons_learned(): void
+    {
+        $user = User::factory()->create();
+        $opportunity = $this->createOutcome('Abandoned', [
+            'title' => 'Laravel Consulting',
+            'outcome_reason' => 'capacity_constraint',
+            'lesson_learned' => 'Local networking produced higher ROI than cold outreach.',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('opportunities.show', $opportunity));
+
+        $response
+            ->assertOk()
+            ->assertSeeText('Learning')
+            ->assertSeeText('Abandoned')
+            ->assertSeeText('Capacity Constraint')
+            ->assertSeeText('Local networking produced higher ROI than cold outreach.');
+    }
+
     public function test_dashboard_outcome_snapshot_appears(): void
     {
         $user = User::factory()->create();
@@ -171,7 +235,9 @@ class OutcomeAnalyticsTest extends TestCase
             'type' => 'Consulting',
             'status' => 'Closed',
             'outcome_date' => '2026-06-09',
+            'outcome_reason' => 'referral',
             'outcome_notes' => 'Won because the portfolio project mapped directly to the buyer problem and a trusted contact introduced the work.',
+            'lesson_learned' => 'Warm introductions made the buyer conversation easier to win.',
             'income_potential' => 8,
             'probability_of_success' => 7,
             'time_to_revenue' => 2,
@@ -192,6 +258,8 @@ class OutcomeAnalyticsTest extends TestCase
             ->assertSeeText('Won')
             ->assertSeeText('Jun 9, 2026')
             ->assertSeeText('Grow advisory income')
+            ->assertSeeText('Referral')
+            ->assertSeeText('Warm introductions made the buyer conversation easier to win')
             ->assertSeeText('Won because the portfolio project mapped directly to the buyer problem');
     }
 

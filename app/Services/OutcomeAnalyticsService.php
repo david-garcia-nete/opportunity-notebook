@@ -66,9 +66,54 @@ class OutcomeAnalyticsService
             'Opportunity Type' => $this->singleValueBreakdown($opportunities, fn (Opportunity $opportunity) => $opportunity->type ?: 'No type'),
             'Status' => $this->singleValueBreakdown($opportunities, fn (Opportunity $opportunity) => $opportunity->status ?: 'No status'),
             'Focus Status' => $this->singleValueBreakdown($opportunities, fn (Opportunity $opportunity) => $opportunity->is_focus ? 'Focus' : 'Not Focus'),
+            'Outcome Reason' => $this->singleValueBreakdown($opportunities, fn (Opportunity $opportunity) => $opportunity->outcomeReasonLabel() ?: 'No reason'),
             'Readiness Status' => $this->singleValueBreakdown($opportunities, fn (Opportunity $opportunity) => $readiness->statusForScore($readiness->score($opportunity))),
             'Strategic Objective' => $this->strategicObjectiveBreakdown($opportunities),
         ];
+    }
+
+    public function reasonBreakdownFor(string $outcome, int $limit = 5): Collection
+    {
+        $options = Opportunity::outcomeReasonOptionsFor($outcome);
+
+        return Opportunity::query()
+            ->where('outcome', $outcome)
+            ->whereNotNull('outcome_reason')
+            ->selectRaw('outcome_reason, count(*) as aggregate')
+            ->groupBy('outcome_reason')
+            ->orderByDesc('aggregate')
+            ->orderBy('outcome_reason')
+            ->take($limit)
+            ->get()
+            ->map(fn (Opportunity $opportunity) => [
+                'reason' => $opportunity->outcome_reason,
+                'label' => $options[$opportunity->outcome_reason]
+                    ?? Opportunity::outcomeReasonOptions()[$opportunity->outcome_reason]
+                    ?? $opportunity->outcome_reason,
+                'count' => (int) $opportunity->aggregate,
+            ]);
+    }
+
+    public function outcomeReasonBreakdowns(): array
+    {
+        return [
+            'wins' => $this->reasonBreakdownFor('Won'),
+            'losses' => $this->reasonBreakdownFor('Lost'),
+            'abandonments' => $this->reasonBreakdownFor('Abandoned'),
+            'no_responses' => $this->reasonBreakdownFor('No Response'),
+        ];
+    }
+
+    public function recentLessons(int $limit = 5): Collection
+    {
+        return Opportunity::query()
+            ->whereNotNull('lesson_learned')
+            ->where('lesson_learned', '!=', '')
+            ->orderByRaw('outcome_date is null')
+            ->latest('outcome_date')
+            ->latest()
+            ->take($limit)
+            ->get();
     }
 
     public function recentOutcomes(int $limit = 10): Collection

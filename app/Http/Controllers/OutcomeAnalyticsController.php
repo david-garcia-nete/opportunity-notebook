@@ -14,6 +14,8 @@ class OutcomeAnalyticsController extends Controller
         return view('outcome-analytics.index', [
             'breakdowns' => $analytics->breakdowns(),
             'outcomes' => Opportunity::OUTCOMES,
+            'outcomeReasonBreakdowns' => $analytics->outcomeReasonBreakdowns(),
+            'recentLessons' => $analytics->recentLessons(),
             'recentOutcomes' => $analytics->recentOutcomes(),
             'readiness' => $readiness,
             'summary' => $analytics->summary(),
