@@ -13,6 +13,7 @@ use App\Http\Controllers\OpportunityDecisionController;
 use App\Http\Controllers\OpportunityGapController;
 use App\Http\Controllers\OutcomeAnalyticsController;
 use App\Http\Controllers\OpportunityProjectController;
+use App\Http\Controllers\OpportunityStrategicContextController;
 use App\Http\Controllers\PortfolioController;
 use App\Http\Controllers\PortfolioReadinessController;
 use App\Http\Controllers\OpportunityStrategicObjectiveController;
@@ -45,6 +46,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/opportunities/compare', [OpportunityController::class, 'compare'])
         ->name('opportunities.compare');
+    Route::get('/opportunities/{opportunity}/strategic-context', OpportunityStrategicContextController::class)
+        ->name('opportunities.strategic-context');
     Route::resource('opportunities', OpportunityController::class);
     Route::post('/opportunities/{opportunity}/decisions', [OpportunityDecisionController::class, 'store'])
         ->name('opportunities.decisions.store');
