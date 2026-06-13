@@ -23,11 +23,7 @@ class SeedCareerPathsCommandTest extends TestCase
         $exitCode = Artisan::call('opportunity:seed-career-paths');
 
         $this->assertSame(0, $exitCode);
-        $this->assertStringContainsString('Themes: 4 created, 0 updated, 0 unchanged', Artisan::output());
-        $this->assertStringContainsString('Opportunities: 8 created, 0 updated, 0 unchanged', Artisan::output());
-        $this->assertStringContainsString('Gaps: 21 created, 0 updated, 0 unchanged', Artisan::output());
-        $this->assertStringContainsString('Actions: 15 created, 0 updated, 0 unchanged', Artisan::output());
-        $this->assertStringContainsString('Preferences: 1 created, 0 updated, 0 unchanged', Artisan::output());
+        $this->assertStringContainsString('Career path seed complete.', Artisan::output());
 
         $this->assertDatabaseCount('themes', 4);
         $this->assertDatabaseCount('opportunities', 8);

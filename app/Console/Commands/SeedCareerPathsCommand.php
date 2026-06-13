@@ -22,16 +22,12 @@ class SeedCareerPathsCommand extends Command
     /**
      * @var array<string, array{created: int, updated: int, unchanged: int}>
      */
-    private array $summary = [
-        'themes' => ['created' => 0, 'updated' => 0, 'unchanged' => 0],
-        'opportunities' => ['created' => 0, 'updated' => 0, 'unchanged' => 0],
-        'gaps' => ['created' => 0, 'updated' => 0, 'unchanged' => 0],
-        'actions' => ['created' => 0, 'updated' => 0, 'unchanged' => 0],
-        'preferences' => ['created' => 0, 'updated' => 0, 'unchanged' => 0],
-    ];
+    private array $summary = [];
 
     public function handle(): int
     {
+        $this->summary = $this->emptySummary();
+
         $themes = collect($this->themes())
             ->mapWithKeys(fn (string $themeName, int $index): array => [
                 $themeName => $this->upsertTheme($themeName, $index + 1),
@@ -54,6 +50,20 @@ class SeedCareerPathsCommand extends Command
         $this->printSummary();
 
         return self::SUCCESS;
+    }
+
+    /**
+     * @return array<string, array{created: int, updated: int, unchanged: int}>
+     */
+    private function emptySummary(): array
+    {
+        return [
+            'themes' => ['created' => 0, 'updated' => 0, 'unchanged' => 0],
+            'opportunities' => ['created' => 0, 'updated' => 0, 'unchanged' => 0],
+            'gaps' => ['created' => 0, 'updated' => 0, 'unchanged' => 0],
+            'actions' => ['created' => 0, 'updated' => 0, 'unchanged' => 0],
+            'preferences' => ['created' => 0, 'updated' => 0, 'unchanged' => 0],
+        ];
     }
 
     private function upsertTheme(string $name, int $priority): Theme
