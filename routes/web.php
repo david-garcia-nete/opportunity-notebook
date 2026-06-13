@@ -33,10 +33,11 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', DashboardController::class)
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'approved'])
     ->name('dashboard');
 
-Route::middleware('auth')->group(function () {
+// Private family deployment: approved users intentionally share all application records.
+Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/daily-queue', DailyActionQueueController::class)->name('daily-queue');
     Route::get('/weekly-review', WeeklyReviewController::class)->name('weekly-review');
     Route::get('/timeline', TimelineController::class)->name('timeline.index');
